@@ -48,6 +48,33 @@ class SimpleXlsxService
     }
 
     /**
+     * Menghasilkan binary file XLSX murni tanpa header HTTP response (berguna untuk pengujian atau penyimpanan ke disk).
+     *
+     * @param  array<int, string>  $headers
+     * @param  iterable<array<int, mixed>>  $rows
+     */
+    public static function generateRawContent(array $headers, iterable $rows): string
+    {
+        $sheetXml = self::buildSheetXml($headers, $rows);
+        $workbookXml = self::buildWorkbookXml();
+        $workbookRelsXml = self::buildWorkbookRelsXml();
+        $contentTypesXml = self::buildContentTypesXml();
+        $relsXml = self::buildRelsXml();
+        $stylesXml = self::buildStylesXml();
+
+        $files = [
+            '[Content_Types].xml' => $contentTypesXml,
+            '_rels/.rels' => $relsXml,
+            'xl/_rels/workbook.xml.rels' => $workbookRelsXml,
+            'xl/workbook.xml' => $workbookXml,
+            'xl/styles.xml' => $stylesXml,
+            'xl/worksheets/sheet1.xml' => $sheetXml,
+        ];
+
+        return self::packZipManually($files);
+    }
+
+    /**
      * Membuat binary ZIP dari array file name => content menggunakan ZipArchive jika ada, atau pure PHP fallback.
      */
     protected static function createZipData(array $files): string
@@ -78,12 +105,7 @@ class SimpleXlsxService
         $offset = 0;
 
         foreach ($files as $name => $data) {
-            $dtime = dechex(self::dosTime());
-            $hexdtime = '\x'.$dtime[6].$dtime[7]
-                      .'\x'.$dtime[4].$dtime[5]
-                      .'\x'.$dtime[2].$dtime[3]
-                      .'\x'.$dtime[0].$dtime[1];
-            eval('$hexdtime = "'.$hexdtime.'";');
+            $hexdtime = pack('V', self::dosTime());
 
             $unc_len = strlen($data);
             $crc = crc32($data);

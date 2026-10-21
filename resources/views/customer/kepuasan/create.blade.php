@@ -33,20 +33,20 @@
             </div>
         @else
             @if($activeService)
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 text-xs flex items-center justify-between">
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                         <span class="text-slate-400 font-semibold uppercase text-[10px]">Layanan yang Dinilai:</span>
-                        <div class="font-bold text-slate-800">
+                        <div class="font-bold text-slate-800 break-words">
                             {{ $serviceType }}: {{ $serviceType === 'Pengujian' ? ($activeService->sample_code . ' (' . $activeService->sample_type . ')') : ($activeService->kode_peminjaman . ' (' . $activeService->purpose . ')') }}
                         </div>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <span class="self-start sm:self-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex-shrink-0">
                         {{ $activeService->status }}
                     </span>
                 </div>
             @endif
 
-            <form action="{{ route('customer.satisfaction.store') }}" method="POST" x-data="{ rating: {{ $existing->rating ?? 5 }} }" class="space-y-5">
+            <form action="{{ route('customer.satisfaction.store') }}" method="POST" x-data="{ rating: {{ $existing->rating ?? 5 }}, submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="space-y-5">
                 @csrf
                 <input type="hidden" name="service_type" value="{{ $serviceType }}">
                 <input type="hidden" name="service_id" value="{{ $serviceId }}">
@@ -73,8 +73,13 @@
                 </div>
 
                 <div class="space-y-2.5">
-                    <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all cursor-pointer">
-                        Kirim Penilaian Kepuasan Pelanggan <i class="fa-solid fa-paper-plane ml-1"></i>
+                    <button type="submit" 
+                        :disabled="submitting"
+                        :class="{ 'opacity-75 pointer-events-none': submitting }"
+                        class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="submitting" x-cloak></i>
+                        <span x-text="submitting ? 'Mengirim Penilaian...' : 'Kirim Penilaian Kepuasan Pelanggan'">Kirim Penilaian Kepuasan Pelanggan</span>
+                        <i class="fa-solid fa-paper-plane" x-show="!submitting"></i>
                     </button>
                     <div class="text-center">
                         <a href="{{ route('customer.dashboard') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors py-1">

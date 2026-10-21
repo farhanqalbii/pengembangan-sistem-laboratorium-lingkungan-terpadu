@@ -12,7 +12,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[650px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Kode Pinjam</th>
@@ -46,7 +46,7 @@
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center space-x-2">
                                 <a href="{{ route('staff.borrowings.show', $b->id) }}" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm text-xs">
-                                    {{ $b->status === 'Menunggu' ? 'Otorisasi & Kesiapan' : ($b->status === 'Dipinjam' ? 'Inspeksi & Pengembalian' : 'Lihat Detail') }}
+                                    {{ in_array($b->status, ['Diajukan', 'Menunggu']) ? 'Otorisasi & Kesiapan' : (in_array($b->status, ['Dipinjam', 'Terlambat']) ? 'Inspeksi & Pengembalian' : 'Lihat Detail') }}
                                 </a>
                             </td>
                         </tr>

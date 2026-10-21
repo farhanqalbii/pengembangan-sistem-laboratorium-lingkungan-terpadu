@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\LogAktivitas;
 use App\Models\Notification;
 use App\Models\Pembayaran;
+use App\Models\Peminjaman;
+use App\Models\Peralatan;
 use App\Models\RiwayatStok;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -180,62 +182,156 @@ class PaymentGatewayService
         }
 
         DB::transaction(function () use ($payment, $reference, $method) {
-            $payment->update([
+            // Kunci baris pembayaran secara eksklusif (SELECT ... FOR UPDATE) untuk mencegah eksekusi paralel bersamaan
+            $lockedPayment = Pembayaran::where('id', $payment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $lockedPayment || $lockedPayment->status === 'Berhasil') {
+                Log::info("Idempotency (Locked): Pembayaran {$payment->payment_code} sudah berstatus Berhasil atau tidak ditemukan. Mengabaikan pemrosesan duplikat.");
+
+                return;
+            }
+
+            $lockedPayment->update([
                 'payment_method' => $method,
                 'status' => 'Berhasil',
                 'payment_reference' => $reference,
                 'paid_at' => now(),
             ]);
 
-            if ($payment->invoice) {
-                $payment->invoice->update([
+            if ($lockedPayment->invoice) {
+                $lockedPayment->invoice->update([
                     'status' => 'Lunas',
                 ]);
             }
 
             // Jika pembayaran adalah deposit peminjaman alat
-            if ($payment->borrowing && $payment->type === 'Deposit Peminjaman') {
-                $payment->borrowing->update(['status' => 'Dipinjam']);
+            if ($lockedPayment->borrowing && $lockedPayment->type === 'Deposit Peminjaman') {
+                $borrowing = Peminjaman::where('id', $lockedPayment->borrowing->id)
+                    ->lockForUpdate()
+                    ->first();
 
-                // Potong stok alat dan catat riwayat mutasi stok
-                foreach ($payment->borrowing->borrowingDetails as $detail) {
-                    $eq = $detail->equipment;
-                    if ($eq) {
-                        $oldQty = $eq->quantity;
-                        $eq->decrement('jumlah', $detail->quantity);
-                        $newQty = $eq->fresh()->quantity;
+                if ($borrowing) {
+                    $stockSufficient = true;
+                    $insufficientEquipments = [];
 
-                        RiwayatStok::create([
-                            'id_peralatan' => $eq->id,
-                            'tipe' => 'Peminjaman',
-                            'jumlah_sebelum' => $oldQty,
-                            'jumlah_perubahan' => -$detail->quantity,
-                            'jumlah_setelah' => $newQty,
-                            'user_id' => $payment->customer_id,
-                            'catatan' => "Pengurangan stok karena peminjaman aktif {$payment->borrowing->borrow_code}",
-                        ]);
+                    foreach ($borrowing->borrowingDetails as $detail) {
+                        $eq = Peralatan::where('id', $detail->id_peralatan)
+                            ->lockForUpdate()
+                            ->first();
 
-                        if ($newQty <= $eq->min_stock) {
-                            $admins = User::whereIn('role', ['admin', 'staff'])->get();
-                            foreach ($admins as $ad) {
-                                Notification::create([
-                                    'user_id' => $ad->id,
-                                    'title' => 'Peringatan Stok Minimum!',
-                                    'message' => "Stok alat {$eq->name} tersisa {$newQty} unit (Stok min: {$eq->min_stock}).",
-                                    'link' => '/staff/equipment/'.$eq->id,
-                                ]);
-                            }
+                        if (! $eq || $eq->status !== 'Tersedia' || $eq->quantity < $detail->quantity) {
+                            $stockSufficient = false;
+                            $insufficientEquipments[] = $eq ? $eq->name : 'Alat tidak ditemukan';
                         }
                     }
+
+                    if ($stockSufficient) {
+                        $borrowing->update(['status' => 'Dipinjam']);
+
+                        // Potong stok alat dan catat riwayat mutasi stok
+                        foreach ($borrowing->borrowingDetails as $detail) {
+                            $eq = Peralatan::where('id', $detail->id_peralatan)
+                                ->lockForUpdate()
+                                ->first();
+
+                            if ($eq) {
+                                $oldQty = $eq->quantity;
+                                $eq->decrement('jumlah', $detail->quantity);
+                                $newQty = $eq->fresh()->quantity;
+
+                                RiwayatStok::create([
+                                    'id_peralatan' => $eq->id,
+                                    'tipe' => 'Peminjaman',
+                                    'jumlah_sebelum' => $oldQty,
+                                    'jumlah_perubahan' => -$detail->quantity,
+                                    'jumlah_setelah' => $newQty,
+                                    'user_id' => $lockedPayment->customer_id,
+                                    'catatan' => "Pengurangan stok karena peminjaman aktif {$borrowing->borrow_code}",
+                                ]);
+
+                                if ($newQty <= $eq->min_stock) {
+                                    $admins = User::whereIn('role', ['admin', 'staff'])->get();
+                                    foreach ($admins as $ad) {
+                                        Notification::create([
+                                            'user_id' => $ad->id,
+                                            'title' => 'Peringatan Stok Minimum!',
+                                            'message' => "Stok alat {$eq->name} tersisa {$newQty} unit (Stok min: {$eq->min_stock}).",
+                                            'link' => '/staff/equipment/'.$eq->id,
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Deposit berhasil dibayar namun stok tidak mencukupi saat settlement
+                        $warningMsg = 'Pembayaran deposit berhasil, namun stok alat ('.implode(', ', $insufficientEquipments).') tidak mencukupi saat aktivasi. Status tidak diubah menjadi Dipinjam.';
+                        $borrowing->update([
+                            'catatan' => trim($borrowing->catatan." [Kendala Stok: {$warningMsg}]"),
+                        ]);
+
+                        LogAktivitas::record(
+                            'Kendala Stok Settlement Peminjaman',
+                            'Peminjaman',
+                            "Pembayaran deposit {$borrowing->borrow_code} berhasil, namun stok alat tidak mencukupi (".implode(', ', $insufficientEquipments).').',
+                            $lockedPayment->customer_id
+                        );
+
+                        // Notifikasi ke Staf & Admin
+                        $admins = User::whereIn('role', ['admin', 'staff'])->get();
+                        foreach ($admins as $ad) {
+                            Notification::create([
+                                'user_id' => $ad->id,
+                                'title' => 'Peringatan: Stok Tidak Mencukupi Saat Settlement!',
+                                'message' => "Deposit peminjaman {$borrowing->borrow_code} lunas, tetapi stok (".implode(', ', $insufficientEquipments).') tidak mencukupi. Segera atur penyesuaian atau pengembalian.',
+                                'link' => '/admin/borrowings/'.$borrowing->id,
+                            ]);
+                        }
+
+                        // Notifikasi ke Customer
+                        Notification::create([
+                            'user_id' => $borrowing->customer_id,
+                            'title' => 'Pembayaran Berhasil - Menunggu Ketersediaan Alat',
+                            'message' => "Pembayaran deposit peminjaman {$borrowing->borrow_code} telah diterima. Namun saat ini ketersediaan unit sedang terkendala. Staf kami akan segera menghubungi Anda.",
+                            'link' => '/customer/borrowings/'.$borrowing->id,
+                        ]);
+                    }
+                }
+            }
+
+            // Jika pembayaran adalah pengujian sampel
+            if ($lockedPayment->sample) {
+                // Notifikasi ke Customer: pembayaran lunas, sampel menunggu pemeriksaan staf
+                Notification::create([
+                    'user_id' => $lockedPayment->customer_id,
+                    'title' => 'Pembayaran Sampel Terkonfirmasi',
+                    'message' => "Pembayaran tagihan sampel {$lockedPayment->sample->sample_code} telah berhasil diverifikasi. Sampel Anda menunggu pemeriksaan & persetujuan penerimaan oleh staf lab.",
+                    'link' => '/customer/samples/'.$lockedPayment->sample->id,
+                ]);
+
+                // Notifikasi ke Staf & Admin: pembayaran lunas, siap diperiksa dan diterima
+                $staffUsers = User::whereIn('role', ['staff', 'admin'])->get();
+                foreach ($staffUsers as $st) {
+                    Notification::create([
+                        'user_id' => $st->id,
+                        'title' => 'Sampel Siap Diterima (Lunas)',
+                        'message' => "Pembayaran sampel {$lockedPayment->sample->sample_code} dari {$lockedPayment->customer->name} telah lunas. Sampel siap diverifikasi dan diterima.",
+                        'link' => '/staff/samples/'.$lockedPayment->sample->id,
+                    ]);
                 }
             }
 
             LogAktivitas::record(
                 'Pembayaran Terkonfirmasi',
                 'Pembayaran',
-                "Pembayaran {$payment->payment_code} sebesar Rp ".number_format($payment->amount, 0, ',', '.')." berhasil diverifikasi via payment gateway ({$reference}).",
-                $payment->customer_id
+                "Pembayaran {$lockedPayment->payment_code} sebesar Rp ".number_format($lockedPayment->amount, 0, ',', '.')." berhasil diverifikasi via payment gateway ({$reference}).",
+                $lockedPayment->customer_id
             );
+
+            // Sinkronkan objek di memori pemanggil
+            $payment->fill($lockedPayment->toArray());
+            $payment->syncOriginal();
         });
     }
 
@@ -249,18 +345,39 @@ class PaymentGatewayService
         }
 
         DB::transaction(function () use ($payment, $status) {
+            $lockedPayment = Pembayaran::where('id', $payment->id)
+                ->lockForUpdate()
+                ->first();
+
             $normalizedStatus = in_array($status, ['Gagal', 'Kadaluarsa']) ? $status : 'Gagal';
 
-            $payment->update([
+            // Idempoten: Jika sudah Berhasil atau sudah memiliki status gagal yang sama, jangan kirim ulang notifikasi atau efek samping
+            if (! $lockedPayment || $lockedPayment->status === 'Berhasil' || $lockedPayment->status === $normalizedStatus) {
+                return;
+            }
+
+            $lockedPayment->update([
                 'status' => $normalizedStatus,
             ]);
+
+            if ($lockedPayment->sample) {
+                Notification::create([
+                    'user_id' => $lockedPayment->customer_id,
+                    'title' => 'Pembayaran Sampel '.$normalizedStatus,
+                    'message' => "Pembayaran untuk sampel {$lockedPayment->sample->sample_code} berstatus {$normalizedStatus}. Silakan lakukan pembayaran ulang melalui portal customer.",
+                    'link' => '/customer/samples/'.$lockedPayment->sample->id,
+                ]);
+            }
 
             LogAktivitas::record(
                 'Pembayaran '.$normalizedStatus,
                 'Pembayaran',
-                "Pembayaran {$payment->payment_code} diperbarui menjadi {$normalizedStatus} dari payment gateway.",
-                $payment->customer_id
+                "Pembayaran {$lockedPayment->payment_code} diperbarui menjadi {$normalizedStatus} dari payment gateway.",
+                $lockedPayment->customer_id
             );
+
+            $payment->fill($lockedPayment->toArray());
+            $payment->syncOriginal();
         });
     }
 
@@ -299,6 +416,7 @@ class PaymentGatewayService
             if ($response->successful()) {
                 $data = $response->json();
                 $trxStatus = $data['transaction_status'] ?? null;
+                $fraudStatus = $data['fraud_status'] ?? null;
                 $grossAmount = $data['gross_amount'] ?? null;
                 $paymentType = $data['payment_type'] ?? 'midtrans';
                 $transactionId = $data['transaction_id'] ?? $payment->payment_code;
@@ -307,13 +425,24 @@ class PaymentGatewayService
                 $dbAmount = (int) round((float) $payment->amount);
                 $gwAmount = (int) round((float) $grossAmount);
 
-                if (in_array($trxStatus, ['capture', 'settlement']) && $dbAmount === $gwAmount) {
+                $isCapturedAccept = ($trxStatus === 'capture' && ($fraudStatus === 'accept' || $fraudStatus === null));
+                $isSettled = ($trxStatus === 'settlement');
+
+                if (($isCapturedAccept || $isSettled) && $dbAmount === $gwAmount) {
                     $this->handleSuccessfulPayment($payment, $transactionId, $paymentType);
 
                     return [
                         'success' => true,
                         'status' => 'Berhasil',
                         'message' => 'Pembayaran telah terverifikasi lunas oleh payment gateway.',
+                    ];
+                }
+
+                if ($trxStatus === 'capture' && $fraudStatus === 'challenge') {
+                    return [
+                        'success' => false,
+                        'status' => $payment->fresh()->status,
+                        'message' => 'Transaksi kartu kredit dalam status challenge fraud review.',
                     ];
                 }
 

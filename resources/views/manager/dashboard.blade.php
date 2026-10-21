@@ -27,15 +27,18 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm flex items-center space-x-3.5 card-hover">
-            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                <i class="fa-solid fa-star"></i>
+        <a href="{{ route('manager.reports.satisfaction') }}" class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm flex items-center justify-between card-hover group cursor-pointer transition-all">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Indeks Kepuasan (IKP)</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-800">{{ number_format($avgRating, 2) }} / 5.00</h3>
+                </div>
             </div>
-            <div>
-                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Indeks Kepuasan (IKP)</p>
-                <h3 class="text-xl sm:text-2xl font-black text-slate-800">{{ number_format($avgRating, 2) }} / 5.00</h3>
-            </div>
-        </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-amber-600 transition-colors"></i>
+        </a>
 
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm flex items-center space-x-3.5 card-hover">
             <div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
@@ -56,7 +59,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[720px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Kode Sampel</th>
@@ -116,7 +119,7 @@
 
     <!-- Recent Published COA Certificates Table -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden anim-fade-up anim-delay-3 card-hover">
-        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
                     <i class="fa-solid fa-file-contract"></i>
@@ -126,13 +129,13 @@
                     <p class="text-[11px] text-slate-400">Daftar dokumen resmi COA yang telah disahkan dan siap diunduh</p>
                 </div>
             </div>
-            <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+            <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full self-start sm:self-auto">
                 {{ $recentCertificates->count() }} Berkas Terakhir
             </span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[700px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Dokumen</th>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="{{ request()->cookie('theme_preference') === 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +12,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Theme Manager (Anti-FOUC) & Styles -->
+    <script src="{{ asset('js/theme-switcher.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/theme-dark.css') }}">
+
+    <!-- Tailwind CSS + Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -101,15 +108,24 @@
 
     <!-- Main Container -->
     <div class="max-w-xl mx-auto w-full relative z-10 my-auto py-6 space-y-6 anim-fade-up">
-        <!-- Logo Header -->
-        <div class="text-center">
-            <a href="/" class="inline-block hover:opacity-95 transition-opacity">
-                <img src="{{ asset('images/logo_lab_lgn_rgst.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-16 sm:h-20 w-auto max-w-[280px] sm:max-w-[340px] object-contain mx-auto filter drop-shadow-sm">
+        <!-- Header Navigasi & Logo -->
+        <div class="flex items-center justify-between gap-3">
+            <a href="{{ route('home') }}#peminjaman" onclick="if (history.length > 1) { history.back(); return false; }" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/95 hover:bg-white text-slate-700 hover:text-emerald-700 font-bold text-xs border border-slate-200/90 shadow-2xs backdrop-blur-md transition-all cursor-pointer">
+                <i class="fa-solid fa-arrow-left text-slate-400"></i> Kembali
             </a>
+            <a href="/" class="inline-block hover:opacity-95 transition-opacity mx-auto">
+                <!-- Logo Light Mode: teks gelap untuk latar terang -->
+                <img src="{{ asset('images/logo_lab_lgn_rgst.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-12 sm:h-16 w-auto max-w-[140px] sm:max-w-[260px] object-contain filter drop-shadow-sm block dark:hidden">
+                <!-- Logo Dark Mode: teks putih / terang untuk latar gelap -->
+                <img src="{{ asset('images/logo_lab_navbar_clean.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-12 sm:h-16 w-auto max-w-[140px] sm:max-w-[260px] object-contain filter drop-shadow-sm hidden dark:block">
+            </a>
+            <div class="flex items-center">
+                <x-theme-switcher align="right" />
+            </div>
         </div>
 
         <!-- Detail Card -->
-        <div class="bg-white/95 border border-slate-200/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl shadow-slate-900/10 space-y-6 card-hover relative overflow-hidden">
+        <div class="bg-white/95 border border-slate-200/90 backdrop-blur-2xl rounded-3xl p-4 sm:p-8 shadow-2xl shadow-slate-900/10 space-y-6 card-hover relative overflow-hidden">
             <!-- Header Section -->
             <div class="border-b border-slate-100 pb-5">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-2.5">
@@ -144,6 +160,18 @@
                     <i class="fa-solid fa-microchip text-slate-400"></i>
                     <span>Merk / Model: <strong class="text-slate-700 font-semibold">{{ $equipment->brand ?: 'Standar Laboratorium' }}</strong></span>
                 </p>
+            </div>
+
+            <!-- Foto Instrumen Laboratorium -->
+            <div class="w-full h-48 sm:h-56 bg-slate-50/90 border border-slate-100 rounded-2xl flex items-center justify-center overflow-hidden p-3.5 shadow-2xs">
+                @if($equipment->photo_url)
+                    <img src="{{ $equipment->photo_url }}" alt="{{ $equipment->name }}" class="max-h-full max-w-full object-contain mx-auto transition-transform duration-300 hover:scale-105" loading="lazy">
+                @else
+                    <div class="flex flex-col items-center justify-center text-slate-300 py-6 text-center">
+                        <i class="fa-solid fa-microscope text-5xl mb-2 text-slate-300"></i>
+                        <span class="text-xs font-semibold text-slate-400">Instrumen Laboratorium Terverifikasi</span>
+                    </div>
+                @endif
             </div>
 
             <!-- Key Information Grid -->

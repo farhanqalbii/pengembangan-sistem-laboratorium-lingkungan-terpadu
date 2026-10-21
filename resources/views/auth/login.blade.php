@@ -7,7 +7,7 @@
 @section('content')
 <div class="bg-white border border-slate-200/80 rounded-3xl shadow-xl shadow-slate-900/5 overflow-hidden flex flex-col md:flex-row items-stretch">
     <!-- 1. BAGIAN KIRI: Panel Visual & Branding (Foto Nyata Lab + Overlay Branding) -->
-    <div class="w-full md:w-[45%] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden text-white shrink-0">
+    <div class="w-full md:w-[45%] p-4 sm:p-8 flex flex-col justify-between relative overflow-hidden text-white shrink-0">
         <!-- Real Lab Photo Background -->
         <img src="{{ asset('images/login_lab_real.jpg') }}" alt="Laboratorium Lingkungan Terpadu" class="absolute inset-0 w-full h-full object-cover object-center">
         
@@ -69,7 +69,7 @@
     </div>
 
     <!-- 2. BAGIAN KANAN: Form Login (55% lebar container) -->
-    <div class="w-full md:w-[55%] p-6 sm:p-8 flex flex-col justify-center bg-white relative">
+    <div class="w-full md:w-[55%] p-4 sm:p-8 flex flex-col justify-center bg-white relative">
         <!-- Header -->
         <div class="border-b border-slate-100 pb-3 mb-4">
             <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Login Portal Laboratorium</h2>
@@ -91,7 +91,7 @@
         @endif
 
         <!-- Form Login -->
-        <form action="{{ route('login') }}" method="POST" class="space-y-3.5">
+        <form action="{{ route('login') }}" method="POST" class="space-y-3.5" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)">
             @csrf
 
             <!-- Email Input -->
@@ -133,8 +133,11 @@
 
             <!-- Tombol Masuk ke Akun -->
             <button type="submit" 
-                class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-700/15 hover:shadow-emerald-700/25 transition-all text-sm mt-1 flex items-center justify-center cursor-pointer">
-                <span>Masuk</span>
+                :disabled="submitting"
+                :class="{ 'opacity-75 pointer-events-none': submitting }"
+                class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-700/15 hover:shadow-emerald-700/25 transition-all text-sm mt-1 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                <i class="fa-solid fa-spinner fa-spin text-sm" x-show="submitting" x-cloak></i>
+                <span x-text="submitting ? 'Memproses Masuk...' : 'Masuk'">Masuk</span>
             </button>
         </form>
 

@@ -19,7 +19,7 @@
             <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-700">Filter</button>
         </form>
 
-        <button @click="editUser = null; showModal = true" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center">
+        <button @click="editUser = null; showModal = true" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center">
             <i class="fa-solid fa-user-plus mr-2"></i> Tambah User Baru
         </button>
     </div>
@@ -27,7 +27,7 @@
     <!-- Users Table -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[700px]">
                 <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Nama Lengkap</th>
@@ -124,7 +124,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                  x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                 class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-auto relative">
+                  class="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto relative max-h-[92vh] overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <h3 class="font-bold text-slate-800 text-base" x-text="editUser ? 'Edit User: ' + editUser.name : 'Tambah Pengguna Baru'"></h3>
                     <button @click="showModal = false" class="text-slate-400 hover:text-slate-700 cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -180,7 +180,7 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">No WhatsApp/HP</label>
                             <input type="text" name="phone" :value="editUser ? editUser.phone : ''" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
@@ -196,9 +196,9 @@
                         <input type="password" name="password" :required="!editUser" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
                     </div>
 
-                    <div class="flex justify-end space-x-3 pt-2">
-                        <button type="button" @click="showModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Batal</button>
-                        <button type="submit" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30">Simpan User</button>
+                    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:space-x-3 pt-2">
+                        <button type="button" @click="showModal = false" class="w-full sm:w-auto px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl text-center">Batal</button>
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 text-center">Simpan User</button>
                     </div>
                 </form>
             </div>
@@ -229,7 +229,7 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                 x-transition:leave-end="opacity-0 scale-95 translate-y-3"
-                class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center relative overflow-hidden my-auto"
+                class="bg-white rounded-3xl max-w-sm w-full p-5 sm:p-7 shadow-2xl border border-slate-200 text-center relative overflow-hidden my-auto max-h-[92vh] overflow-y-auto"
             >
                 <!-- Decorative Accent Background -->
                 <div class="absolute -top-10 -right-10 w-24 h-24 bg-rose-50 rounded-full pointer-events-none"></div>
@@ -246,15 +246,15 @@
                 </p>
 
                 <!-- Buttons Action -->
-                <div class="mt-6 flex items-center gap-3">
+                <div class="mt-6 flex flex-col-reverse sm:flex-row items-center gap-2.5 sm:gap-3">
                     <button 
                         type="button" 
                         @click="showDeleteModal = false" 
-                        class="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors cursor-pointer"
+                        class="w-full sm:flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors cursor-pointer text-center"
                     >
                         Batal
                     </button>
-                    <form :action="deleteUrl" method="POST" class="flex-1 m-0">
+                    <form :action="deleteUrl" method="POST" class="w-full sm:flex-1 m-0">
                         @csrf
                         @method('DELETE')
                         <button 

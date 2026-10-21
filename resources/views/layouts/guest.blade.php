@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="{{ request()->cookie('theme_preference') === 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +12,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Theme Manager (Anti-FOUC) & Styles -->
+    <script src="{{ asset('js/theme-switcher.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/theme-dark.css') }}">
+
+    <!-- Tailwind CSS CDN + Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -143,6 +150,11 @@
     </style>
 </head>
 <body class="guest-gradient-bg text-slate-800 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
+    <!-- Floating Theme Switcher -->
+    <div class="fixed top-4 right-4 z-50">
+        <x-theme-switcher />
+    </div>
+
     <!-- Ambient Luminous Background Elements matching Logo Palette -->
     <div class="fixed -bottom-24 -left-24 w-96 h-96 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none"></div>
     <div class="fixed -bottom-24 -right-24 w-96 h-96 bg-cyan-400/30 rounded-full blur-3xl pointer-events-none"></div>
@@ -158,9 +170,14 @@
         <!-- Logo Header (Animasi Bertahap 1) -->
         <div class="text-center mb-6 sm:mb-7 anim-logo-entry flex justify-center">
             <a href="/" class="inline-flex items-center justify-center hover:opacity-95 transition-all group">
+                <!-- Logo Light Mode: teks gelap untuk latar terang -->
                 <img src="{{ asset('images/logo_lab_lgn_rgst_clean.png') }}" 
                      alt="Laboratorium Lingkungan Terpadu" 
-                     class="w-56 sm:w-64 md:w-72 max-w-[85vw] h-auto object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-300">
+                     class="w-56 sm:w-64 md:w-72 max-w-[85vw] h-auto object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-300 block dark:hidden">
+                <!-- Logo Dark Mode: teks putih / terang untuk latar gelap -->
+                <img src="{{ asset('images/logo_lab_navbar_clean.png') }}" 
+                     alt="Laboratorium Lingkungan Terpadu" 
+                     class="w-56 sm:w-64 md:w-72 max-w-[85vw] h-auto object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-300 hidden dark:block">
             </a>
         </div>
         @endif

@@ -11,6 +11,7 @@ use App\Models\Peralatan;
 use App\Models\Sample;
 use App\Models\Sertifikat;
 use App\Models\User;
+use App\Services\PaymentGatewayService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -64,6 +65,12 @@ class ComprehensiveWorkflowTest extends TestCase
         // Customer can view the sample page
         $resView = $this->actingAs($this->customer)->get(route('customer.samples.show', $sample));
         $resView->assertStatus(200);
+
+        // Settle sample payment before staff can receive
+        $payment = $sample->payments()->latest()->first();
+        if ($payment) {
+            app(PaymentGatewayService::class)->handleSuccessfulPayment($payment, 'TRX-SAMPLE-'.rand(), 'bank_transfer');
+        }
 
         // 2. Staff receives the sample
         $receiveRes = $this->actingAs($this->staff)->post(route('staff.samples.receive', $sample), [
@@ -261,6 +268,9 @@ class ComprehensiveWorkflowTest extends TestCase
             'payment_method' => 'Transfer Bank BCA',
         ]);
         $payRes->assertRedirect();
+
+        // Simulate gateway settlement via PaymentGatewayService
+        app(PaymentGatewayService::class)->handleSuccessfulPayment($payment, 'TRX-SETTLE-TEST-'.rand(), 'bank_transfer');
 
         $borrowing->refresh();
         $equipment->refresh();

@@ -68,6 +68,20 @@ class Sample extends Model
         });
     }
 
+    public function isPaid(): bool
+    {
+        if ($this->calculateTotalPrice() <= 0) {
+            return true;
+        }
+
+        return $this->payments()->where('status', 'Berhasil')->exists();
+    }
+
+    public function latestPayment(): ?Pembayaran
+    {
+        return $this->payments()->latest()->first();
+    }
+
     public function getStatusBadgeClassAttribute(): string
     {
         return match ($this->status) {

@@ -4,7 +4,7 @@
 @section('container-width', 'max-w-lg')
 
 @section('content')
-<div class="bg-white/95 border border-slate-200/80 backdrop-blur-2xl rounded-3xl p-6 sm:p-10 shadow-2xl shadow-slate-300/40 relative">
+<div class="bg-white/95 border border-slate-200/80 backdrop-blur-2xl rounded-3xl p-4 sm:p-10 shadow-2xl shadow-slate-300/40 relative">
     <!-- Header -->
     <div class="border-b border-slate-100 pb-5 mb-6">
         <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Buat Kata Sandi Baru</h2>
@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <form action="{{ route('password.update') }}" method="POST" class="space-y-5">
+    <form action="{{ route('password.update') }}" method="POST" class="space-y-5" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)">
         @csrf
         <input type="hidden" name="token" value="{{ $token }}">
 
@@ -59,9 +59,12 @@
         </div>
 
         <button type="submit" 
-            class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-700/25 hover:shadow-emerald-700/35 transition-all text-sm mt-3 flex items-center justify-center gap-2">
-            <span>Simpan Kata Sandi Baru</span>
-            <i class="fa-solid fa-circle-check"></i>
+            :disabled="submitting"
+            :class="{ 'opacity-75 pointer-events-none': submitting }"
+            class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-700/25 hover:shadow-emerald-700/35 transition-all text-sm mt-3 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+            <i class="fa-solid fa-spinner fa-spin text-sm" x-show="submitting" x-cloak></i>
+            <span x-text="submitting ? 'Menyimpan Kata Sandi...' : 'Simpan Kata Sandi Baru'">Simpan Kata Sandi Baru</span>
+            <i class="fa-solid fa-circle-check" x-show="!submitting"></i>
         </button>
     </form>
 </div>

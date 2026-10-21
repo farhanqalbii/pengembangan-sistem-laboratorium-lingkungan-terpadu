@@ -93,7 +93,9 @@ class SendLaboratoryReminders extends Command
         }
 
         // 3. INV-F-003: Notifikasi Stok Minimum Alat
-        $lowStockEquipments = Peralatan::whereRaw('jumlah <= stok_minimum')->get();
+        $lowStockEquipments = Peralatan::where('status', '!=', 'Tidak Tersedia')
+            ->whereRaw('jumlah <= stok_minimum')
+            ->get();
 
         foreach ($lowStockEquipments as $eq) {
             foreach ($staffAndAdmins as $officer) {

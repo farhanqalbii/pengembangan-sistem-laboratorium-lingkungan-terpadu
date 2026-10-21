@@ -121,12 +121,12 @@
 
                 <div class="space-y-2.5">
                     @forelse($upcomingCalibrations as $cal)
-                        <div class="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between text-xs">
+                        <div class="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                             <div>
                                 <span class="font-bold text-indigo-950 block text-xs">{{ $cal->equipment->name }}</span>
                                 <span class="text-[11px] text-indigo-700">Jadwal: {{ $cal->next_calibration_date ? $cal->next_calibration_date->format('d F Y') : '-' }}</span>
                             </div>
-                            <a href="{{ route('staff.equipment.show', $cal->equipment_id) }}" class="px-2.5 py-1 bg-white border border-indigo-200 hover:bg-indigo-100/50 text-indigo-700 font-bold text-xs rounded-lg transition-colors">
+                            <a href="{{ route('staff.equipment.show', $cal->equipment_id) }}" class="self-start sm:self-auto px-2.5 py-1 bg-white border border-indigo-200 hover:bg-indigo-100/50 text-indigo-700 font-bold text-xs rounded-lg transition-colors">
                                 Detail Alat
                             </a>
                         </div>
@@ -144,7 +144,7 @@
 
             <!-- Stok Kritis -->
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm card-hover">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
                             <i class="fa-solid fa-triangle-exclamation"></i>
@@ -159,12 +159,12 @@
 
                 <div class="space-y-2.5">
                     @forelse($lowStockEquipment as $eq)
-                        <div class="p-3.5 rounded-xl bg-rose-50/60 border border-rose-100 flex items-center justify-between text-xs">
+                        <div class="p-3.5 rounded-xl bg-rose-50/60 border border-rose-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                             <div>
                                 <span class="font-bold text-rose-950 block text-xs">{{ $eq->name }} ({{ $eq->code }})</span>
                                 <span class="text-[11px] text-rose-700">Tersisa: <strong>{{ $eq->quantity }} unit</strong> (Min: {{ $eq->min_stock }})</span>
                             </div>
-                            <a href="{{ route('staff.equipment.edit', $eq->id) }}" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
+                            <a href="{{ route('staff.equipment.edit', $eq->id) }}" class="self-start sm:self-auto px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
                                 Restok
                             </a>
                         </div>

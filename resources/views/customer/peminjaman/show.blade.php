@@ -168,7 +168,7 @@
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100"
                      x-transition:leave-end="opacity-0"
-                     class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 overflow-y-auto"
+                     class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
                      style="z-index: 99999;">
                     <div @click.outside="showPayModal = false" 
                          x-show="showPayModal"
@@ -178,7 +178,7 @@
                          x-transition:leave="transition ease-in duration-200"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto relative max-h-[90vh] overflow-y-auto">
+                         class="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto relative max-h-[90vh] overflow-y-auto">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                             <div>
                                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
@@ -193,9 +193,9 @@
                         </div>
 
                         <!-- Summary Box -->
-                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl space-y-1.5 shadow-inner">
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 sm:p-5 rounded-2xl space-y-1.5 shadow-inner">
                             <span class="text-slate-400 text-xs uppercase font-medium">Total Deposit Jaminan:</span>
-                            <div class="text-3xl font-extrabold text-emerald-400">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 break-words">
                                 Rp {{ number_format($depositPayment->amount, 0, ',', '.') }}
                             </div>
                             <div class="text-xs text-slate-300 flex items-center justify-between pt-1 border-t border-slate-700/60 mt-2">
@@ -341,7 +341,7 @@
         </div>
         <div class="p-4 space-y-3">
             @foreach($borrowing->borrowingDetails as $detail)
-                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                         <h4 class="font-bold text-slate-800 text-sm">{{ $detail->equipment->name }}</h4>
                         <p class="text-xs text-slate-500">Kode: {{ $detail->equipment->code }} | Merk: {{ $detail->equipment->brand ?? 'N/A' }} | Lokasi: {{ $detail->equipment->location }}</p>
@@ -351,7 +351,7 @@
                             </span>
                         @endif
                     </div>
-                    <div class="text-right">
+                    <div class="self-start sm:self-auto text-left sm:text-right">
                         <span class="text-xs font-bold text-slate-800 bg-white border border-slate-200 px-3 py-1 rounded-lg">
                             {{ $detail->quantity }} Unit
                         </span>

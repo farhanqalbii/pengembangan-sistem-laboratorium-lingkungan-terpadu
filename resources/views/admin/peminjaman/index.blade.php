@@ -6,13 +6,13 @@
 @section('content')
 <div class="space-y-6">
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <h3 class="text-sm font-bold text-slate-800">Permohonan Peminjaman Alat Lapangan</h3>
             <span class="text-xs text-slate-500">Pemeriksaan Ketersediaan Stok & Syarat Admin</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[720px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Kode Pinjam</th>
@@ -27,8 +27,15 @@
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse($borrowings as $b)
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 sm:px-5 py-3 font-mono font-bold text-blue-600">
-                                {{ $b->borrow_code }}
+                            <td class="px-4 sm:px-5 py-3">
+                                <a href="{{ route('admin.borrowings.show', $b->id) }}" class="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ $b->borrow_code }}
+                                </a>
+                                @if($b->perpanjangan_diajukan && $b->status_perpanjangan === 'Pending')
+                                    <span class="block text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 mt-1 text-center">
+                                        Perpanjangan Diajukan
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-4 sm:px-5 py-3">
                                 <div class="font-bold text-slate-800">{{ $b->customer->company_name ?? $b->customer->name }}</div>
@@ -53,18 +60,24 @@
                                 @if($b->status === 'Diajukan')
                                     <form action="{{ route('admin.borrowings.approve', $b->id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm">
+                                        <button type="submit" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer">
                                             Approve
                                         </button>
                                     </form>
                                     <form action="{{ route('admin.borrowings.reject', $b->id) }}" method="POST" class="inline" onsubmit="return confirm('Tolak permohonan pinjam ini?')">
                                         @csrf
-                                        <button type="submit" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg shadow-sm">
+                                        <button type="submit" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer">
                                             Tolak
                                         </button>
                                     </form>
+                                @elseif($b->perpanjangan_diajukan && $b->status_perpanjangan === 'Pending')
+                                    <a href="{{ route('admin.borrowings.show', $b->id) }}" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-lg shadow-sm inline-block">
+                                        Perpanjangan
+                                    </a>
                                 @else
-                                    <span class="text-slate-400 font-semibold text-xs">Processed</span>
+                                    <a href="{{ route('admin.borrowings.show', $b->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs inline-block">
+                                        Detail
+                                    </a>
                                 @endif
                             </td>
                         </tr>

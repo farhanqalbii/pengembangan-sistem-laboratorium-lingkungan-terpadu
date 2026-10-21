@@ -23,13 +23,13 @@
 
     <!-- Refund Deposit Processing Section -->
     <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <h3 class="text-xs sm:text-sm font-bold text-slate-800">Antrean Pengembalian Jaminan (Refund Deposit Peminjaman)</h3>
             <span class="text-xs text-slate-500">Pencairan Dana ke Rekening Customer</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[650px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Kode Pinjam</th>

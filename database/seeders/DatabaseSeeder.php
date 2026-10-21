@@ -80,6 +80,8 @@ class DatabaseSeeder extends Seeder
             'address' => 'Jl. Raya Merdeka No. 88, Tangerang',
         ]);
 
+        $this->call(TestUserSeeder::class);
+
         // 2. Equipment
         $eq1 = Equipment::create([
             'code' => 'EQP-SPE-001',
@@ -147,6 +149,23 @@ class DatabaseSeeder extends Seeder
             'status' => 'Tersedia',
             'rental_price_per_day' => 250000,
             'deposit_amount' => 800000,
+        ]);
+
+        $eq5 = Equipment::create([
+            'code' => 'EQP-DO-002',
+            'name' => 'Dissolved Oxygen Meter Portable',
+            'category' => 'Pengukuran Fisika',
+            'brand' => 'Hach HQ30D',
+            'specification' => 'Luminescent DO sensor, optical technology, waterproof IP67',
+            'purchase_year' => 2023,
+            'quantity' => 3,
+            'location' => 'Lab Lapangan & Fisika',
+            'qr_code' => 'QR-EQP-DO-002',
+            'barcode' => '8991001002005',
+            'min_stock' => 1,
+            'status' => 'Tersedia',
+            'rental_price_per_day' => 175000,
+            'deposit_amount' => 600000,
         ]);
 
         // Calibrations & Services

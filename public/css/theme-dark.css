@@ -1,0 +1,382 @@
+/**
+ * Sistem Laboratorium Lingkungan Terpadu 2026
+ * Comprehensive Dark Mode Stylesheet
+ * 
+ * Arsitektur Palet:
+ * - Latar Utama: Deep Navy-Dark (#081421)
+ * - Permukaan Kartu: Elevated Navy (#0f2236)
+ * - Permukaan Sekunder (Inner rows/inputs): Darker Navy (#0a1827 / #091726)
+ * - Garis Batas (Borders): Subtle Slate-Blue (#1c3752)
+ * - Teks Utama: Crisp Off-White (#f8fafc / #e2e8f0)
+ * - Teks Sekunder: Soft Slate (#cbd5e1 / #94a3b8)
+ * - Teks Muted / Metadata: Clear Slate-Blue (#8fa7c2)
+ * - Aksen Brand: Emerald / Teal Lab (#168975 / #34d399)
+ */
+
+/* 1. Pengaturan Color Scheme Peramban */
+html.dark {
+    color-scheme: dark;
+}
+
+/* 2. Latar Belakang & Teks Dasar Aplikasi */
+html.dark,
+html.dark body {
+    background-color: #081421 !important;
+    color: #e2e8f0 !important;
+}
+
+/* 3. Permukaan Kartu, Kontainer, dan Panel Utama */
+html.dark .bg-white {
+    background-color: #0f2236 !important;
+    color: #e2e8f0;
+}
+html.dark [class*="bg-white/"] {
+    background-color: rgba(15, 34, 54, 0.94) !important;
+    color: #e2e8f0;
+}
+html.dark .bg-slate-50,
+html.dark [class*="bg-slate-50"] {
+    background-color: #0a1827 !important;
+}
+html.dark .bg-slate-100,
+html.dark [class*="bg-slate-100"] {
+    background-color: #0d1e30 !important;
+}
+html.dark .bg-slate-200,
+html.dark [class*="bg-slate-200"] {
+    background-color: #162c42 !important;
+}
+html.dark [class*="bg-gradient-"][class*="from-slate-50"],
+html.dark [class*="bg-gradient-"][class*="to-slate-100"],
+html.dark [class*="bg-gradient-"][class*="to-teal-50"] {
+    background-image: none !important;
+    background-color: #0f2236 !important;
+    border-color: #1c3752 !important;
+}
+
+/* 4. Garis Batas & Pembatas (Borders & Dividers Konsisten) */
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark [class*="border-slate-100"],
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-slate-300"],
+html.dark [class*="border-gray-100"],
+html.dark [class*="border-gray-200"],
+html.dark [class*="border-gray-300"] {
+    border-color: #1c3752 !important;
+}
+
+html.dark [class*="divide-slate-"] > :not([hidden]) ~ :not([hidden]),
+html.dark [class*="divide-gray-"] > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-300 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #1c3752 !important;
+}
+
+/* 5. Tipografi & Kontras Teks yang Jelas */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+    color: #f8fafc !important;
+}
+html.dark .text-slate-700,
+html.dark .text-gray-700,
+html.dark .text-brand-navy {
+    color: #e2e8f0 !important;
+}
+html.dark .text-slate-600,
+html.dark .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+html.dark .text-slate-500,
+html.dark .text-gray-500 {
+    color: #94a3b8 !important;
+}
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+    color: #8fa7c2 !important;
+}
+
+/* 6. Form Controls: Input, Select, Textarea */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark input[type="date"],
+html.dark input[type="search"],
+html.dark input[type="tel"],
+html.dark input[type="file"],
+html.dark select,
+html.dark textarea {
+    background-color: #091726 !important;
+    color: #f8fafc !important;
+    border-color: #1e3c5c !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder,
+html.dark ::placeholder {
+    color: #64748b !important;
+}
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+    border-color: #168975 !important;
+    box-shadow: 0 0 0 2px rgba(22, 137, 117, 0.3) !important;
+}
+html.dark select option {
+    background-color: #0f2236 !important;
+    color: #f8fafc !important;
+}
+
+/* 7. Tabel Data (Head, Row, Cell, Hover) */
+html.dark table thead,
+html.dark table thead tr {
+    background-color: #0a1827 !important;
+}
+html.dark table thead th {
+    background-color: #0a1827 !important;
+    color: #94a3b8 !important;
+    border-bottom: 1px solid #1c3752 !important;
+}
+html.dark table tbody tr {
+    border-bottom-color: #1c3752 !important;
+}
+html.dark table tbody tr:hover {
+    background-color: rgba(22, 44, 66, 0.6) !important;
+}
+html.dark table tbody td {
+    color: #cbd5e1 !important;
+    border-bottom-color: #1c3752 !important;
+}
+
+/* 8. Kotak Ikon Kartu Statistik (KPI) & Akses Cepat */
+html.dark .bg-purple-50,
+html.dark .bg-purple-100 {
+    background-color: rgba(168, 85, 247, 0.18) !important;
+    color: #c084fc !important;
+}
+html.dark .bg-blue-50,
+html.dark .bg-blue-100 {
+    background-color: rgba(59, 130, 246, 0.18) !important;
+    color: #60a5fa !important;
+}
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100,
+html.dark [class*="bg-emerald-50"] {
+    background-color: rgba(22, 137, 117, 0.22) !important;
+}
+html.dark .bg-teal-50,
+html.dark .bg-teal-100 {
+    background-color: rgba(20, 184, 166, 0.2) !important;
+    color: #2dd4bf !important;
+}
+html.dark .bg-amber-50,
+html.dark .bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    color: #fbbf24 !important;
+}
+html.dark .bg-rose-50,
+html.dark .bg-rose-100 {
+    background-color: rgba(244, 63, 94, 0.2) !important;
+    color: #fb7185 !important;
+}
+html.dark .bg-indigo-50,
+html.dark .bg-indigo-100 {
+    background-color: rgba(99, 102, 241, 0.2) !important;
+    color: #818cf8 !important;
+}
+
+/* 9. Tombol Interaktif, Akses Cepat & Hover Effects */
+html.dark a.bg-slate-50,
+html.dark a.bg-white,
+html.dark button.bg-white {
+    background-color: #0a1827 !important;
+    color: #e2e8f0 !important;
+    border-color: #1c3752 !important;
+}
+html.dark a.bg-slate-50:hover,
+html.dark a.bg-white:hover,
+html.dark button.bg-white:hover,
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover {
+    background-color: #142a42 !important;
+    border-color: #204163 !important;
+    color: #ffffff !important;
+}
+html.dark .hover\:bg-emerald-50\/50:hover,
+html.dark .hover\:bg-emerald-50:hover {
+    background-color: rgba(22, 137, 117, 0.25) !important;
+    color: #34d399 !important;
+}
+html.dark .hover\:border-emerald-400:hover {
+    border-color: #168975 !important;
+}
+
+/* 10. Status Badges & Alerts */
+html.dark .text-emerald-700,
+html.dark .text-emerald-800,
+html.dark .text-emerald-600 {
+    color: #34d399 !important;
+}
+html.dark .text-blue-700,
+html.dark .text-blue-800,
+html.dark .text-blue-600 {
+    color: #60a5fa !important;
+}
+html.dark .text-amber-700,
+html.dark .text-amber-800,
+html.dark .text-amber-600 {
+    color: #fbbf24 !important;
+}
+html.dark .text-rose-700,
+html.dark .text-rose-800,
+html.dark .text-rose-600 {
+    color: #fb7185 !important;
+}
+html.dark .text-purple-700,
+html.dark .text-purple-800,
+html.dark .text-purple-600 {
+    color: #c084fc !important;
+}
+html.dark .text-indigo-700,
+html.dark .text-indigo-800,
+html.dark .text-indigo-600 {
+    color: #818cf8 !important;
+}
+
+/* 11. Header, Topbar, & Navigasi */
+html.dark header.bg-white {
+    background-color: #0d1e2f !important;
+    border-bottom-color: #1c3752 !important;
+}
+html.dark .glass-header {
+    background: rgba(10, 24, 38, 0.94) !important;
+    border-bottom-color: rgba(28, 55, 82, 0.85) !important;
+}
+html.dark footer.bg-white,
+html.dark footer.bg-white\/90 {
+    background-color: rgba(13, 30, 47, 0.96) !important;
+    border-top-color: #1c3752 !important;
+}
+
+/* 11.1 Sidebar Navigation (Midnight Dark Palette) */
+html.dark {
+    --sidebar-bg: #071521;
+    --sidebar-logo-bg: #071521;
+    --sidebar-hover-bg: #142A3D;
+    --sidebar-text: #C4D2DF;
+    --sidebar-icon: #C4D2DF;
+    --sidebar-active-bg: #168F7A;
+    --sidebar-active-text: #FFFFFF;
+    --sidebar-border: #1C3448;
+    --sidebar-section-title: #7E93A7;
+}
+
+html.dark .app-sidebar {
+    background-color: #071521 !important;
+    border-right: 1px solid #1C3448 !important;
+    color: #C4D2DF !important;
+}
+
+html.dark .app-sidebar-logo {
+    background-color: #071521 !important;
+    border-bottom: 1px solid #1C3448 !important;
+}
+
+html.dark .app-sidebar-section-title {
+    color: #7E93A7 !important;
+}
+
+html.dark .app-sidebar-link {
+    color: #C4D2DF !important;
+}
+
+html.dark .app-sidebar-link i {
+    color: #C4D2DF !important;
+}
+
+html.dark .app-sidebar-link:hover {
+    background-color: #142A3D !important;
+    color: #C4D2DF !important;
+}
+
+html.dark .app-sidebar-link.is-active,
+html.dark .app-sidebar-link.is-active:hover {
+    background-color: #168F7A !important;
+    color: #FFFFFF !important;
+}
+
+html.dark .app-sidebar-link.is-active i {
+    color: #FFFFFF !important;
+}
+
+html.dark .app-sidebar-close-btn {
+    color: #C4D2DF !important;
+}
+
+html.dark .app-sidebar-close-btn:hover {
+    color: #FFFFFF !important;
+}
+
+/* 12. Modals, Dialogs, Dropdown Popups */
+html.dark .fixed.inset-0 .bg-white,
+html.dark [role="dialog"] .bg-white,
+html.dark .modal-card {
+    background-color: #0f2236 !important;
+    border: 1px solid #1e3c5c !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+    color: #f8fafc !important;
+}
+html.dark .shadow-2xl.border.border-slate-200,
+html.dark [x-show="open"].bg-white,
+html.dark [x-show="userMenuOpen"] {
+    background-color: #0d1e2f !important;
+    border-color: #1c3752 !important;
+    color: #f8fafc !important;
+}
+
+/* 13. Komponen Pagination (Laravel Tailwind) */
+html.dark nav[role="navigation"] a,
+html.dark nav[role="navigation"] span {
+    background-color: #0f2236 !important;
+    border-color: #1c3752 !important;
+    color: #cbd5e1 !important;
+}
+html.dark nav[role="navigation"] a:hover {
+    background-color: #162c42 !important;
+    color: #ffffff !important;
+}
+html.dark nav[role="navigation"] span[aria-current="page"] span {
+    background-color: #168975 !important;
+    border-color: #168975 !important;
+    color: #ffffff !important;
+}
+html.dark nav[role="navigation"] span[aria-disabled="true"] span {
+    background-color: #0a1827 !important;
+    border-color: #1c3752 !important;
+    color: #64748b !important;
+}
+
+/* 14. Halaman Publik (Gradient & Sections) */
+html.dark .guest-gradient-bg {
+    background: linear-gradient(180deg, 
+        #081421 0%, 
+        #071926 25%, 
+        #07242d 55%, 
+        #062b2e 75%, 
+        #051c24 100%
+    ) !important;
+    background-attachment: fixed !important;
+}
+
+/* 15. Watermark Background Logo */
+html.dark #app-watermark img,
+html.dark .fixed.inset-0 img[src*="logo_icon"] {
+    opacity: 0.015 !important;
+}

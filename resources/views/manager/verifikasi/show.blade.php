@@ -27,7 +27,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[650px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Parameter Uji</th>
@@ -73,6 +73,17 @@
     </div>
 
     @if($sample->status === 'Menunggu Verifikasi')
+        @if($sample->rejection_reason)
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-900 text-xs flex items-start gap-3">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600 text-base mt-0.5 shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-sm text-amber-800">Catatan Permintaan Revisi Sebelumnya:</h4>
+                    <p class="mt-0.5 italic text-amber-900 font-medium">"{{ $sample->rejection_reason }}"</p>
+                    <p class="mt-1 text-[11px] text-amber-700">Staf analis telah memperbarui nilai pengujian dan mengirimkannya kembali untuk ditinjau ulang.</p>
+                </div>
+            </div>
+        @endif
+
         <!-- Manager Decision Action Box (Hanya Tampil Saat Menunggu Verifikasi) -->
         <div class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
@@ -80,15 +91,20 @@
                 <p class="text-xs text-slate-300 mt-0.5">Approval akan secara otomatis menanda-tangani digital Sertifikat (COA) dan menerbitkannya untuk customer.</p>
             </div>
 
-            <div class="flex items-center space-x-3 w-full sm:w-auto">
-                <button type="button" @click="showRejectModal = true" class="px-4 py-2 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/50 font-bold text-xs rounded-xl transition-all">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+                <button type="button" @click="showRejectModal = true" class="w-full sm:w-auto px-4 py-2 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/50 font-bold text-xs rounded-xl transition-all text-center">
                     <i class="fa-solid fa-rotate-left mr-1.5"></i> Tolak / Minta Revisi
                 </button>
 
-                <form action="{{ route('manager.verifications.approve', $sample->id) }}" method="POST">
+                <form action="{{ route('manager.verifications.approve', $sample->id) }}" method="POST" x-data="{ submitting: false }" @submit="submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="w-full sm:w-auto">
                     @csrf
-                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center">
-                        <i class="fa-solid fa-signature mr-2"></i> Approve & Terbitkan COA
+                    <button type="submit" 
+                        :disabled="submitting"
+                        :class="{ 'opacity-75 pointer-events-none': submitting }"
+                        class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="submitting" x-cloak></i>
+                        <i class="fa-solid fa-signature" x-show="!submitting"></i>
+                        <span x-text="submitting ? 'Memproses & Menandatangani...' : 'Approve & Terbitkan COA'">Approve & Terbitkan COA</span>
                     </button>
                 </form>
             </div>
@@ -175,7 +191,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 overflow-y-auto"
+             class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
              style="z-index: 99999;">
             <div @click.outside="showRejectModal = false" 
                  x-show="showRejectModal"
@@ -185,14 +201,14 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                  x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                 class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 my-auto relative border border-slate-200">
+                 class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto relative border border-slate-200">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <h3 class="font-bold text-slate-800 text-base">Alasan Penolakan / Permintaan Revisi</h3>
                     <button @click="showRejectModal = false" class="text-slate-400 hover:text-slate-700 cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
                 <p class="text-xs text-slate-500">Berikan catatan perbaikan secara spesifik untuk staf teknis / analis laboratorium.</p>
 
-                <form action="{{ route('manager.verifications.reject', $sample->id) }}" method="POST" class="space-y-4">
+                <form action="{{ route('manager.verifications.reject', $sample->id) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Revisi <span class="text-rose-500">*</span></label>
@@ -200,8 +216,14 @@
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-2">
-                        <button type="button" @click="showRejectModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer">Batal</button>
-                        <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer">Kirim Catatan Revisi</button>
+                        <button type="button" @click="showRejectModal = false; submitting = false" :disabled="submitting" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer disabled:opacity-50">Batal</button>
+                        <button type="submit" 
+                            :disabled="submitting"
+                            :class="{ 'opacity-75 pointer-events-none': submitting }"
+                            class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-spinner fa-spin" x-show="submitting" x-cloak></i>
+                            <span x-text="submitting ? 'Mengirim Revisi...' : 'Kirim Catatan Revisi'">Kirim Catatan Revisi</span>
+                        </button>
                     </div>
                 </form>
             </div>

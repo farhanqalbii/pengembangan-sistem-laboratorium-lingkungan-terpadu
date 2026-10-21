@@ -6,13 +6,13 @@
 @section('content')
 <div class="space-y-6">
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <h3 class="text-sm font-bold text-slate-800">Catatan Aktivitas Pengguna & Log Keamanan</h3>
             <span class="text-xs text-slate-500">Perekaman Aktivitas ISO/IEC 17025 Compliance</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[650px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Waktu</th>

@@ -9,6 +9,7 @@ use App\Models\Sample;
 use App\Models\Sertifikat;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VerifikasiController extends Controller
 {
@@ -58,42 +59,59 @@ class VerifikasiController extends Controller
         $certificate = null;
         $coaNumber = '';
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($sample, &$certificate, &$coaNumber) {
-            // Transisi ke status Diverifikasi lalu Selesai secara sah
-            $sample->update([
-                'status' => 'Diverifikasi',
-                'rejection_reason' => null,
-            ]);
+        try {
+            DB::transaction(function () use ($sample, &$certificate, &$coaNumber) {
+                $lockedSample = Sample::where('id', $sample->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            // Generate Certificate of Analysis (COA)
-            $coaNumber = 'COA/'.date('Y/m').'/'.sprintf('%04d', Sertifikat::whereYear('created_at', date('Y'))->count() + 1);
-            $issuedAt = now();
-            $signatureHash = Sertifikat::generateSignature($sample, $coaNumber, auth()->id(), (string) $issuedAt->timestamp);
+                if ($lockedSample->status !== 'Menunggu Verifikasi') {
+                    throw new \DomainException("Sampel ini tidak dalam status Menunggu Verifikasi (Status saat ini: {$lockedSample->status}).");
+                }
 
-            $certificate = Sertifikat::create([
-                'nomor_sertifikat' => $coaNumber,
-                'certificate_number' => $coaNumber,
-                'sample_id' => $sample->id,
-                'customer_id' => $sample->customer_id,
-                'verified_by' => auth()->id(),
-                'tanggal_verifikasi' => $issuedAt,
-                'tanggal_terbit' => $issuedAt,
-                'hash_tanda_tangan' => $signatureHash,
-            ]);
+                // Cek apakah sertifikat sudah pernah dibuat untuk sampel ini
+                if ($lockedSample->certificate()->exists() || Sertifikat::where('sample_id', $lockedSample->id)->exists()) {
+                    throw new \DomainException('Sertifikat (COA) untuk sampel ini sudah pernah diterbitkan.');
+                }
 
-            // Status akhir sampel menjadi Selesai setelah COA resmi terbit
-            $sample->update(['status' => 'Selesai']);
+                // Transisi ke status Diverifikasi lalu Selesai secara sah
+                $lockedSample->update([
+                    'status' => 'Diverifikasi',
+                    'rejection_reason' => null,
+                ]);
 
-            LogAktivitas::record('Verifikasi & Terbit COA', 'Verifikasi', 'Manajer Lab ('.auth()->user()->name.") menyetujui verifikasi teknis sampel {$sample->sample_code} dan menerbitkan Sertifikat Hasil Uji {$coaNumber}.", auth()->id());
+                // Generate Certificate of Analysis (COA)
+                $coaNumber = 'COA/'.date('Y/m').'/'.sprintf('%04d', Sertifikat::whereYear('created_at', date('Y'))->count() + 1);
+                $issuedAt = now();
+                $signatureHash = Sertifikat::generateSignature($lockedSample, $coaNumber, auth()->id(), (string) $issuedAt->timestamp);
 
-            // Notify Customer
-            Notification::create([
-                'user_id' => $sample->customer_id,
-                'title' => 'Sertifikat Hasil Uji (COA) Terbit!',
-                'message' => "Sertifikat Hasil Uji {$coaNumber} untuk sampel {$sample->sample_code} telah diterbitkan dan siap diunduh.",
-                'link' => '/customer/certificates/'.$certificate->id,
-            ]);
-        });
+                $certificate = Sertifikat::create([
+                    'nomor_sertifikat' => $coaNumber,
+                    'certificate_number' => $coaNumber,
+                    'sample_id' => $lockedSample->id,
+                    'customer_id' => $lockedSample->customer_id,
+                    'verified_by' => auth()->id(),
+                    'tanggal_verifikasi' => $issuedAt,
+                    'tanggal_terbit' => $issuedAt,
+                    'hash_tanda_tangan' => $signatureHash,
+                ]);
+
+                // Status akhir sampel menjadi Selesai setelah COA resmi terbit
+                $lockedSample->update(['status' => 'Selesai']);
+
+                LogAktivitas::record('Verifikasi & Terbit COA', 'Verifikasi', 'Manajer Lab ('.auth()->user()->name.") menyetujui verifikasi teknis sampel {$lockedSample->sample_code} dan menerbitkan Sertifikat Hasil Uji {$coaNumber}.", auth()->id());
+
+                // Notify Customer
+                Notification::create([
+                    'user_id' => $lockedSample->customer_id,
+                    'title' => 'Sertifikat Hasil Uji (COA) Terbit!',
+                    'message' => "Sertifikat Hasil Uji {$coaNumber} untuk sampel {$lockedSample->sample_code} telah diterbitkan dan siap diunduh.",
+                    'link' => '/customer/certificates/'.$certificate->id,
+                ]);
+            });
+        } catch (\DomainException $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
 
         return redirect()->route('manager.verifications.show', $sample)
             ->with('success', "Verifikasi teknis berhasil disetujui! Certificate of Analysis ({$coaNumber}) telah diterbitkan dengan Tanda Tangan Digital sah.");

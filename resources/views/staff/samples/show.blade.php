@@ -18,9 +18,13 @@
                     <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                         <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Pembayaran: LUNAS ({{ $samplePay->payment_method }})
                     </span>
+                @elseif($samplePay && in_array($samplePay->status, ['Gagal', 'Kadaluarsa']))
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                        <i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> Pembayaran: {{ $samplePay->status }}
+                    </span>
                 @elseif($samplePay)
                     <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                        <i class="fa-solid fa-clock mr-1 text-amber-600"></i> Pembayaran: Belum Lunas
+                        <i class="fa-solid fa-clock mr-1 text-amber-600"></i> Pembayaran: Menunggu Pembayaran
                     </span>
                 @endif
             </div>
@@ -34,13 +38,22 @@
             </a>
 
             @if($sample->status === 'Diajukan')
-                <form action="{{ route('staff.samples.receive', $sample->id) }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="received_date" value="{{ date('Y-m-d H:i:s') }}">
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors cursor-pointer">
-                        <i class="fa-solid fa-box-archive mr-2"></i> Konfirmasi Penerimaan Sampel
+                @php
+                    $isPaid = $sample->calculateTotalPrice() <= 0 || ($samplePay && $samplePay->status === 'Berhasil');
+                @endphp
+                @if($isPaid)
+                    <form action="{{ route('staff.samples.receive', $sample->id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="received_date" value="{{ date('Y-m-d H:i:s') }}">
+                        <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors cursor-pointer">
+                            <i class="fa-solid fa-box-archive mr-2"></i> Konfirmasi Penerimaan Sampel
+                        </button>
+                    </form>
+                @else
+                    <button type="button" disabled class="px-4 py-2 bg-slate-100 border border-slate-200 text-slate-400 font-bold text-xs rounded-xl flex items-center cursor-not-allowed shadow-2xs" title="Sampel belum dapat disetujui karena pembayaran belum diselesaikan oleh customer.">
+                        <i class="fa-solid fa-lock mr-2 text-slate-400"></i> Menunggu Pelunasan Pembayaran
                     </button>
-                </form>
+                @endif
             @endif
 
             @if(in_array($sample->status, ['Diterima', 'Diproses', 'Diuji', 'Revisi']))
@@ -51,6 +64,16 @@
         </div>
     </div>
 
+    @if($sample->status === 'Diajukan' && $sample->calculateTotalPrice() > 0 && (! $samplePay || $samplePay->status !== 'Berhasil'))
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-3">
+            <i class="fa-solid fa-circle-exclamation text-amber-600 text-base mt-0.5 shrink-0"></i>
+            <div>
+                <h4 class="font-bold text-sm text-amber-800">Menunggu Verifikasi Pembayaran Customer</h4>
+                <p class="mt-0.5 text-amber-700">Sampel ini memiliki total tagihan uji sebesar <strong>Rp {{ number_format($sample->calculateTotalPrice(), 0, ',', '.') }}</strong> dengan status pembayaran: <strong>{{ $samplePay ? $samplePay->status : 'Belum Ada Tagihan' }}</strong>. Berdasarkan SOP laboratorium, staf hanya dapat menyetujui dan menerima sampel setelah pembayaran terkonfirmasi lunas oleh sistem.</p>
+            </div>
+        </div>
+    @endif
+
     @if($sample->status === 'Revisi' && $sample->rejection_reason)
         <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs">
             <h4 class="font-bold text-sm mb-1 text-rose-800"><i class="fa-solid fa-circle-exclamation mr-1"></i> Catatan Revisi dari Manajer Lab:</h4>
@@ -60,12 +83,12 @@
 
     <!-- Assign Analyst & Equipment Form (SPL-F-003) -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
                 <h3 class="text-sm font-bold text-slate-800">Penugasan Analis & Alokasi Instrumen Uji (SPL-F-003)</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Setiap parameter uji wajib memiliki metode uji, analis penanggung jawab, dan instrumen laboratorium yang valid.</p>
             </div>
-            <span class="text-xs text-slate-500 font-semibold bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold bg-white px-2.5 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
                 Total {{ $sample->sampleParameters->count() }} Parameter
             </span>
         </div>
@@ -93,7 +116,7 @@
         <form action="{{ route('staff.samples.assign', $sample->id) }}" method="POST">
             @csrf
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[760px]">
                     <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                         <tr>
                             <th class="px-4 sm:px-5 py-3">Parameter Uji</th>

@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Sample;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class LimsWorkflowTest extends TestCase
 {
+    use DatabaseTransactions;
+
     /** @test */
     public function customer_can_access_customer_dashboard()
     {

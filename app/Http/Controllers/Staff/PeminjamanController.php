@@ -9,6 +9,8 @@ use App\Models\LogAktivitas;
 use App\Models\Notification;
 use App\Models\Pembayaran;
 use App\Models\Peminjaman;
+use App\Models\Peralatan;
+use App\Models\RiwayatServis;
 use App\Models\RiwayatStok;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -38,77 +40,136 @@ class PeminjamanController extends Controller
 
     public function approve(Peminjaman $borrowing)
     {
-        DB::transaction(function () use ($borrowing) {
-            $borrowing->update([
-                'status' => 'Disetujui',
-            ]);
+        if ($borrowing->status !== 'Diajukan') {
+            return back()->with('error', "Pengajuan peminjaman tidak dapat disetujui karena status saat ini adalah '{$borrowing->status}'.")
+                ->withErrors(['status' => "Status peminjaman bukan 'Diajukan'."]);
+        }
 
-            // Generate deposit payment request jika belum ada
-            if ($borrowing->deposit_amount > 0 && ! $borrowing->payments()->where('tipe', 'Deposit Peminjaman')->exists()) {
-                $payCode = 'PAY-'.date('Ymd').'-'.sprintf('%04d', Pembayaran::whereDate('created_at', today())->count() + 1);
-                $payment = Pembayaran::create([
-                    'kode_pembayaran' => $payCode,
-                    'customer_id' => $borrowing->customer_id,
-                    'id_peminjaman' => $borrowing->id,
-                    'tipe' => 'Deposit Peminjaman',
-                    'jumlah_bayar' => $borrowing->deposit_amount,
-                    'metode_pembayaran' => 'Transfer Bank',
-                    'status' => 'Menunggu Pembayaran',
+        try {
+            DB::transaction(function () use ($borrowing) {
+                $lockedBorrowing = Peminjaman::where('id', $borrowing->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($lockedBorrowing->status !== 'Diajukan') {
+                    throw new \DomainException("Pengajuan peminjaman tidak dapat disetujui karena status saat ini adalah '{$lockedBorrowing->status}'.");
+                }
+
+                // Periksa ketersediaan stok fisik alat sebelum menyetujui
+                foreach ($lockedBorrowing->borrowingDetails as $detail) {
+                    $eq = Peralatan::where('id', $detail->id_peralatan)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $eq) {
+                        throw new \DomainException('Data alat tidak ditemukan.');
+                    }
+
+                    if ($eq->status !== 'Tersedia') {
+                        throw new \DomainException("Alat '{$eq->name}' tidak tersedia untuk dipinjam (Status: {$eq->status}).");
+                    }
+
+                    $available = $eq->getAvailableStockExcludingBorrowing($lockedBorrowing->id);
+                    if ($available < $detail->quantity) {
+                        throw new \DomainException("Stok alat '{$eq->name}' tidak mencukupi untuk disetujui (Tersedia: {$available}, Dibutuhkan: {$detail->quantity}).");
+                    }
+                }
+
+                $lockedBorrowing->update([
+                    'status' => 'Disetujui',
                 ]);
 
-                $invCode = 'INV/'.date('Y/m').'/'.sprintf('%04d', Invoice::whereYear('created_at', date('Y'))->count() + 1);
-                Invoice::create([
-                    'invoice_number' => $invCode,
-                    'customer_id' => $borrowing->customer_id,
-                    'id_pembayaran' => $payment->id,
-                    'subtotal' => $borrowing->deposit_amount,
-                    'deposit' => $borrowing->deposit_amount,
-                    'fine' => 0,
-                    'total' => $borrowing->deposit_amount,
-                    'status' => 'Belum Lunas',
+                // Generate deposit payment request jika belum ada
+                if ($lockedBorrowing->deposit_amount > 0 && ! $lockedBorrowing->payments()->where('tipe', 'Deposit Peminjaman')->exists()) {
+                    $payCode = 'PAY-'.date('Ymd').'-'.sprintf('%04d', Pembayaran::whereDate('created_at', today())->count() + 1);
+                    $payment = Pembayaran::create([
+                        'kode_pembayaran' => $payCode,
+                        'customer_id' => $lockedBorrowing->customer_id,
+                        'id_peminjaman' => $lockedBorrowing->id,
+                        'tipe' => 'Deposit Peminjaman',
+                        'jumlah_bayar' => $lockedBorrowing->deposit_amount,
+                        'metode_pembayaran' => 'Transfer Bank',
+                        'status' => 'Menunggu Pembayaran',
+                    ]);
+
+                    $invCode = 'INV/'.date('Y/m').'/'.sprintf('%04d', Invoice::whereYear('created_at', date('Y'))->count() + 1);
+                    Invoice::create([
+                        'invoice_number' => $invCode,
+                        'customer_id' => $lockedBorrowing->customer_id,
+                        'id_pembayaran' => $payment->id,
+                        'subtotal' => $lockedBorrowing->deposit_amount,
+                        'deposit' => $lockedBorrowing->deposit_amount,
+                        'fine' => 0,
+                        'total' => $lockedBorrowing->deposit_amount,
+                        'status' => 'Belum Lunas',
+                    ]);
+                }
+
+                LogAktivitas::record('Persetujuan Peminjaman', 'Peminjaman', "Staf menyetujui pengajuan peminjaman {$lockedBorrowing->borrow_code} setelah memeriksa kesiapan fisik alat.", auth()->id());
+
+                Notification::create([
+                    'user_id' => $lockedBorrowing->customer_id,
+                    'title' => 'Pengajuan Peminjaman Disetujui!',
+                    'message' => "Pengajuan peminjaman {$lockedBorrowing->borrow_code} telah diverifikasi dan disetujui staf. Silakan lakukan pembayaran deposit.",
+                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
                 ]);
-            }
-
-            LogAktivitas::record('Persetujuan Peminjaman', 'Peminjaman', "Staf menyetujui pengajuan peminjaman {$borrowing->borrow_code} setelah memeriksa kesiapan fisik alat.", auth()->id());
-
-            Notification::create([
-                'user_id' => $borrowing->customer_id,
-                'title' => 'Pengajuan Peminjaman Disetujui!',
-                'message' => "Pengajuan peminjaman {$borrowing->borrow_code} telah diverifikasi dan disetujui staf. Silakan lakukan pembayaran deposit.",
-                'link' => '/customer/borrowings/'.$borrowing->id,
-            ]);
-        });
+            });
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage())->withErrors(['status' => $e->getMessage()]);
+        }
 
         return back()->with('success', "Pengajuan peminjaman {$borrowing->borrow_code} berhasil disetujui.");
     }
 
     public function reject(Request $request, Peminjaman $borrowing)
     {
+        if ($borrowing->status !== 'Diajukan') {
+            return back()->with('error', "Pengajuan peminjaman tidak dapat ditolak karena status saat ini adalah '{$borrowing->status}'.")
+                ->withErrors(['status' => "Status peminjaman bukan 'Diajukan'."]);
+        }
+
         $validated = $request->validate([
             'notes' => ['required', 'string', 'max:500'],
         ]);
 
-        DB::transaction(function () use ($borrowing, $validated) {
-            $borrowing->update([
-                'status' => 'Ditolak',
-                'catatan' => $validated['notes'],
-            ]);
+        try {
+            DB::transaction(function () use ($borrowing, $validated) {
+                $lockedBorrowing = Peminjaman::where('id', $borrowing->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            LogAktivitas::record('Penolakan Peminjaman', 'Peminjaman', "Staf menolak peminjaman {$borrowing->borrow_code}: {$validated['notes']}", auth()->id());
+                if ($lockedBorrowing->status !== 'Diajukan') {
+                    throw new \DomainException("Pengajuan peminjaman tidak dapat ditolak karena status saat ini adalah '{$lockedBorrowing->status}'.");
+                }
 
-            Notification::create([
-                'user_id' => $borrowing->customer_id,
-                'title' => 'Pengajuan Peminjaman Ditolak',
-                'message' => "Pengajuan peminjaman {$borrowing->borrow_code} ditolak oleh staf. Alasan: {$validated['notes']}",
-                'link' => '/customer/borrowings/'.$borrowing->id,
-            ]);
-        });
+                $lockedBorrowing->update([
+                    'status' => 'Ditolak',
+                    'catatan' => $validated['notes'],
+                ]);
+
+                LogAktivitas::record('Penolakan Peminjaman', 'Peminjaman', "Staf menolak peminjaman {$lockedBorrowing->borrow_code}: {$validated['notes']}", auth()->id());
+
+                Notification::create([
+                    'user_id' => $lockedBorrowing->customer_id,
+                    'title' => 'Pengajuan Peminjaman Ditolak',
+                    'message' => "Pengajuan peminjaman {$lockedBorrowing->borrow_code} ditolak oleh staf. Alasan: {$validated['notes']}",
+                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                ]);
+            });
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage())->withErrors(['status' => $e->getMessage()]);
+        }
 
         return back()->with('success', "Pengajuan peminjaman {$borrowing->borrow_code} ditolak.");
     }
 
     public function processReturn(Request $request, Peminjaman $borrowing)
     {
+        if (! in_array($borrowing->status, ['Dipinjam', 'Terlambat'])) {
+            return back()->with('error', "Pengembalian tidak dapat diproses karena status peminjaman saat ini adalah '{$borrowing->status}'.")
+                ->withErrors(['status' => 'Status peminjaman tidak valid untuk pengembalian.']);
+        }
+
         if (! $request->has('conditions') && $request->has('returns')) {
             $request->merge(['conditions' => $request->input('returns')]);
         }
@@ -137,88 +198,152 @@ class PeminjamanController extends Controller
             $totalFine += $lateFine;
         }
 
-        DB::transaction(function () use ($borrowing, $validated, &$totalFine, &$refund) {
-            foreach ($validated['conditions'] as $cond) {
-                $detail = DetailPeminjaman::with('equipment')->find($cond['detail_id']);
-                if ($detail && (int) $detail->borrowing_id === (int) $borrowing->id) {
-                    $detail->update([
-                        'condition_return' => $cond['condition_return'],
-                        'condition_notes' => $cond['notes'] ?? null,
-                    ]);
+        $refund = 0;
 
-                    // Restore equipment stock if condition is Baik or Rusak Ringan
-                    if (in_array($cond['condition_return'], ['Baik', 'Rusak Ringan'])) {
-                        $eq = $detail->equipment;
-                        $oldQty = $eq->quantity;
-                        $eq->increment('jumlah', $detail->quantity);
+        try {
+            DB::transaction(function () use ($borrowing, $validated, &$totalFine, &$refund) {
+                $lockedBorrowing = Peminjaman::where('id', $borrowing->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-                        RiwayatStok::create([
-                            'id_peralatan' => $eq->id,
-                            'tipe' => 'Pengembalian',
-                            'jumlah_sebelum' => $oldQty,
-                            'jumlah_perubahan' => $detail->quantity,
-                            'jumlah_setelah' => $eq->quantity,
-                            'user_id' => auth()->id(),
-                            'catatan' => "Pengembalian peminjaman {$borrowing->borrow_code} (Kondisi: {$cond['condition_return']})",
+                if (! in_array($lockedBorrowing->status, ['Dipinjam', 'Terlambat'])) {
+                    throw new \DomainException("Pengembalian tidak dapat diproses karena status peminjaman saat ini adalah '{$lockedBorrowing->status}'.");
+                }
+
+                foreach ($validated['conditions'] as $cond) {
+                    $detail = DetailPeminjaman::where('id', $cond['detail_id'])
+                        ->where('id_peminjaman', $lockedBorrowing->id)
+                        ->first();
+
+                    if ($detail) {
+                        $detail->update([
+                            'condition_return' => $cond['condition_return'],
+                            'condition_notes' => $cond['notes'] ?? null,
                         ]);
-                    } else {
-                        // Damaged/Lost fine penalty
-                        if ($cond['condition_return'] === 'Rusak Berat') {
-                            $totalFine += $detail->equipment->deposit_amount * 0.5 * $detail->quantity;
-                        } elseif ($cond['condition_return'] === 'Hilang') {
-                            $totalFine += $detail->equipment->deposit_amount * 1.0 * $detail->quantity;
+
+                        // Restore equipment stock if condition is Baik or Rusak Ringan
+                        if (in_array($cond['condition_return'], ['Baik', 'Rusak Ringan'])) {
+                            $eq = Peralatan::where('id', $detail->id_peralatan)
+                                ->lockForUpdate()
+                                ->first();
+
+                            if ($eq) {
+                                $oldQty = $eq->quantity;
+                                $eq->increment('jumlah', $detail->quantity);
+                                $newQty = $eq->fresh()->quantity;
+
+                                RiwayatStok::create([
+                                    'id_peralatan' => $eq->id,
+                                    'tipe' => 'Pengembalian',
+                                    'jumlah_sebelum' => $oldQty,
+                                    'jumlah_perubahan' => $detail->quantity,
+                                    'jumlah_setelah' => $newQty,
+                                    'user_id' => auth()->id(),
+                                    'catatan' => "Pengembalian peminjaman {$lockedBorrowing->borrow_code} (Kondisi: {$cond['condition_return']})",
+                                ]);
+                            }
+                        } else {
+                            // Damaged/Lost fine penalty & audit record
+                            $eq = Peralatan::where('id', $detail->id_peralatan)
+                                ->lockForUpdate()
+                                ->first();
+
+                            if ($eq) {
+                                if ($cond['condition_return'] === 'Rusak Berat') {
+                                    $totalFine += $eq->deposit_amount * 0.5 * $detail->quantity;
+
+                                    RiwayatServis::create([
+                                        'id_peralatan' => $eq->id,
+                                        'tanggal_servis' => $validated['actual_return_date'],
+                                        'status' => 'Perlu Perbaikan',
+                                        'teknisi' => 'Staff Pengembalian',
+                                        'catatan' => 'Kerusakan pasca peminjaman '.$lockedBorrowing->borrow_code.': '.($cond['notes'] ?? 'Rusak Berat saat serah-terima pengembalian'),
+                                    ]);
+
+                                    RiwayatStok::create([
+                                        'id_peralatan' => $eq->id,
+                                        'tipe' => 'Rusak/Afkir',
+                                        'jumlah_sebelum' => $eq->quantity,
+                                        'jumlah_perubahan' => 0,
+                                        'jumlah_setelah' => $eq->quantity,
+                                        'user_id' => auth()->id(),
+                                        'catatan' => "Unit tidak dipulihkan ke stok siap pakai karena Rusak Berat pada peminjaman {$lockedBorrowing->borrow_code}",
+                                    ]);
+                                } elseif ($cond['condition_return'] === 'Hilang') {
+                                    $totalFine += $eq->deposit_amount * 1.0 * $detail->quantity;
+
+                                    RiwayatStok::create([
+                                        'id_peralatan' => $eq->id,
+                                        'tipe' => 'Hilang',
+                                        'jumlah_sebelum' => $eq->quantity,
+                                        'jumlah_perubahan' => 0,
+                                        'jumlah_setelah' => $eq->quantity,
+                                        'user_id' => auth()->id(),
+                                        'catatan' => "Unit hilang pada transaksi peminjaman {$lockedBorrowing->borrow_code}",
+                                    ]);
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            $deposit = (float) $borrowing->deposit_amount;
-            $refund = max(0, $deposit - $totalFine);
-            $refundStatus = $refund > 0 ? 'Diprofilkan' : 'Belum';
+                $deposit = (float) $lockedBorrowing->deposit_amount;
+                $refund = max(0, $deposit - $totalFine);
+                $refundStatus = $refund > 0 ? 'Diprofilkan' : 'Belum';
+                $excessFine = max(0, $totalFine - $deposit);
 
-            $borrowing->update([
-                'actual_return_date' => $validated['actual_return_date'],
-                'status' => 'Dikembalikan',
-                'fine_amount' => $totalFine,
-                'refund_amount' => $refund,
-                'refund_status' => $refundStatus,
-            ]);
-
-            if ($totalFine > 0) {
-                // Generate fine payment record
-                $payCode = 'PAY-'.date('Ymd').'-'.sprintf('%04d', Pembayaran::whereDate('created_at', today())->count() + 1);
-                $payment = Pembayaran::create([
-                    'payment_code' => $payCode,
-                    'customer_id' => $borrowing->customer_id,
-                    'borrowing_id' => $borrowing->id,
-                    'type' => 'Denda Peminjaman',
-                    'amount' => $totalFine,
-                    'payment_method' => 'Transfer Bank',
-                    'status' => 'Menunggu Pembayaran',
+                $lockedBorrowing->update([
+                    'actual_return_date' => $validated['actual_return_date'],
+                    'status' => 'Dikembalikan',
+                    'fine_amount' => $totalFine,
+                    'refund_amount' => $refund,
+                    'refund_status' => $refundStatus,
                 ]);
 
-                $invCode = 'INV/'.date('Y/m').'/'.sprintf('%04d', Invoice::whereYear('created_at', date('Y'))->count() + 1);
-                Invoice::create([
-                    'invoice_number' => $invCode,
-                    'customer_id' => $borrowing->customer_id,
-                    'payment_id' => $payment->id,
-                    'subtotal' => 0,
-                    'deposit' => $deposit,
-                    'fine' => $totalFine,
-                    'total' => $totalFine,
-                    'status' => 'Belum Lunas',
+                // Hanya tagihkan tagihan denda tambahan jika denda melebihi deposit jaminan (SRS BYR-F-002)
+                if ($excessFine > 0) {
+                    $existingFinePayment = Pembayaran::where('id_peminjaman', $lockedBorrowing->id)
+                        ->whereIn('tipe', ['Denda Peminjaman', 'denda'])
+                        ->first();
+
+                    if (! $existingFinePayment) {
+                        $payCode = 'PAY-'.date('Ymd').'-'.sprintf('%04d', Pembayaran::whereDate('created_at', today())->count() + 1);
+                        $payment = Pembayaran::create([
+                            'payment_code' => $payCode,
+                            'customer_id' => $lockedBorrowing->customer_id,
+                            'borrowing_id' => $lockedBorrowing->id,
+                            'type' => 'Denda Peminjaman',
+                            'amount' => $excessFine,
+                            'payment_method' => 'Transfer Bank',
+                            'status' => 'Menunggu Pembayaran',
+                        ]);
+
+                        $invCode = 'INV/'.date('Y/m').'/'.sprintf('%04d', Invoice::whereYear('created_at', date('Y'))->count() + 1);
+                        Invoice::create([
+                            'invoice_number' => $invCode,
+                            'customer_id' => $lockedBorrowing->customer_id,
+                            'payment_id' => $payment->id,
+                            'subtotal' => 0,
+                            'deposit' => 0,
+                            'fine' => $excessFine,
+                            'total' => $excessFine,
+                            'status' => 'Belum Lunas',
+                        ]);
+                    }
+                }
+
+                LogAktivitas::record('Pencatatan Pengembalian', 'Peminjaman', "Staf mencatat pengembalian alat {$lockedBorrowing->borrow_code}. Denda: Rp ".number_format($totalFine, 0, ',', '.'), auth()->id());
+
+                Notification::create([
+                    'user_id' => $lockedBorrowing->customer_id,
+                    'title' => 'Pengembalian Alat Dicatat',
+                    'message' => "Pengembalian alat peminjaman {$lockedBorrowing->borrow_code} telah dicatat oleh staf laboratorium.",
+                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
                 ]);
-            }
-
-            LogAktivitas::record('Pencatatan Pengembalian', 'Peminjaman', "Staf mencatat pengembalian alat {$borrowing->borrow_code}. Denda: Rp ".number_format($totalFine, 0, ',', '.'), auth()->id());
-
-            Notification::create([
-                'user_id' => $borrowing->customer_id,
-                'title' => 'Pengembalian Alat Dicatat',
-                'message' => "Pengembalian alat peminjaman {$borrowing->borrow_code} telah dicatat oleh staf laboratorium.",
-                'link' => '/customer/borrowings/'.$borrowing->id,
-            ]);
-        });
+            });
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage())->withErrors(['status' => $e->getMessage()]);
+        }
 
         return redirect()->route('staff.borrowings.show', $borrowing)
             ->with('success', "Pengembalian alat {$borrowing->borrow_code} berhasil diproses. Denda: Rp ".number_format($totalFine, 0, ',', '.').', Deposit Refundable: Rp '.number_format($refund, 0, ',', '.'));

@@ -46,7 +46,7 @@
             $currentIndex = array_search($sample->status, $steps);
             if($currentIndex === false) $currentIndex = 2;
         @endphp
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
             @foreach($steps as $idx => $step)
                 <div class="flex flex-col items-center text-center">
                     <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs mb-1.5 transition-all
@@ -88,7 +88,7 @@
                     </div>
 
                     <div class="flex flex-wrap items-baseline gap-3">
-                        <span class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                        <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 break-words">
                             Rp {{ number_format($latestPayment->amount, 0, ',', '.') }}
                         </span>
                         @if($invoice)
@@ -136,7 +136,7 @@
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100"
                      x-transition:leave-end="opacity-0"
-                     class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 overflow-y-auto"
+                     class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
                      style="z-index: 99999;">
                     <div @click.outside="showPayModal = false" 
                          x-show="showPayModal"
@@ -146,7 +146,7 @@
                          x-transition:leave="transition ease-in duration-200"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto relative max-h-[90vh] overflow-y-auto">
+                         class="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto relative max-h-[90vh] overflow-y-auto">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                             <div>
                                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
@@ -161,9 +161,9 @@
                         </div>
 
                         <!-- Payment Summary Box -->
-                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-2xl space-y-1.5 shadow-inner">
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 sm:p-5 rounded-2xl space-y-1.5 shadow-inner">
                             <span class="text-slate-400 text-xs uppercase font-medium">Total Yang Harus Dibayar:</span>
-                            <div class="text-3xl font-extrabold text-emerald-400">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 break-words">
                                 Rp {{ number_format($latestPayment->amount, 0, ',', '.') }}
                             </div>
                             <div class="text-xs text-slate-300 flex items-center justify-between pt-1 border-t border-slate-700/60 mt-2">
@@ -310,7 +310,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[650px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 sm:px-5 py-3">Parameter Uji</th>

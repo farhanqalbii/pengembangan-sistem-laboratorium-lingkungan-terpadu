@@ -28,7 +28,7 @@
             <p class="text-xs text-slate-400">Sertifikat Hasil Uji Laboratorium Pengujian Lingkungan</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
                 <span class="text-slate-400 block">Kode Sampel:</span>
                 <span class="font-bold text-white text-sm">{{ $certificate->sample->sample_code }}</span>
@@ -51,14 +51,14 @@
             <h3 class="text-xs font-bold uppercase text-slate-300 mb-3">Ringkasan Hasil Analisis:</h3>
             <div class="space-y-2">
                 @foreach($certificate->sample->sampleParameters as $sp)
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 text-xs border border-slate-700">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-slate-800/80 text-xs border border-slate-700">
                         <div>
                             <span class="font-bold text-white block">{{ $sp->parameter->name ?? 'Parameter' }}</span>
                             <span class="text-[11px] text-slate-400">Metode: {{ $sp->test_method }} | Baku Mutu: {{ $sp->quality_standard_summary }}</span>
                         </div>
-                        <div class="text-right">
+                        <div class="self-start sm:self-auto text-left sm:text-right">
                             <span class="font-mono font-bold text-sm text-emerald-400 block">{{ $sp->test_value }} {{ $sp->unit }}</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $sp->compliance_status === 'Memenuhi' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-rose-950 text-rose-300 border border-rose-800' }}">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5 {{ $sp->compliance_status === 'Memenuhi' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-rose-950 text-rose-300 border border-rose-800' }}">
                                 {{ $sp->compliance_status }}
                             </span>
                         </div>

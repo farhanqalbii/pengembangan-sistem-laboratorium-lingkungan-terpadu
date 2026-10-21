@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +11,8 @@ use Tests\TestCase;
 
 class PasswordResetAndRemindersTest extends TestCase
 {
+    use DatabaseTransactions;
+
     public function test_forgot_password_page_loads_successfully(): void
     {
         $response = $this->get(route('password.request'));

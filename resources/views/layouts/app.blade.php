@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="{{ request()->cookie('theme_preference') === 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,14 +14,52 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Theme Manager (Anti-FOUC) & Styles -->
+    <script src="{{ asset('js/theme-switcher.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/theme-dark.css') }}">
+
     <!-- Tailwind CSS CDN Fallback + Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    @auth
+        @php
+            $unreadCounts = \App\Models\Notification::getUnreadCountsFor(auth()->id());
+            $defaultCounts = ['total' => 0, 'sample' => 0, 'borrowing' => 0, 'coa' => 0, 'payment' => 0, 'equipment' => 0, 'verification' => 0, 'finance' => 0];
+            $storeCounts = array_merge($defaultCounts, $unreadCounts ?? []);
+        @endphp
+        <script>
+            (function() {
+                const initNotificationStore = () => {
+                    if (window.Alpine && window.Alpine.store && !window.Alpine.store('notifications')) {
+                        window.Alpine.store('notifications', {
+                            counts: {{ Js::from($storeCounts) }},
+                            updateCounts(newCounts) {
+                                this.counts = Object.assign({}, this.counts, newCounts);
+                            },
+                            decrement(category) {
+                                if (this.counts.total > 0) this.counts.total--;
+                                if (category && this.counts[category] > 0) this.counts[category]--;
+                            },
+                            zeroAll() {
+                                this.counts = { total: 0, sample: 0, borrowing: 0, coa: 0, payment: 0, equipment: 0, verification: 0, finance: 0 };
+                            }
+                        });
+                    }
+                };
+                document.addEventListener('alpine:init', initNotificationStore);
+                if (window.Alpine && window.Alpine.store) {
+                    initNotificationStore();
+                }
+            })();
+        </script>
+    @endauth
+
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -246,26 +284,144 @@
             visibility: hidden !important;
             pointer-events: none !important;
         }
+
+        /* =========================================================================
+           Sidebar Navigation Theming
+           Light Mode: Soft Blue (#EAF2F8)
+           Dark Mode:  Midnight  (#071521)
+           ========================================================================= */
+        :root {
+            --sidebar-bg: #EAF2F8;
+            --sidebar-logo-bg: #EAF2F8;
+            --sidebar-hover-bg: #D8E7F3;
+            --sidebar-text: #17324D;
+            --sidebar-icon: #36536D;
+            --sidebar-active-bg: #168F7A;
+            --sidebar-active-text: #FFFFFF;
+            --sidebar-border: #D1DFEB;
+            --sidebar-section-title: #36536D;
+        }
+
+        html.dark {
+            --sidebar-bg: #071521;
+            --sidebar-logo-bg: #071521;
+            --sidebar-hover-bg: #142A3D;
+            --sidebar-text: #C4D2DF;
+            --sidebar-icon: #C4D2DF;
+            --sidebar-active-bg: #168F7A;
+            --sidebar-active-text: #FFFFFF;
+            --sidebar-border: #1C3448;
+            --sidebar-section-title: #7E93A7;
+        }
+
+        .app-sidebar {
+            background-color: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--sidebar-border) !important;
+            color: var(--sidebar-text) !important;
+        }
+
+        .app-sidebar-logo {
+            background-color: var(--sidebar-logo-bg) !important;
+            border-bottom: 1px solid var(--sidebar-border) !important;
+        }
+
+        .app-sidebar-section-title {
+            color: var(--sidebar-section-title) !important;
+        }
+
+        .app-sidebar-link {
+            color: var(--sidebar-text) !important;
+            background-color: transparent;
+            transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .app-sidebar-link i {
+            color: var(--sidebar-icon) !important;
+            transition: color 0.2s ease;
+        }
+
+        .app-sidebar-link:hover {
+            background-color: var(--sidebar-hover-bg) !important;
+            color: var(--sidebar-text) !important;
+        }
+
+        .app-sidebar-link:hover i {
+            color: var(--sidebar-text) !important;
+        }
+
+        .app-sidebar-link.is-active,
+        .app-sidebar-link.is-active:hover {
+            background-color: var(--sidebar-active-bg) !important;
+            color: var(--sidebar-active-text) !important;
+            box-shadow: 0 10px 18px -4px rgba(22, 143, 122, 0.35) !important;
+        }
+
+        .app-sidebar-link.is-active i {
+            color: var(--sidebar-active-text) !important;
+        }
+
+        .app-sidebar-close-btn {
+            color: var(--sidebar-icon) !important;
+        }
+
+        .app-sidebar-close-btn:hover {
+            color: var(--sidebar-text) !important;
+        }
+
+        .app-sidebar .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(54, 83, 109, 0.22);
+        }
+        .app-sidebar .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(54, 83, 109, 0.40);
+        }
+        html.dark .app-sidebar .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(196, 210, 223, 0.22);
+        }
+        html.dark .app-sidebar .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(196, 210, 223, 0.40);
+        }
     </style>
     @stack('styles')
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false, showLogoutModal: false }" x-effect="document.body.classList.toggle('overflow-hidden', showLogoutModal); document.body.classList.toggle('modal-open', showLogoutModal)">
 
+    <!-- Top Navigation Progress Bar -->
+    <div id="top-nav-loader" class="fixed top-0 left-0 w-full h-[3px] z-[99999] pointer-events-none opacity-0 transition-opacity duration-200" style="z-index: 99999;">
+        <div id="top-nav-loader-bar" class="h-full w-0 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 shadow-[0_0_8px_rgba(20,184,166,0.7)] transition-all duration-300 ease-out"></div>
+    </div>
+
     <div class="flex min-h-screen">
+        <!-- Mobile Sidebar Backdrop Overlay -->
+        <div 
+            x-show="sidebarOpen" 
+            @click="sidebarOpen = false" 
+            x-transition:enter="transition-opacity ease-linear duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-linear duration-300"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-30 bg-slate-900/60 backdrop-blur-xs lg:hidden"
+            x-cloak
+        ></div>
+
         <!-- Sidebar Navigation -->
         <aside 
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-            class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-100 transition-transform duration-300 ease-in-out flex flex-col justify-between border-r border-slate-800 shadow-xl"
+            class="fixed inset-y-0 left-0 z-40 w-64 app-sidebar transition-transform duration-300 ease-in-out flex flex-col justify-between shadow-xl"
         >
             <div>
                 <!-- Brand Header -->
-                <div class="p-3.5 sm:p-4 flex items-center justify-between border-b border-slate-800 bg-slate-950/70">
+                <div class="p-3.5 sm:p-4 flex items-center justify-between app-sidebar-logo">
                     <a href="/" class="block flex-1 mr-2">
                         <div class="flex items-center justify-center py-0.5 px-1">
-                            <img src="{{ asset('images/logo_lab_navbar_clean.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-9 sm:h-10 w-auto max-w-full object-contain filter drop-shadow">
+                            <!-- Light Mode Logo: Soft Blue Background (#EAF2F8) with Clean Navy Text -->
+                            <img src="{{ asset('images/logo_lab_lgn_rgst.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-9 sm:h-10 w-auto max-w-full object-contain filter drop-shadow block dark:hidden">
+                            <!-- Dark Mode Logo: Midnight Background (#071521) with Clean White Text -->
+                            <img src="{{ asset('images/logo_lab_navbar_clean.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-9 sm:h-10 w-auto max-w-full object-contain filter drop-shadow hidden dark:block">
                         </div>
                     </a>
-                    <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
+                    <button @click="sidebarOpen = false" class="lg:hidden app-sidebar-close-btn p-1 transition-colors" aria-label="Tutup navigasi sidebar">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
@@ -273,211 +429,208 @@
                 <!-- Navigation Items based on Role -->
                 <nav class="p-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-85px)] custom-scrollbar">
                     @auth
-                        @php
-                            $unreadNotifs = \App\Models\Notification::where('user_id', auth()->id())->whereNull('read_at')->latest()->get();
-                            
-                            $notifSampleCount = $unreadNotifs->filter(fn($n) => (str_contains($n->link ?? '', 'sample') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'sampel') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'pengujian')) && !str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'sertifikat'))->count();
-                            
-                            $notifBorrowingCount = $unreadNotifs->filter(fn($n) => str_contains($n->link ?? '', 'borrow') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'pinjam'))->count();
-                            
-                            $notifCoaCount = $unreadNotifs->filter(fn($n) => str_contains($n->link ?? '', 'certificate') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'coa') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'sertifikat'))->count();
-                            
-                            $notifPaymentCount = $unreadNotifs->filter(fn($n) => str_contains($n->link ?? '', 'payment') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'bayar') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'invoice') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'tagihan'))->count();
-
-                            $notifEquipCount = $unreadNotifs->filter(fn($n) => str_contains($n->link ?? '', 'equipment') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'stok'))->count();
-
-                            $notifVerifCount = $unreadNotifs->filter(fn($n) => str_contains($n->link ?? '', 'verifikasi') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'verifikasi'))->count();
-
-                            $notifFinanceCount = $unreadNotifs->filter(fn($n) => str_contains($n->link ?? '', 'finance') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'refund') || str_contains(strtolower(($n->title ?? '').' '.($n->message ?? '')), 'keuangan'))->count();
-                        @endphp
-
                         @if(auth()->user()->isCustomer())
-                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">Customer Portal</div>
-                            <a href="{{ route('customer.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('customer.dashboard') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase app-sidebar-section-title tracking-wider">Customer Portal</div>
+                            <a href="{{ route('customer.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('customer.dashboard') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-chart-line w-4 text-center"></i>
                                 <span>Dashboard</span>
                             </a>
-                            <a href="{{ route('customer.samples.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('customer.samples.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('customer.samples.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('customer.samples.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-vial-circle-check w-4 text-center"></i>
                                     <span>Pengujian Sampel</span>
                                 </div>
-                                @if($notifSampleCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.samples.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifSampleCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.sample ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.sample ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.samples.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['sample'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['sample'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('customer.borrowings.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('customer.borrowings.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('customer.borrowings.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('customer.borrowings.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-toolbox w-4 text-center"></i>
                                     <span>Peminjaman Alat</span>
                                 </div>
-                                @if($notifBorrowingCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.borrowings.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifBorrowingCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.borrowing ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.borrowing ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.borrowings.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['borrowing'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['borrowing'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('customer.certificates.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('customer.certificates.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('customer.certificates.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('customer.certificates.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-file-contract w-4 text-center"></i>
                                     <span>Sertifikat (COA)</span>
                                 </div>
-                                @if($notifCoaCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.certificates.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifCoaCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.coa ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.coa ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.certificates.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['coa'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['coa'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('customer.payments.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('customer.payments.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('customer.payments.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('customer.payments.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-file-invoice-dollar w-4 text-center"></i>
                                     <span>Invoice & Pembayaran</span>
                                 </div>
-                                @if($notifPaymentCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.payments.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifPaymentCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.payment ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.payment ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('customer.payments.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['payment'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['payment'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('customer.satisfaction.create') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('customer.satisfaction.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('customer.satisfaction.create') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('customer.satisfaction.*') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-face-smile w-4 text-center"></i>
                                 <span>Kepuasan Pelanggan</span>
                             </a>
                         @elseif(auth()->user()->isStaff())
-                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">Staff / Analis Portal</div>
-                            <a href="{{ route('staff.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.dashboard') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase app-sidebar-section-title tracking-wider">Staff / Analis Portal</div>
+                            <a href="{{ route('staff.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('staff.dashboard') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-table-cells-large w-4 text-center"></i>
                                 <span>Dashboard Staf</span>
                             </a>
-                            <a href="{{ route('staff.samples.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.samples.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('staff.samples.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('staff.samples.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-vials w-4 text-center"></i>
                                     <span>Manajemen Sampel</span>
                                 </div>
-                                @if($notifSampleCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.samples.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifSampleCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.sample ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.sample ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.samples.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['sample'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['sample'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('staff.equipment.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.equipment.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('staff.equipment.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('staff.equipment.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-microscope w-4 text-center"></i>
                                     <span>Inventori Alat</span>
                                 </div>
-                                @if($notifEquipCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.equipment.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifEquipCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.equipment ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.equipment ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.equipment.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['equipment'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['equipment'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('staff.borrowings.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.borrowings.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('staff.borrowings.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('staff.borrowings.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-hand-holding-hand w-4 text-center"></i>
                                     <span>Pengembalian Alat</span>
                                 </div>
-                                @if($notifBorrowingCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.borrowings.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifBorrowingCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.borrowing ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.borrowing ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.borrowings.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['borrowing'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['borrowing'] ?? 0 }}</span>
                             </a>
                         @elseif(auth()->user()->isManager())
-                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">Manajer Lab Portal</div>
-                            <a href="{{ route('manager.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('manager.dashboard') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase app-sidebar-section-title tracking-wider">Manajer Lab Portal</div>
+                            <a href="{{ route('manager.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('manager.dashboard') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-chart-pie w-4 text-center"></i>
                                 <span>Dashboard Manajer</span>
                             </a>
-                            <a href="{{ route('manager.verifications.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('manager.verifications.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('manager.verifications.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('manager.verifications.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-user-check w-4 text-center"></i>
                                     <span>Verifikasi Technical</span>
                                 </div>
-                                @if($notifVerifCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('manager.verifications.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifVerifCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.verification ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.verification ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('manager.verifications.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['verification'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['verification'] ?? 0 }}</span>
+                            </a>
+                            <a href="{{ route('manager.reports.satisfaction') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('manager.reports.*') ? 'is-active' : '' }}">
+                                <i class="fa-solid fa-star w-4 text-center"></i>
+                                <span>Laporan Kepuasan</span>
                             </a>
                         @elseif(auth()->user()->isAdmin())
-                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">Administrator Portal</div>
-                            <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase app-sidebar-section-title tracking-wider">Administrator Portal</div>
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-gauge-high w-4 text-center"></i>
                                 <span>Dashboard Admin</span>
                             </a>
-                            <a href="{{ route('admin.users.index') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.users.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.users.index') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.users.*') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-users-gear w-4 text-center"></i>
                                 <span>Manajemen Pengguna</span>
                             </a>
-                            <a href="{{ route('admin.borrowings.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.borrowings.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.borrowings.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.borrowings.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-boxes-packing w-4 text-center"></i>
                                     <span>Approval Peminjaman</span>
                                 </div>
-                                @if($notifBorrowingCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('admin.borrowings.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifBorrowingCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.borrowing ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.borrowing ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('admin.borrowings.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['borrowing'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['borrowing'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('admin.finance.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.finance.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.finance.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.finance.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-wallet w-4 text-center"></i>
                                     <span>Keuangan & Refund</span>
                                 </div>
-                                @if($notifFinanceCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('admin.finance.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifFinanceCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.finance ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.finance ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('admin.finance.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['finance'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['finance'] ?? 0 }}</span>
                             </a>
-                            <a href="{{ route('admin.parameters.index') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.parameters.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.parameters.index') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.parameters.*') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-sliders w-4 text-center"></i>
                                 <span>Parameter & Baku Mutu</span>
                             </a>
-                            <a href="{{ route('staff.equipment.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('staff.equipment.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('staff.equipment.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('staff.equipment.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-microscope w-4 text-center"></i>
                                     <span>Inventori Alat</span>
                                 </div>
-                                @if($notifEquipCount > 0)
-                                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.equipment.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs">
-                                        {{ $notifEquipCount }}
-                                    </span>
-                                @endif
+                                <span 
+                                    x-show="($store?.notifications?.counts?.equipment ?? 0) > 0" 
+                                    x-text="$store?.notifications?.counts?.equipment ?? 0"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.equipment.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    @if(($unreadCounts['equipment'] ?? 0) === 0) style="display: none;" @endif
+                                >{{ $unreadCounts['equipment'] ?? 0 }}</span>
                             </a>
-                            <div class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">Laporan & Audit</div>
-                            <a href="{{ route('admin.reports.samples') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.reports.samples') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <div class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase app-sidebar-section-title tracking-wider">Laporan & Audit</div>
+                            <a href="{{ route('admin.reports.samples') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.reports.samples') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-file-pdf w-4 text-center"></i>
                                 <span>Laporan Sampel</span>
                             </a>
-                            <a href="{{ route('admin.reports.inventory') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.reports.inventory') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.reports.inventory') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.reports.inventory') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-file-csv w-4 text-center"></i>
                                 <span>Laporan Inventori</span>
                             </a>
-                            <a href="{{ route('admin.reports.borrowings') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.reports.borrowings') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.reports.borrowings') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.reports.borrowings') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-file-lines w-4 text-center"></i>
                                 <span>Laporan Peminjaman</span>
                             </a>
-                            <a href="{{ route('admin.reports.financial') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.reports.financial') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.reports.financial') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.reports.financial') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-receipt w-4 text-center"></i>
                                 <span>Laporan Keuangan</span>
                             </a>
-                            <a href="{{ route('admin.reports.satisfaction') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.reports.satisfaction') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.reports.satisfaction') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.reports.satisfaction') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-star w-4 text-center"></i>
                                 <span>Laporan Kepuasan</span>
                             </a>
-                            <a href="{{ route('admin.activity-logs.index') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold transition-all {{ request()->routeIs('admin.activity-logs.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <a href="{{ route('admin.activity-logs.index') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.activity-logs.*') ? 'is-active' : '' }}">
                                 <i class="fa-solid fa-shield-cat w-4 text-center"></i>
                                 <span>Log Aktivitas</span>
                             </a>
                         @endif
                     @endauth
 
-                    <div class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase text-slate-400 tracking-wider">Tools</div>
-                    <a href="{{ route('equipment.scan') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+                    <div class="px-3 pt-3 pb-1 text-[10px] font-bold uppercase app-sidebar-section-title tracking-wider">Tools</div>
+                    <a href="{{ route('equipment.scan') }}" class="flex items-center space-x-2.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('equipment.scan') ? 'is-active' : '' }}">
                         <i class="fa-solid fa-qrcode w-4 text-center"></i>
                         <span>Scan QR / Barcode</span>
                     </a>
@@ -503,46 +656,97 @@
                     </div>
 
                     <!-- Right Topbar Controls -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 sm:space-x-3">
+                        <!-- Theme Switcher Control -->
+                        <x-theme-switcher />
+
                         <!-- Notification Center -->
                         @auth
                         @php
-                            $unreadNotifs = $unreadNotifs ?? \App\Models\Notification::where('user_id', auth()->id())->whereNull('read_at')->latest()->get();
+                            $recentNotifs = \App\Models\Notification::where('user_id', auth()->id())->latest()->take(10)->get();
+                            $notifsList = $recentNotifs->map(function($n) {
+                                return [
+                                    'id' => $n->id,
+                                    'title' => $n->title,
+                                    'message' => $n->message,
+                                    'link' => $n->link,
+                                    'is_read' => $n->read_at !== null,
+                                    'time' => $n->created_at->diffForHumans(),
+                                ];
+                            })->values()->all();
                         @endphp
                         <div class="relative" x-data="{ 
                             open: false,
-                            unreadCount: {{ $unreadNotifs->count() }},
-                            readAllDone: false,
                             marking: false,
-                            markAllRead() {
-                                if (this.marking || this.unreadCount === 0) return;
-                                this.marking = true;
-                                fetch('{{ route('notifications.read-all') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Accept': 'application/json'
+                            notifications: {{ Js::from($notifsList) }},
+                            async markItemAsRead(item) {
+                                if (!item.is_read) {
+                                    try {
+                                        const res = await fetch('/notifications/' + item.id + '/read', {
+                                            method: 'PATCH',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json'
+                                            }
+                                        });
+                                        if (res.ok) {
+                                            const data = await res.json();
+                                            item.is_read = true;
+                                            if (data.counts && this.$store && this.$store.notifications) {
+                                                this.$store.notifications.updateCounts(data.counts);
+                                            } else if (this.$store && this.$store.notifications) {
+                                                this.$store.notifications.decrement();
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.error('Gagal menandai notifikasi dibaca', err);
                                     }
-                                })
-                                .then(res => res.json())
-                                .then(() => {
+                                }
+                                if (item.link) {
+                                    window.location.href = item.link;
+                                }
+                            },
+                            async markAllRead() {
+                                if (this.marking || (this.$store?.notifications?.counts?.total ?? 0) === 0) return;
+                                this.marking = true;
+                                try {
+                                    const res = await fetch('{{ route('notifications.read-all') }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+                                    if (res.ok) {
+                                        const data = await res.json();
+                                        this.notifications.forEach(n => n.is_read = true);
+                                        if (data.counts && this.$store && this.$store.notifications) {
+                                            this.$store.notifications.updateCounts(data.counts);
+                                        } else if (this.$store && this.$store.notifications) {
+                                            this.$store.notifications.zeroAll();
+                                        }
+                                    } else {
+                                        alert('Gagal menandai semua notifikasi dibaca.');
+                                    }
+                                } catch (err) {
+                                    console.error('Gagal menandai semua notifikasi dibaca', err);
+                                    alert('Terjadi kesalahan jaringan.');
+                                } finally {
                                     this.marking = false;
-                                    this.unreadCount = 0;
-                                    this.readAllDone = true;
-                                })
-                                .catch(() => {
-                                    this.marking = false;
-                                    this.unreadCount = 0;
-                                    this.readAllDone = true;
-                                });
+                                }
                             }
                         }">
-                            <button @click="open = !open" class="relative p-2 text-slate-600 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition-all cursor-pointer">
+                            <button @click="open = !open" class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer" aria-label="Notifikasi">
                                 <i class="fa-solid fa-bell text-lg"></i>
-                                <template x-if="unreadCount > 0 && !readAllDone">
-                                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                                </template>
+                                <span 
+                                    x-show="($store?.notifications?.counts?.total ?? 0) > 0" 
+                                    x-text="($store?.notifications?.counts?.total ?? 0) > 99 ? '99+' : ($store?.notifications?.counts?.total ?? 0)" 
+                                    class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-sm leading-none"
+                                    @if(($unreadCounts['total'] ?? 0) === 0) style="display: none;" @endif
+                                    x-cloak
+                                >{{ ($unreadCounts['total'] ?? 0) > 99 ? '99+' : ($unreadCounts['total'] ?? 0) }}</span>
                             </button>
 
                             <!-- Dropdown -->
@@ -556,42 +760,55 @@
                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
                                 x-cloak
-                                class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 overflow-hidden"
+                                class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white dark:bg-[#0e1e2e] rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700/80 py-2 z-50 overflow-hidden"
                             >
-                                <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700">
-                                        Notifikasi (<span x-text="readAllDone ? 0 : unreadCount"></span>)
+                                <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/70">
+                                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                                        Notifikasi (<span x-text="$store?.notifications?.counts?.total ?? 0"></span>)
                                     </span>
                                     <div class="flex items-center gap-2">
-                                        <template x-if="readAllDone">
-                                            <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                                                <i class="fa-solid fa-check"></i> Sudah dibaca
+                                        <template x-if="($store?.notifications?.counts?.total ?? 0) === 0 && notifications.length > 0">
+                                            <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                                <i class="fa-solid fa-check-double"></i> Sudah dibaca
                                             </span>
                                         </template>
-                                        <template x-if="!readAllDone && unreadCount > 0">
-                                            <button type="button" @click="markAllRead()" :disabled="marking" class="text-[11px] text-emerald-600 hover:text-emerald-700 hover:underline font-medium cursor-pointer">
+                                        <template x-if="($store?.notifications?.counts?.total ?? 0) > 0">
+                                            <button type="button" @click="markAllRead()" :disabled="marking" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline font-semibold cursor-pointer inline-flex items-center gap-1.5">
+                                                <i class="fa-solid fa-spinner fa-spin text-[10px]" x-show="marking" x-cloak></i>
                                                 <span x-text="marking ? 'Menandai...' : 'Tandai Dibaca'"></span>
                                             </button>
                                         </template>
                                     </div>
                                 </div>
-                                <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                                    <template x-if="readAllDone || unreadCount === 0">
-                                        <div class="p-6 text-center text-slate-400 text-xs">Tidak ada notifikasi baru</div>
+                                <div class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 custom-scrollbar">
+                                    <template x-if="notifications.length === 0">
+                                        <div class="p-6 text-center text-slate-400 dark:text-slate-500 text-xs">Belum ada notifikasi</div>
                                     </template>
-                                    <template x-if="!readAllDone && unreadCount > 0">
-                                        <div>
-                                            @foreach($unreadNotifs as $n)
-                                                <a href="{{ route('notifications.read', $n->id) }}" class="block p-3.5 hover:bg-slate-50 transition-colors">
-                                                    <p class="font-semibold text-xs text-slate-800 mb-0.5">{{ $n->title }}</p>
-                                                    <p class="text-xs text-slate-600 line-clamp-2">{{ $n->message }}</p>
-                                                    <span class="text-[10px] text-slate-400 mt-1 block">{{ $n->created_at->diffForHumans() }}</span>
-                                                </a>
-                                            @endforeach
+                                    <template x-for="n in notifications" :key="n.id">
+                                        <div 
+                                            @click="markItemAsRead(n)"
+                                            class="w-full text-left p-3.5 transition-colors block cursor-pointer"
+                                            :class="!n.is_read ? 'bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 opacity-80'"
+                                        >
+                                            <div class="flex items-start justify-between gap-2">
+                                                <p class="text-xs text-slate-800 dark:text-white mb-0.5" :class="!n.is_read ? 'font-bold' : 'font-medium'" x-text="n.title"></p>
+                                                <template x-if="!n.is_read">
+                                                    <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1" title="Belum dibaca"></span>
+                                                </template>
+                                            </div>
+                                            <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2" x-text="n.message"></p>
+                                            <div class="flex items-center justify-between mt-1 text-[10px] text-slate-400 dark:text-slate-500">
+                                                <span x-text="n.time"></span>
+                                                <template x-if="n.link">
+                                                    <span class="text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-0.5">
+                                                        Lihat detail <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                                                    </span>
+                                                </template>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
-                                <a href="{{ route('notifications.index') }}" class="block text-center py-2.5 bg-slate-50 border-t border-slate-100 text-xs font-semibold text-slate-600 hover:text-emerald-600">
+                                <a href="{{ route('notifications.index') }}" class="block text-center py-2.5 bg-slate-50 dark:bg-slate-900/70 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                                     Lihat Semua Notifikasi
                                 </a>
                             </div>
@@ -601,15 +818,15 @@
                         <!-- User Profile Dropdown -->
                         @auth
                         <div class="relative" x-data="{ userMenuOpen: false }">
-                            <button @click="userMenuOpen = !userMenuOpen" type="button" class="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-full hover:bg-slate-100 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30 group">
-                                <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-100 border border-slate-300 group-hover:border-emerald-500 flex items-center justify-center font-bold text-emerald-700 text-xs flex-shrink-0 transition-colors shadow-sm">
+                            <button @click="userMenuOpen = !userMenuOpen" type="button" class="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30 group" :class="userMenuOpen ? 'bg-slate-100 dark:bg-slate-800' : ''">
+                                <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 group-hover:border-emerald-500 flex items-center justify-center font-bold text-emerald-700 dark:text-emerald-400 text-xs flex-shrink-0 transition-colors shadow-sm">
                                     @if(auth()->user()->avatar_url)
                                         <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
                                     @else
                                         {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                                     @endif
                                 </div>
-                                <span class="hidden md:inline text-xs font-semibold text-slate-700 group-hover:text-emerald-700 transition-colors max-w-[130px] truncate">
+                                <span class="hidden md:inline text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors max-w-[130px] truncate">
                                     {{ auth()->user()->name }}
                                 </span>
                             </button>
@@ -618,6 +835,7 @@
                             <div 
                                 x-show="userMenuOpen" 
                                 @click.outside="userMenuOpen = false" 
+                                @keydown.escape.window="userMenuOpen = false"
                                 x-transition:enter="transition ease-out duration-150"
                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -625,11 +843,11 @@
                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
                                 x-cloak
-                                class="absolute right-0 mt-2.5 w-72 bg-[#0e1e2e] text-white rounded-2xl shadow-2xl border border-slate-700/80 p-2 z-50 overflow-hidden"
+                                class="absolute right-0 mt-2.5 w-[calc(100vw-2rem)] max-w-xs sm:w-72 bg-white dark:bg-[#0e1e2e] text-slate-800 dark:text-white rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-2xl border border-slate-200 dark:border-slate-700/80 p-2 z-50 overflow-hidden"
                             >
                                 <!-- Header Profile Info -->
-                                <div class="p-3 bg-slate-900/70 rounded-xl mb-1 flex items-center gap-3 border border-slate-800">
-                                    <div class="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-cyan-300 text-sm flex-shrink-0 shadow-inner">
+                                <div class="p-3 bg-slate-50 dark:bg-slate-900/70 rounded-xl mb-1 flex items-center gap-3 border border-slate-200/80 dark:border-slate-800">
+                                    <div class="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-emerald-700 dark:text-cyan-300 text-sm flex-shrink-0 shadow-xs dark:shadow-inner">
                                         @if(auth()->user()->avatar_url)
                                             <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
                                         @else
@@ -638,31 +856,31 @@
                                     </div>
                                     <div class="overflow-hidden flex-1 min-w-0">
                                         <div class="flex items-center gap-1.5 mb-0.5">
-                                            <p class="text-xs font-bold text-white truncate">{{ auth()->user()->name }}</p>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
                                             <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold capitalize flex-shrink-0
-                                                {{ auth()->user()->role === 'admin' ? 'bg-purple-500/20 text-purple-300 border border-purple-400/30' : '' }}
-                                                {{ auth()->user()->role === 'manager' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/30' : '' }}
-                                                {{ auth()->user()->role === 'staff' ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' : '' }}
-                                                {{ auth()->user()->role === 'customer' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : '' }}
+                                                {{ auth()->user()->role === 'admin' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-400/30' : '' }}
+                                                {{ auth()->user()->role === 'manager' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-400/30' : '' }}
+                                                {{ auth()->user()->role === 'staff' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-400/30' : '' }}
+                                                {{ auth()->user()->role === 'customer' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-400/30' : '' }}
                                             ">
                                                 {{ auth()->user()->role }}
                                             </span>
                                         </div>
-                                        <p class="text-[11px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ auth()->user()->email }}</p>
                                     </div>
                                 </div>
 
                                 <!-- Menu Items -->
                                 <div class="space-y-0.5 text-xs pt-1">
-                                    <a href="{{ route('profile.edit') }}" @click="userMenuOpen = false" class="flex items-center gap-3 px-3 py-2.5 font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
-                                        <i class="fa-regular fa-user w-4 text-center text-slate-400 group-hover:text-emerald-400 transition-colors"></i>
+                                    <a href="{{ route('profile.edit') }}" @click="userMenuOpen = false" class="flex items-center gap-3 px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl transition-all group">
+                                        <i class="fa-regular fa-user w-4 text-center text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"></i>
                                         <span>Profile</span>
                                     </a>
 
-                                    <div class="h-px bg-slate-800 my-1"></div>
+                                    <div class="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
 
-                                    <button type="button" @click="userMenuOpen = false; showLogoutModal = true" class="w-full flex items-center gap-3 px-3 py-2.5 font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all text-left cursor-pointer">
-                                        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-rose-400"></i>
+                                    <button type="button" @click="userMenuOpen = false; showLogoutModal = true" class="w-full flex items-center gap-3 px-3 py-2.5 font-medium text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all text-left cursor-pointer">
+                                        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-rose-500 dark:text-rose-400"></i>
                                         <span>Sign Out</span>
                                     </button>
                                 </div>
@@ -693,6 +911,16 @@
                             <span class="text-sm font-semibold">{{ session('warning') }}</span>
                         </div>
                         <button onclick="this.parentElement.remove()" class="text-amber-500 hover:text-amber-800"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i>
+                            <span class="text-sm font-semibold">{{ session('error') }}</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 @endif
 
@@ -770,5 +998,78 @@
     @endauth
 
     @stack('scripts')
+    <!-- Script Loading Navigasi Antar Halaman Ringan -->
+    <script>
+        (function() {
+            const loader = document.getElementById('top-nav-loader');
+            const bar = document.getElementById('top-nav-loader-bar');
+            if (!loader || !bar) return;
+
+            let timer = null;
+            let progress = 0;
+
+            function startLoading() {
+                if (timer) clearInterval(timer);
+                progress = 12;
+                bar.style.width = '12%';
+                loader.classList.remove('opacity-0');
+                loader.classList.add('opacity-100');
+
+                timer = setInterval(function() {
+                    if (progress < 85) {
+                        progress += Math.max(1, (85 - progress) * 0.15);
+                        bar.style.width = progress + '%';
+                    }
+                }, 180);
+            }
+
+            function stopLoading() {
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+                bar.style.width = '100%';
+                setTimeout(function() {
+                    loader.classList.remove('opacity-100');
+                    loader.classList.add('opacity-0');
+                    setTimeout(function() {
+                        bar.style.width = '0%';
+                        progress = 0;
+                    }, 250);
+                }, 150);
+            }
+
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                if (link.target && link.target !== '_self') return;
+                if (link.hasAttribute('download')) return;
+
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+
+                try {
+                    const url = new URL(link.href, window.location.href);
+                    if (url.origin !== window.location.origin) return;
+                    if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
+                    if (/\.(pdf|xlsx|xls|csv|doc|docx|zip)$/i.test(url.pathname) || url.pathname.includes('/download')) return;
+
+                    startLoading();
+                } catch (err) {
+                    // Ignore invalid url
+                }
+            });
+
+            window.addEventListener('pageshow', function() {
+                stopLoading();
+            });
+
+            window.addEventListener('pagehide', function() {
+                stopLoading();
+            });
+        })();
+    </script>
 </body>
 </html>

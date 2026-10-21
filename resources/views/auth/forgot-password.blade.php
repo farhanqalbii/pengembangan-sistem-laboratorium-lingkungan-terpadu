@@ -4,7 +4,7 @@
 @section('container-width', 'max-w-md')
 
 @section('content')
-<div class="bg-white/95 border border-slate-200/80 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl shadow-slate-900/10 relative">
+<div class="bg-white/95 border border-slate-200/80 backdrop-blur-2xl rounded-3xl p-4 sm:p-8 shadow-2xl shadow-slate-900/10 relative">
     <!-- Header -->
     <div class="border-b border-slate-100 pb-4 mb-5">
         <a href="{{ route('login') }}" class="text-xs text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1.5 transition-colors mb-2 font-semibold">
@@ -32,7 +32,7 @@
         </div>
     @endif
 
-    <form action="{{ route('password.email') }}" method="POST" class="space-y-5">
+    <form action="{{ route('password.email') }}" method="POST" class="space-y-5" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)">
         @csrf
 
         <div>
@@ -47,9 +47,12 @@
         </div>
 
         <button type="submit" 
-            class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-700/25 hover:shadow-emerald-700/35 transition-all text-sm mt-3 flex items-center justify-center gap-2">
-            <span>Kirim Tautan Reset Kata Sandi</span>
-            <i class="fa-solid fa-paper-plane"></i>
+            :disabled="submitting"
+            :class="{ 'opacity-75 pointer-events-none': submitting }"
+            class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-700/25 hover:shadow-emerald-700/35 transition-all text-sm mt-3 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+            <i class="fa-solid fa-spinner fa-spin text-sm" x-show="submitting" x-cloak></i>
+            <span x-text="submitting ? 'Mengirim Permintaan...' : 'Kirim Tautan Reset Kata Sandi'">Kirim Tautan Reset Kata Sandi</span>
+            <i class="fa-solid fa-paper-plane" x-show="!submitting"></i>
         </button>
     </form>
 </div>

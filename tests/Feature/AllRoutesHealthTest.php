@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Peralatan;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -79,11 +80,13 @@ class AllRoutesHealthTest extends TestCase
     {
         $this->actingAs($this->staff);
 
+        $eqId = Peralatan::first()?->id ?? 1;
+
         $routes = [
             '/staff/dashboard',
             '/staff/samples',
             '/staff/equipment',
-            '/staff/equipment/1',
+            '/staff/equipment/'.$eqId,
             '/staff/equipment/create',
             '/staff/borrowings',
         ];
@@ -94,7 +97,7 @@ class AllRoutesHealthTest extends TestCase
         }
 
         // Test staff equipment detail contains QR & Cetak Stiker
-        $res = $this->get('/staff/equipment/1');
+        $res = $this->get('/staff/equipment/'.$eqId);
         $res->assertSee('Cetak Stiker Label');
         $res->assertSee('qrcode-display');
         $res->assertSee('barcode-display');

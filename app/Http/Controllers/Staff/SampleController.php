@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Models\Invoice;
 use App\Models\LogAktivitas;
 use App\Models\Notification;
 use App\Models\Pembayaran;
@@ -45,12 +44,12 @@ class SampleController extends Controller
     public function show(Sample $sample)
     {
         $sample->load(['customer', 'sampleParameters.parameter.qualityStandard', 'sampleParameters.equipment', 'sampleParameters.analyst', 'certificate', 'payments.invoice']);
-        
+
         $assignedAnalystIds = $sample->sampleParameters->pluck('analyst_id')->filter()->all();
         $analysts = User::whereIn('role', ['staff', 'admin'])
             ->orWhereIn('id', $assignedAnalystIds)
             ->get();
-        
+
         $assignedEquipmentIds = $sample->sampleParameters->pluck('id_peralatan')->filter()->all();
         $equipmentList = Peralatan::where('status', 'Tersedia')
             ->orWhereIn('id', $assignedEquipmentIds)
@@ -65,52 +64,65 @@ class SampleController extends Controller
             return back()->withErrors(['error' => "Sampel tidak dapat diterima karena saat ini berstatus '{$sample->status}' (hanya sampel 'Diajukan' yang dapat diterima)."]);
         }
 
+        // Aturan Bisnis: Pembayaran harus terverifikasi lunas sebelum staf dapat menerima sampel
+        $totalPrice = $sample->calculateTotalPrice();
+        if ($totalPrice > 0) {
+            $latestPayment = $sample->payments()->latest()->first();
+
+            if (! $latestPayment) {
+                return back()->withErrors(['error' => 'Persetujuan sampel ditolak: Bukti tagihan pembayaran tidak ditemukan dalam sistem.']);
+            }
+
+            if ($latestPayment->status === 'Menunggu Pembayaran') {
+                return back()->withErrors(['error' => 'Persetujuan sampel ditolak: Pembayaran pengujian masih berstatus pending / belum diselesaikan oleh customer.']);
+            }
+
+            if (in_array($latestPayment->status, ['Gagal', 'Kadaluarsa'])) {
+                return back()->withErrors(['error' => "Persetujuan sampel ditolak: Pembayaran pengujian berstatus '{$latestPayment->status}'. Customer harus melakukan pembayaran ulang."]);
+            }
+
+            if ($latestPayment->status !== 'Berhasil') {
+                return back()->withErrors(['error' => 'Persetujuan sampel ditolak: Pembayaran pengujian belum terkonfirmasi berhasil.']);
+            }
+        }
+
         $validated = $request->validate([
             'received_date' => ['required', 'date'],
         ]);
 
-        DB::transaction(function () use ($sample, $validated) {
-            $sample->update([
-                'received_date' => $validated['received_date'],
-                'status' => 'Diterima',
-            ]);
+        try {
+            DB::transaction(function () use ($sample, $validated, $totalPrice) {
+                // Lock row sampel untuk mencegah race condition saat persetujuan simultan
+                $lockedSample = Sample::where('id', $sample->id)->lockForUpdate()->firstOrFail();
 
-            // Generate invoice for testing payment if not created
-            $totalPrice = $sample->calculateTotalPrice();
-            if ($totalPrice > 0 && ! $sample->payments()->exists()) {
-                $payCode = 'PAY-'.date('Ymd').'-'.sprintf('%04d', Pembayaran::whereDate('created_at', today())->count() + 1);
-                $payment = Pembayaran::create([
-                    'payment_code' => $payCode,
-                    'customer_id' => $sample->customer_id,
-                    'sample_id' => $sample->id,
-                    'type' => 'Pengujian',
-                    'amount' => $totalPrice,
-                    'payment_method' => 'Transfer Bank',
-                    'status' => 'Menunggu Pembayaran',
+                if ($lockedSample->status !== 'Diajukan') {
+                    throw new \RuntimeException("Sampel sudah diproses sebelumnya (Status saat ini: {$lockedSample->status}).");
+                }
+
+                if ($totalPrice > 0) {
+                    $hasVerifiedPayment = $lockedSample->payments()->where('status', 'Berhasil')->exists();
+                    if (! $hasVerifiedPayment) {
+                        throw new \RuntimeException('Persetujuan sampel ditolak: Pembayaran pengujian belum terverifikasi berhasil dalam database.');
+                    }
+                }
+
+                $lockedSample->update([
+                    'received_date' => $validated['received_date'],
+                    'status' => 'Diterima',
                 ]);
 
-                $invCode = 'INV/'.date('Y/m').'/'.sprintf('%04d', Invoice::whereYear('created_at', date('Y'))->count() + 1);
-                Invoice::create([
-                    'invoice_number' => $invCode,
-                    'customer_id' => $sample->customer_id,
-                    'payment_id' => $payment->id,
-                    'subtotal' => $totalPrice,
-                    'deposit' => 0,
-                    'fine' => 0,
-                    'total' => $totalPrice,
-                    'status' => 'Belum Lunas',
+                LogAktivitas::record('Penerimaan Sampel', 'Sampel', 'Staf '.auth()->user()->name." memverifikasi penerimaan sampel {$lockedSample->sample_code}.", auth()->id());
+
+                Notification::create([
+                    'user_id' => $lockedSample->customer_id,
+                    'title' => 'Sampel Telah Diterima',
+                    'message' => "Sampel {$lockedSample->sample_code} telah disetujui & diterima oleh staf laboratorium dan siap diproses ke tahap pengujian.",
+                    'link' => '/customer/samples/'.$lockedSample->id,
                 ]);
-            }
-
-            LogAktivitas::record('Penerimaan Sampel', 'Sampel', 'Staf '.auth()->user()->name." memverifikasi penerimaan sampel {$sample->sample_code}.", auth()->id());
-
-            Notification::create([
-                'user_id' => $sample->customer_id,
-                'title' => 'Sampel Telah Diterima',
-                'message' => "Sampel {$sample->sample_code} telah diterima oleh laboratorium dan siap diproses.",
-                'link' => '/customer/samples/'.$sample->id,
-            ]);
-        });
+            });
+        } catch (\Throwable $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
 
         return back()->with('success', "Sampel {$sample->sample_code} berhasil diterima dan didaftarkan.");
     }

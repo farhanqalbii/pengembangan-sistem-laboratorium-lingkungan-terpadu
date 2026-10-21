@@ -75,15 +75,15 @@
 
         <!-- Recent Audit Activity Log -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm card-hover">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                 <h2 class="text-sm sm:text-base font-bold text-slate-800">Audit Trail Activity Logs (Terbaru)</h2>
                 <a href="{{ route('admin.activity-logs.index') }}" class="text-xs font-semibold text-emerald-600 hover:underline">Semua Log &rarr;</a>
             </div>
 
             <div class="space-y-2.5">
                 @forelse($recentActivityLogs as $log)
-                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between text-xs">
-                        <div class="flex items-center space-x-3 min-w-0 pr-3">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
+                        <div class="flex items-center space-x-3 min-w-0 pr-0 sm:pr-3">
                             <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs flex-shrink-0">
                                 {{ strtoupper(substr($log->user->name ?? 'SYS', 0, 2)) }}
                             </div>
@@ -92,7 +92,7 @@
                                 <span class="text-slate-500 text-[11px] block truncate">{{ $log->description }}</span>
                             </div>
                         </div>
-                        <span class="text-[10px] text-slate-400 font-mono whitespace-nowrap flex-shrink-0">{{ $log->created_at->diffForHumans() }}</span>
+                        <span class="text-[10px] text-slate-400 font-mono whitespace-nowrap self-start sm:self-auto pl-11 sm:pl-0 flex-shrink-0">{{ $log->created_at->diffForHumans() }}</span>
                     </div>
                 @empty
                     <div class="text-center py-8 text-slate-400 text-xs">Belum ada catatan aktivitas log.</div>

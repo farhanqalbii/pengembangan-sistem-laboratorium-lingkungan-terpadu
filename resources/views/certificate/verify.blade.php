@@ -6,7 +6,7 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">
     <!-- Verification Status Banner -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm text-center space-y-4">
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm text-center space-y-4">
         @if($isValid && $certificate)
             <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl shadow-sm">
                 <i class="fa-solid fa-certificate"></i>
@@ -20,24 +20,24 @@
             </div>
 
             <!-- Details Card -->
-            <div class="text-left bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-2.5">
-                <div class="flex justify-between py-1 border-b border-slate-200">
+            <div class="text-left bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-2">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-slate-200 gap-0.5">
                     <span class="text-slate-500">Kode Sampel:</span>
                     <span class="font-mono font-bold text-slate-800">{{ $certificate->sample->sample_code }}</span>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-slate-200 gap-0.5">
                     <span class="text-slate-500">Nama Pelanggan / Perusahaan:</span>
-                    <span class="font-bold text-slate-800">{{ $certificate->customer->company_name ?? $certificate->customer->name }}</span>
+                    <span class="font-bold text-slate-800 break-words">{{ $certificate->customer->company_name ?? $certificate->customer->name }}</span>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-slate-200 gap-0.5">
                     <span class="text-slate-500">Tanggal Pengesahan:</span>
                     <span class="font-semibold text-slate-800">{{ $certificate->tanggal_verifikasi?->format('d F Y, H:i') }} WIB</span>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-slate-200 gap-0.5">
                     <span class="text-slate-500">Disahkan Oleh (Manajer Lab):</span>
                     <span class="font-bold text-emerald-700">{{ $certificate->verifier->name ?? 'Dr. Hendra Gunawan, M.Si' }}</span>
                 </div>
-                <div class="flex justify-between py-1 border-b border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-slate-200 gap-0.5">
                     <span class="text-slate-500">Jumlah Parameter Diuji:</span>
                     <span class="font-bold text-slate-800">{{ $certificate->sample->sampleParameters->count() }} Parameter SNI</span>
                 </div>
@@ -72,9 +72,9 @@
         @endif
 
         <!-- Search Form -->
-        <form action="{{ route('certificate.verify') }}" method="GET" class="pt-4 flex gap-2 max-w-lg mx-auto">
+        <form action="{{ route('certificate.verify') }}" method="GET" class="pt-4 flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
             <input type="text" name="hash" value="{{ $searchHash }}" placeholder="Masukkan Hash / Nomor COA..." class="flex-1 text-xs border border-slate-300 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 font-mono">
-            <button type="submit" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm transition-all">
+            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm transition-all text-center">
                 Verifikasi
             </button>
         </form>

@@ -41,6 +41,7 @@ class DashboardAccessTest extends TestCase
         $routes = [
             'manager.dashboard',
             'manager.verifications.index',
+            'manager.reports.satisfaction',
         ];
 
         foreach ($routes as $routeName) {

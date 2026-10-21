@@ -58,7 +58,9 @@ Route::get('/equipment/detail/{code}', [PeralatanScanController::class, 'detail'
 // Shared Auth Routes (Notifications & Profile)
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/notifications/counts', [NotificationController::class, 'getCounts'])->name('notifications.counts');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::match(['get', 'post'], '/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     // Profile Management
@@ -138,6 +140,9 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->name('mana
     Route::get('/verifications/{sample}', [ManagerVerifikasiController::class, 'show'])->name('verifications.show');
     Route::post('/verifications/{sample}/approve', [ManagerVerifikasiController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifications/{sample}/reject', [ManagerVerifikasiController::class, 'reject'])->name('verifications.reject');
+
+    // Rekap Kepuasan Pelanggan (SRS FDB-F-002: Manajer Lab dan Admin)
+    Route::get('/reports/satisfaction', [LaporanController::class, 'satisfaction'])->name('reports.satisfaction');
 });
 
 // ADMIN ROUTES

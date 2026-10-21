@@ -83,8 +83,36 @@ class PaymentWebhookController extends Controller
             ], 400);
         }
 
+        $fraudStatus = $payload['fraud_status'] ?? null;
+
         // 6. Tangani status transaksi pembayaran secara resmi
-        if (in_array($transactionStatus, ['capture', 'settlement'])) {
+        if ($transactionStatus === 'capture') {
+            // Untuk kartu kredit: jangan menganggap status challenge sebagai settlement final
+            if ($fraudStatus === 'challenge') {
+                Log::info("Webhook: Transaksi kartu kredit berstatus challenge untuk Order {$orderId}. Menunggu konfirmasi fraud review.");
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Notifikasi webhook capture dengan status challenge diterima. Menunggu verifikasi lanjutan.',
+                ]);
+            }
+
+            // Jika fraud_status adalah accept (atau tidak ada fraud review), proses pembayaran sebagai berhasil
+            if ($fraudStatus === 'accept' || $fraudStatus === null) {
+                $this->paymentService->handleSuccessfulPayment(
+                    $payment,
+                    $transactionId,
+                    $paymentType
+                );
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran kartu kredit berhasil dikonfirmasi dan diverifikasi.',
+                ]);
+            }
+        }
+
+        if ($transactionStatus === 'settlement') {
             $this->paymentService->handleSuccessfulPayment(
                 $payment,
                 $transactionId,
@@ -112,6 +140,22 @@ class PaymentWebhookController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Status pembayaran diperbarui menjadi Kadaluarsa.',
+            ]);
+        }
+
+        if ($transactionStatus === 'pending') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi pembayaran pending diterima. Menunggu penyelesaian oleh pengguna.',
+            ]);
+        }
+
+        if (in_array($transactionStatus, ['refund', 'partial_refund'])) {
+            Log::info("Webhook: Notifikasi refund diterima untuk Order {$orderId}.");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi refund diterima dan dicatat.',
             ]);
         }
 

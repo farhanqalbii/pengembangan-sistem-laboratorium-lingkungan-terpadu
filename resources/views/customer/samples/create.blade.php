@@ -9,7 +9,7 @@
         <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Formulir Pendaftaran Sampel</h2>
         <p class="text-xs text-slate-500 mb-5">Pilih jenis sampel dan parameter pengujian yang Anda butuhkan.</p>
 
-        <form action="{{ route('customer.samples.store') }}" method="POST" x-data="sampleForm()" class="space-y-5">
+        <form action="{{ route('customer.samples.store') }}" method="POST" x-data="sampleForm()" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="space-y-5">
             @csrf
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -36,7 +36,7 @@
 
             <!-- Selection of Parameters -->
             <div class="border-t border-slate-200 pt-5">
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                     <h3 class="text-sm font-bold text-slate-800">Pilih Parameter Pengujian & Baku Mutu <span class="text-rose-500">*</span></h3>
                     <span class="text-xs text-slate-500 font-medium">Centang parameter yang akan diuji</span>
                 </div>
@@ -66,17 +66,22 @@
             </div>
 
             <!-- Total Estimated Price Sticky Box -->
-            <div class="p-4 sm:p-5 rounded-xl bg-slate-900 text-white flex items-center justify-between shadow-xl">
+            <div class="p-4 sm:p-5 rounded-xl bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
                 <div>
                     <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Estimasi Biaya Pengujian</p>
                     <h3 class="text-xl sm:text-2xl font-extrabold text-emerald-400" x-text="formatRupiah(totalPrice)">Rp 0</h3>
                 </div>
-                <div class="flex items-center gap-2.5">
-                    <a href="{{ route('customer.samples.index') }}" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+                    <a href="{{ route('customer.samples.index') }}" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all text-center">
                         Batal
                     </a>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 text-xs transition-all flex items-center cursor-pointer">
-                        <i class="fa-solid fa-paper-plane mr-2"></i> Kirim Pengajuan Sampel
+                    <button type="submit" 
+                        :disabled="submitting"
+                        :class="{ 'opacity-75 pointer-events-none': submitting }"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="submitting" x-cloak></i>
+                        <i class="fa-solid fa-paper-plane" x-show="!submitting"></i>
+                        <span x-text="submitting ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Sampel'">Kirim Pengajuan Sampel</span>
                     </button>
                 </div>
             </div>
@@ -88,6 +93,7 @@
     function sampleForm() {
         return {
             totalPrice: 0,
+            submitting: false,
             updateTotal() {
                 let total = 0;
                 document.querySelectorAll('input[name="parameters[]"]:checked').forEach(cb => {

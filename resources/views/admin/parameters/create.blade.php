@@ -4,7 +4,7 @@
 @section('page-title', 'Tambah Parameter Uji & Baku Mutu Baru')
 
 @section('content')
-<div class="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+<div class="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
     <form action="{{ route('admin.parameters.store') }}" method="POST" class="space-y-4">
         @csrf
 
@@ -60,9 +60,9 @@
             </div>
         </div>
 
-        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
-            <a href="{{ route('admin.parameters.index') }}" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Batal</a>
-            <button type="submit" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30">Simpan Parameter</button>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:space-x-3 pt-4 border-t border-slate-100">
+            <a href="{{ route('admin.parameters.index') }}" class="w-full sm:w-auto px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl text-center">Batal</a>
+            <button type="submit" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 text-center">Simpan Parameter</button>
         </div>
     </form>
 </div>

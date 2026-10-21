@@ -20,10 +20,16 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <!-- Landing page terkunci pada desain & warna aslinya tanpa tema gelap/terang -->
+    <script>
+        document.documentElement.classList.remove('dark');
+    </script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -207,7 +213,7 @@
                 <!-- Logo Brand -->
                 <div class="flex items-center flex-shrink-0">
                     <a href="{{ route('home') }}" class="flex items-center group focus:outline-none py-1">
-                        <img src="{{ asset('images/logo_lab_lgn_rgst_clean.png') }}" alt="UPTD Laboratorium Lingkungan" class="h-16 sm:h-[72px] w-auto max-w-[310px] object-contain transition-transform group-hover:scale-[1.02] filter drop-shadow-2xs">
+                        <img src="{{ asset('images/logo_lab_lgn_rgst_clean.png') }}" alt="UPTD Laboratorium Lingkungan" class="h-14 sm:h-[72px] w-auto max-w-[210px] sm:max-w-[310px] object-contain transition-transform group-hover:scale-[1.02] filter drop-shadow-2xs">
                     </a>
                 </div>
 
@@ -270,9 +276,8 @@
             <a href="#alur" @click="mobileMenuOpen = false" class="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg">Alur Uji</a>
             <a href="#tracking" @click="mobileMenuOpen = false" class="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg">Cek Status Sampel</a>
             <a href="#standar-mutu" @click="mobileMenuOpen = false" class="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg">Akreditasi</a>
-            <a href="#kontak" @click="mobileMenuOpen = false" class="block px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg">Kontak & Lokasi</a>
 
-            <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+            <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
                 @auth
                     <a href="{{ $dashRoute }}" class="w-full py-2.5 text-center text-xs font-bold text-white bg-emerald-600 rounded-xl">Buka Dashboard ({{ $roleLabel }})</a>
                 @else
@@ -599,7 +604,7 @@
 
             <!-- Table of Parameters -->
             <div class="overflow-x-auto rounded-3xl border border-slate-300 shadow-lg shadow-slate-900/5 bg-white reveal-on-scroll delay-150">
-                <table class="w-full text-left text-xs text-slate-700">
+                <table class="w-full text-left text-xs text-slate-700 min-w-[700px]">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                         <tr>
                             <th class="px-5 py-3.5">Nama Parameter Uji</th>
@@ -705,7 +710,27 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($equipments as $index => $eq)
                     <div class="rounded-3xl glass-card card-lift p-6 sm:p-7 flex flex-col justify-between space-y-4 reveal-on-scroll delay-{{ (($index % 3) + 1) * 100 }}">
-                        <div class="space-y-3">
+                        <div class="space-y-3.5">
+                            <!-- Area Foto Instrumen Laboratorium -->
+                            <a href="{{ route('equipment.detail', $eq->code) }}" class="block w-full h-40 sm:h-44 bg-slate-50/90 rounded-2xl flex items-center justify-center overflow-hidden border border-slate-100/90 p-3 shadow-2xs group cursor-pointer" title="Lihat Detail {{ $eq->name }}">
+                                @if($eq->photo_url)
+                                    <img src="{{ $eq->photo_url }}" 
+                                         alt="{{ $eq->name }}" 
+                                         class="max-h-full max-w-full object-contain mx-auto transition-transform duration-300 group-hover:scale-105" 
+                                         loading="lazy"
+                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                                    <div class="hidden flex-col items-center justify-center text-slate-300 text-center py-4 w-full h-full">
+                                        <i class="fa-solid fa-microscope text-4xl mb-1.5 text-slate-300 group-hover:text-emerald-500 transition-colors"></i>
+                                        <span class="text-[11px] font-semibold text-slate-400 group-hover:text-slate-600 transition-colors">Instrumen Lab Terverifikasi</span>
+                                    </div>
+                                @else
+                                    <div class="flex flex-col items-center justify-center text-slate-300 text-center py-4 w-full h-full">
+                                        <i class="fa-solid fa-microscope text-4xl mb-1.5 text-slate-300 group-hover:text-emerald-500 transition-colors"></i>
+                                        <span class="text-[11px] font-semibold text-slate-400 group-hover:text-slate-600 transition-colors">Instrumen Lab Terverifikasi</span>
+                                    </div>
+                                @endif
+                            </a>
+
                             <div class="flex items-center justify-between gap-2">
                                 <span class="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
                                     {{ $eq->code }}

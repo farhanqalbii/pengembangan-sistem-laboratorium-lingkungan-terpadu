@@ -7,7 +7,7 @@
 @section('content')
 <div class="bg-white border border-slate-200/80 rounded-3xl shadow-xl shadow-slate-900/5 overflow-hidden flex flex-col md:flex-row items-stretch">
     <!-- 1. BAGIAN KIRI: Panel Visual & Branding (Tanpa Logo, Identik dengan Halaman Login) -->
-    <div class="w-full md:w-[42%] lg:w-[40%] p-6 sm:p-7 lg:p-8 flex flex-col justify-between relative overflow-hidden text-white shrink-0">
+    <div class="w-full md:w-[42%] lg:w-[40%] p-4 sm:p-7 lg:p-8 flex flex-col justify-between relative overflow-hidden text-white shrink-0">
         <!-- Real Lab Photo Background -->
         <img src="{{ asset('images/login_lab_real.jpg') }}" alt="Laboratorium Lingkungan Terpadu" class="absolute inset-0 w-full h-full object-cover object-center">
         
@@ -69,7 +69,7 @@
     </div>
 
     <!-- 2. BAGIAN KANAN: Form Register (Rapi, Padat, & Proporsional) -->
-    <div class="w-full md:w-[58%] lg:w-[60%] p-5 sm:p-7 lg:p-8 flex flex-col justify-center bg-white relative">
+    <div class="w-full md:w-[58%] lg:w-[60%] p-4 sm:p-7 lg:p-8 flex flex-col justify-center bg-white relative">
         <!-- Header -->
         <div class="border-b border-slate-100 pb-2.5 mb-3">
             <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Pendaftaran Akun Customer</h2>
@@ -89,7 +89,7 @@
             </div>
         @endif
 
-        <form action="{{ route('register') }}" method="POST" class="space-y-3">
+        <form action="{{ route('register') }}" method="POST" class="space-y-3" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)">
             @csrf
 
             <!-- Baris 1: Nama Lengkap & Alamat Email -->
@@ -181,8 +181,11 @@
 
             <!-- Tombol Daftar Akun Baru -->
             <button type="submit" 
-                class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-700/15 hover:shadow-emerald-700/25 transition-all text-sm mt-1.5 flex items-center justify-center cursor-pointer">
-                <span>Daftar</span>
+                :disabled="submitting"
+                :class="{ 'opacity-75 pointer-events-none': submitting }"
+                class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-700/15 hover:shadow-emerald-700/25 transition-all text-sm mt-1.5 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                <i class="fa-solid fa-spinner fa-spin text-sm" x-show="submitting" x-cloak></i>
+                <span x-text="submitting ? 'Mendaftarkan Akun...' : 'Daftar'">Daftar</span>
             </button>
         </form>
 

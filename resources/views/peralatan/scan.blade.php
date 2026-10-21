@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="{{ request()->cookie('theme_preference') === 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +12,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Theme Manager (Anti-FOUC) & Styles -->
+    <script src="{{ asset('js/theme-switcher.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/theme-dark.css') }}">
+
+    <!-- Tailwind CSS + Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -144,15 +151,24 @@
 
     <!-- Main Container -->
     <div class="max-w-xl mx-auto w-full relative z-10 my-auto py-6 space-y-6 anim-fade-up">
-        <!-- Logo Header -->
-        <div class="text-center">
-            <a href="/" class="inline-block hover:opacity-95 transition-opacity">
-                <img src="{{ asset('images/logo_lab_lgn_rgst.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-16 sm:h-20 w-auto max-w-[280px] sm:max-w-[340px] object-contain mx-auto filter drop-shadow-sm">
+        <!-- Header Navigasi & Logo -->
+        <div class="flex items-center justify-between gap-3">
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/95 hover:bg-white text-slate-700 hover:text-emerald-700 font-bold text-xs border border-slate-200/90 shadow-2xs backdrop-blur-md transition-all cursor-pointer">
+                <i class="fa-solid fa-arrow-left text-slate-400"></i> Beranda
             </a>
+            <a href="/" class="inline-block hover:opacity-95 transition-opacity mx-auto">
+                <!-- Logo Light Mode: teks gelap untuk latar terang -->
+                <img src="{{ asset('images/logo_lab_lgn_rgst.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-12 sm:h-16 w-auto max-w-[140px] sm:max-w-[260px] object-contain filter drop-shadow-sm block dark:hidden">
+                <!-- Logo Dark Mode: teks putih / terang untuk latar gelap -->
+                <img src="{{ asset('images/logo_lab_navbar_clean.png') }}" alt="Laboratorium Lingkungan Terpadu" class="h-12 sm:h-16 w-auto max-w-[140px] sm:max-w-[260px] object-contain filter drop-shadow-sm hidden dark:block">
+            </a>
+            <div class="flex items-center">
+                <x-theme-switcher align="right" />
+            </div>
         </div>
 
         <!-- Camera Scanner Card -->
-        <div class="bg-white/95 border border-slate-200/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl shadow-slate-900/10 space-y-5 card-hover relative overflow-hidden">
+        <div class="bg-white/95 border border-slate-200/90 backdrop-blur-2xl rounded-3xl p-4 sm:p-8 shadow-2xl shadow-slate-900/10 space-y-5 card-hover relative overflow-hidden">
             <div class="text-center border-b border-slate-100 pb-4">
                 <h2 class="text-base font-extrabold text-slate-800">Arahkan Kamera ke QR / Barcode Alat</h2>
                 <p class="text-xs text-slate-500 mt-1">Sistem secara otomatis mengenali dan membuka detail spesifikasi instrumen laboratorium.</p>

@@ -46,7 +46,7 @@
     <!-- Main Table Card -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden anim-fade-up anim-delay-2 card-hover">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs min-w-[760px]">
                 <thead class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
                     <tr>
                         <th class="px-4 py-3">Kode Sampel</th>
@@ -109,6 +109,13 @@
                                     <div>
                                         <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80">
                                             <i class="fa-solid fa-circle-check text-[10px] text-emerald-600"></i> Lunas
+                                        </span>
+                                        <span class="block text-[10px] text-slate-400 mt-0.5 truncate max-w-[140px]">{{ $pay->payment_method }}</span>
+                                    </div>
+                                @elseif($pay && in_array($pay->status, ['Gagal', 'Kadaluarsa']))
+                                    <div>
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200/80">
+                                            <i class="fa-solid fa-circle-xmark text-[10px] text-rose-600"></i> {{ $pay->status }}
                                         </span>
                                         <span class="block text-[10px] text-slate-400 mt-0.5 truncate max-w-[140px]">{{ $pay->payment_method }}</span>
                                     </div>

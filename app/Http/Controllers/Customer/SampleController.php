@@ -12,6 +12,7 @@ use App\Models\Sample;
 use App\Models\SampleParameter;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SampleController extends Controller
 {
@@ -59,7 +60,7 @@ class SampleController extends Controller
         $sample = null;
         $sampleCode = '';
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, &$sample, &$sampleCode) {
+        DB::transaction(function () use ($validated, &$sample, &$sampleCode) {
             $sampleCode = 'SMP-'.date('Ymd').'-'.sprintf('%04d', Sample::whereDate('created_at', today())->count() + 1);
 
             $sample = Sample::create([
@@ -114,7 +115,15 @@ class SampleController extends Controller
 
             LogAktivitas::record('Pengajuan Sampel', 'Sampel', 'Customer '.auth()->user()->name." mengajukan sampel baru: {$sampleCode}", auth()->id());
 
-            // Notify Staff
+            // Notify Customer (Konfirmasi Pengajuan)
+            Notification::create([
+                'user_id' => auth()->id(),
+                'title' => 'Pengajuan Sampel Berhasil',
+                'message' => "Sampel {$sampleCode} ({$sample->sample_type}) telah diajukan dan sedang menunggu verifikasi penerimaan oleh staf laboratorium.",
+                'link' => '/customer/samples/'.$sample->id,
+            ]);
+
+            // Notify Staff & Admin
             $staffUsers = User::whereIn('role', ['staff', 'admin'])->get();
             foreach ($staffUsers as $staff) {
                 Notification::create([

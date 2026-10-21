@@ -81,17 +81,17 @@
             <div class="space-y-4">
                 @forelse($activeSamples as $sample)
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-300 transition-all">
-                        <div class="flex items-start justify-between">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                             <div>
                                 <span class="text-xs font-bold text-emerald-600 font-mono">{{ $sample->sample_code }}</span>
                                 <h4 class="font-bold text-slate-800 text-sm mt-0.5">{{ $sample->sample_type }}</h4>
                                 <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> {{ $sample->sampling_location }}</p>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $sample->status_badge_class }}">
+                            <span class="self-start sm:self-auto px-2.5 py-1 rounded-full text-xs font-bold {{ $sample->status_badge_class }}">
                                 {{ $sample->status }}
                             </span>
                         </div>
-                        <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                        <div class="mt-3 pt-3 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                             <span class="text-slate-400">Tgl Pengajuan: {{ $sample->request_date ? $sample->request_date->format('d/m/Y') : '-' }}</span>
                             <a href="{{ route('customer.samples.show', $sample->id) }}" class="font-semibold text-emerald-600 hover:underline">Lacak Status &rarr;</a>
                         </div>
@@ -112,7 +112,7 @@
             <div class="space-y-4">
                 @forelse($activeBorrowings as $borrowing)
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-300 transition-all">
-                        <div class="flex items-start justify-between">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                             <div>
                                 <span class="text-xs font-bold text-blue-600 font-mono">{{ $borrowing->borrow_code }}</span>
                                 <h4 class="font-bold text-slate-800 text-sm mt-0.5">
@@ -122,11 +122,11 @@
                                     <i class="fa-solid fa-calendar-days mr-1"></i> {{ $borrowing->start_date->format('d/m/Y') }} - {{ $borrowing->end_date->format('d/m/Y') }}
                                 </p>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $borrowing->status_badge_class }}">
+                            <span class="self-start sm:self-auto px-2.5 py-1 rounded-full text-xs font-bold {{ $borrowing->status_badge_class }}">
                                 {{ $borrowing->status }}
                             </span>
                         </div>
-                        <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                        <div class="mt-3 pt-3 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                             <span class="text-slate-400">Deposit: Rp {{ number_format($borrowing->deposit_amount, 0, ',', '.') }}</span>
                             <a href="{{ route('customer.borrowings.show', $borrowing->id) }}" class="font-semibold text-emerald-600 hover:underline">Detail Peminjaman &rarr;</a>
                         </div>

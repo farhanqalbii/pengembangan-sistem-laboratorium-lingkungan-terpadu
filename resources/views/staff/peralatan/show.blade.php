@@ -7,13 +7,22 @@
 <div class="space-y-6" x-data="{ tab: 'calibration', showLabelModal: false }" x-effect="document.body.classList.toggle('overflow-hidden', showLabelModal); document.body.classList.toggle('modal-open', showLabelModal)">
     <!-- Header Card -->
     <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <div class="flex items-center space-x-3 mb-1">
-                <span class="font-mono font-bold text-base sm:text-lg text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">{{ $equipment->code }}</span>
-                <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $equipment->status_badge_class }}">{{ $equipment->status }}</span>
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 p-1">
+                @if($equipment->photo_url)
+                    <img src="{{ $equipment->photo_url }}" alt="{{ $equipment->name }}" class="max-h-full max-w-full object-contain">
+                @else
+                    <i class="fa-solid fa-microscope text-2xl text-slate-300"></i>
+                @endif
             </div>
-            <h1 class="text-lg sm:text-xl font-bold text-slate-800">{{ $equipment->name }}</h1>
-            <p class="text-xs text-slate-500 mt-1">Kategori: {{ $equipment->category }} | Merk: {{ $equipment->brand ?? 'N/A' }} | Lokasi: {{ $equipment->location }}</p>
+            <div>
+                <div class="flex items-center space-x-3 mb-1">
+                    <span class="font-mono font-bold text-base sm:text-lg text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">{{ $equipment->code }}</span>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $equipment->status_badge_class }}">{{ $equipment->status }}</span>
+                </div>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-800">{{ $equipment->name }}</h1>
+                <p class="text-xs text-slate-500 mt-1">Kategori: {{ $equipment->category }} | Merk: {{ $equipment->brand ?? 'N/A' }} | Lokasi: {{ $equipment->location }}</p>
+            </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
@@ -24,7 +33,7 @@
                 <i class="fa-solid fa-qrcode"></i> Cetak Stiker Label
             </button>
             <a href="{{ route('equipment.detail', $equipment->code) }}" target="_blank" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow transition-colors">
-                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Verifikasi Publik
+                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Pratinjau Halaman QR
             </a>
             <a href="{{ route('staff.equipment.edit', $equipment->id) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-colors">
                 <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Data Alat
@@ -61,7 +70,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-row lg:flex-col gap-2.5 w-full lg:w-auto flex-shrink-0">
+            <div class="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full lg:w-auto flex-shrink-0">
                 <button type="button" @click="showLabelModal = true" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
                     <i class="fa-solid fa-print"></i>
                     <span>Cetak Stiker Label</span>
@@ -103,7 +112,7 @@
 
     <!-- Tabs Header -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
-        <div class="flex border-b border-slate-200 space-x-6 text-xs font-bold">
+        <div class="flex border-b border-slate-200 space-x-6 text-xs font-bold overflow-x-auto whitespace-nowrap">
             <button @click="tab = 'calibration'" :class="tab === 'calibration' ? 'border-b-2 border-emerald-600 text-emerald-600 pb-3' : 'text-slate-500 pb-3 hover:text-slate-800'">
                 <i class="fa-solid fa-sliders mr-1"></i> Catatan Kalibrasi ({{ $equipment->calibrations->count() }})
             </button>
@@ -156,7 +165,7 @@
 
             <!-- Table History -->
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[600px]">
                     <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold">
                         <tr>
                             <th class="p-3">Tgl Kalibrasi</th>
@@ -218,7 +227,7 @@
             </form>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[600px]">
                     <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold">
                         <tr>
                             <th class="p-3">Tgl Servis</th>
@@ -246,7 +255,7 @@
         <!-- Tab 3: Stok Audit -->
         <div x-show="tab === 'stock'" class="mt-6">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[600px]">
                     <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold">
                         <tr>
                             <th class="p-3">Tgl & Waktu</th>

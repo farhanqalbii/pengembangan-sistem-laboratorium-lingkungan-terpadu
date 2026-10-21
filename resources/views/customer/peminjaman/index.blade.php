@@ -8,7 +8,7 @@
     <!-- Action Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
         <h2 class="text-sm font-bold text-slate-800">Daftar Peminjaman Instrumen & Alat Field</h2>
-        <a href="{{ route('customer.borrowings.create') }}" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center">
+        <a href="{{ route('customer.borrowings.create') }}" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center w-full sm:w-auto">
             <i class="fa-solid fa-plus-circle mr-2"></i> Pengajuan Pinjam Alat Baru
         </a>
     </div>
@@ -18,9 +18,9 @@
         @forelse($borrowings as $borrowing)
             <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm card-hover flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="font-mono font-bold text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">{{ $borrowing->borrow_code }}</span>
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $borrowing->status_badge_class }}">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <span class="font-mono font-bold text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md self-start sm:self-auto">{{ $borrowing->borrow_code }}</span>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold self-start sm:self-auto {{ $borrowing->status_badge_class }}">
                             {{ $borrowing->status }}
                         </span>
                     </div>

@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Models\DetailPeminjaman;
 use App\Models\Kalibrasi;
 use App\Models\LogAktivitas;
 use App\Models\Peralatan;
 use App\Models\RiwayatServis;
 use App\Models\RiwayatStok;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PeralatanController extends Controller
 {
@@ -60,24 +63,46 @@ class PeralatanController extends Controller
             'status' => ['required', 'in:Tersedia,Dipinjam,Dalam Servis,Dalam Kalibrasi,Tidak Tersedia'],
             'rental_price_per_day' => ['required', 'numeric', 'min:0'],
             'deposit_amount' => ['required', 'numeric', 'min:0'],
+            'photo' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ]);
+
+        $newPhotoPath = null;
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $newPhotoPath = $request->file('photo')->store('equipment', 'public');
+            $validated['foto'] = $newPhotoPath;
+        }
+        unset($validated['photo']);
 
         $validated['qr_code'] = 'QR-'.$validated['code'];
-        $validated['barcode'] = '899'.str_pad((string) rand(1, 999999999), 10, '0', STR_PAD_LEFT);
+        do {
+            $barcode = '899'.str_pad((string) rand(1, 999999999), 10, '0', STR_PAD_LEFT);
+        } while (Peralatan::where('barcode', $barcode)->exists());
+        $validated['barcode'] = $barcode;
 
-        $equipment = Peralatan::create($validated);
+        try {
+            $equipment = DB::transaction(function () use ($validated) {
+                $equipment = Peralatan::create($validated);
 
-        RiwayatStok::create([
-            'id_peralatan' => $equipment->id,
-            'tipe' => 'Stok Awal',
-            'jumlah_sebelum' => 0,
-            'jumlah_perubahan' => $equipment->jumlah,
-            'jumlah_setelah' => $equipment->jumlah,
-            'user_id' => auth()->id(),
-            'catatan' => 'Pendaftaran data alat baru di inventori',
-        ]);
+                RiwayatStok::create([
+                    'id_peralatan' => $equipment->id,
+                    'tipe' => 'Stok Awal',
+                    'jumlah_sebelum' => 0,
+                    'jumlah_perubahan' => $equipment->jumlah,
+                    'jumlah_setelah' => $equipment->jumlah,
+                    'user_id' => auth()->id(),
+                    'catatan' => 'Pendaftaran data alat baru di inventori',
+                ]);
 
-        LogAktivitas::record('Tambah Alat', 'Inventori', "Penambahan alat baru {$equipment->nama} ({$equipment->kode})", auth()->id());
+                LogAktivitas::record('Tambah Alat', 'Inventori', "Penambahan alat baru {$equipment->nama} ({$equipment->kode})", auth()->id());
+
+                return $equipment;
+            });
+        } catch (\Throwable $e) {
+            if ($newPhotoPath && Storage::disk('public')->exists($newPhotoPath)) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+            throw $e;
+        }
 
         return redirect()->route('staff.equipment.show', $equipment)
             ->with('success', "Alat {$equipment->nama} berhasil ditambahkan ke sistem!");
@@ -116,27 +141,64 @@ class PeralatanController extends Controller
             'rental_price_per_day' => ['required', 'numeric', 'min:0'],
             'deposit_amount' => ['required', 'numeric', 'min:0'],
             'stock_change_notes' => ['nullable', 'string'],
+            'photo' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
         ]);
 
-        $oldQty = $equipment->jumlah;
-        $newQty = (int) $validated['quantity'];
+        $newPhotoPath = null;
+        $oldPhotoToDelete = null;
 
-        $equipment->update($validated);
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $newPhotoPath = $request->file('photo')->store('equipment', 'public');
+            $validated['foto'] = $newPhotoPath;
 
-        if ($oldQty !== $newQty) {
-            $diff = $newQty - $oldQty;
-            RiwayatStok::create([
-                'id_peralatan' => $equipment->id,
-                'tipe' => $diff > 0 ? 'Penambahan' : 'Pengurangan',
-                'jumlah_sebelum' => $oldQty,
-                'jumlah_perubahan' => $diff,
-                'jumlah_setelah' => $newQty,
-                'user_id' => auth()->id(),
-                'catatan' => $validated['stock_change_notes'] ?? 'Perubahan jumlah stok oleh staf/admin',
-            ]);
+            $oldFoto = $equipment->foto;
+            if ($oldFoto && ! str_starts_with($oldFoto, 'http') && ! str_starts_with($oldFoto, 'images/')) {
+                $isUsedElsewhere = Peralatan::where('id', '!=', $equipment->id)->where('foto', $oldFoto)->exists();
+                if (! $isUsedElsewhere) {
+                    $oldPhotoToDelete = $oldFoto;
+                }
+            }
         }
+        unset($validated['photo']);
 
-        LogAktivitas::record('Update Alat', 'Inventori', "Pembaruan data alat {$equipment->nama} ({$equipment->kode})", auth()->id());
+        try {
+            $equipment = DB::transaction(function () use ($equipment, $validated) {
+                $lockedEq = Peralatan::where('id', $equipment->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $oldQty = $lockedEq->jumlah;
+                $newQty = (int) $validated['quantity'];
+
+                $lockedEq->update($validated);
+
+                if ($oldQty !== $newQty) {
+                    $diff = $newQty - $oldQty;
+                    RiwayatStok::create([
+                        'id_peralatan' => $lockedEq->id,
+                        'tipe' => $diff > 0 ? 'Penambahan' : 'Pengurangan',
+                        'jumlah_sebelum' => $oldQty,
+                        'jumlah_perubahan' => $diff,
+                        'jumlah_setelah' => $newQty,
+                        'user_id' => auth()->id(),
+                        'catatan' => $validated['stock_change_notes'] ?? 'Perubahan jumlah stok oleh staf/admin',
+                    ]);
+                }
+
+                LogAktivitas::record('Update Alat', 'Inventori', "Pembaruan data alat {$lockedEq->nama} ({$lockedEq->kode})", auth()->id());
+
+                return $lockedEq;
+            });
+
+            if ($oldPhotoToDelete && Storage::disk('public')->exists($oldPhotoToDelete)) {
+                Storage::disk('public')->delete($oldPhotoToDelete);
+            }
+        } catch (\Throwable $e) {
+            if ($newPhotoPath && Storage::disk('public')->exists($newPhotoPath)) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+            throw $e;
+        }
 
         return redirect()->route('staff.equipment.show', $equipment)
             ->with('success', "Data alat {$equipment->nama} berhasil diperbarui.");
@@ -144,6 +206,16 @@ class PeralatanController extends Controller
 
     public function destroy(Peralatan $equipment)
     {
+        $activeBorrowingExists = DetailPeminjaman::where('id_peralatan', $equipment->id)
+            ->whereHas('borrowing', function ($q) {
+                $q->whereIn('status', ['Diajukan', 'Disetujui', 'Dipinjam', 'Terlambat']);
+            })
+            ->exists();
+
+        if ($activeBorrowingExists) {
+            return back()->with('error', "Alat {$equipment->nama} tidak dapat dihapus karena sedang terkait dengan permohonan atau transaksi peminjaman aktif.");
+        }
+
         $name = $equipment->nama;
         $code = $equipment->kode;
         $equipment->delete();
