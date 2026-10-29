@@ -16,6 +16,8 @@ class LaporanController extends Controller
 {
     public function samples(Request $request)
     {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Laporan ini hanya dapat diakses oleh Administrator.');
+
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
 
@@ -48,6 +50,8 @@ class LaporanController extends Controller
 
     public function inventory(Request $request)
     {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Laporan ini hanya dapat diakses oleh Administrator.');
+
         $equipmentList = Peralatan::with(['calibrations', 'serviceHistories', 'stockHistories'])->get();
 
         if ($request->get('export') === 'pdf') {
@@ -77,6 +81,8 @@ class LaporanController extends Controller
 
     public function borrowings(Request $request)
     {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Laporan ini hanya dapat diakses oleh Administrator.');
+
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
 
@@ -111,6 +117,8 @@ class LaporanController extends Controller
 
     public function financial(Request $request)
     {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Laporan ini hanya dapat diakses oleh Administrator.');
+
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
 
@@ -146,6 +154,8 @@ class LaporanController extends Controller
 
     public function satisfaction(Request $request)
     {
+        abort_unless(auth()->user() && in_array(auth()->user()->role, ['admin', 'manager']), 403, 'Akses ditolak: Rekap kepuasan pelanggan hanya dapat diakses oleh Manajer Lab dan Administrator.');
+
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
 

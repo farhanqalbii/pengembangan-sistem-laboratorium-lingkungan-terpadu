@@ -16,8 +16,15 @@ use Illuminate\Support\Facades\DB;
 
 class SampleController extends Controller
 {
+    protected function authorizeCustomer(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak: Hanya Customer yang berwenang mengakses fitur ini.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeCustomer();
+
         $query = Sample::where('customer_id', auth()->id())
             ->with(['sampleParameters.parameter', 'certificate']);
 
@@ -41,6 +48,8 @@ class SampleController extends Controller
 
     public function create()
     {
+        $this->authorizeCustomer();
+
         $parameters = Parameter::with('qualityStandard')->get()->groupBy('category');
 
         return view('customer.samples.create', compact('parameters'));
@@ -48,6 +57,8 @@ class SampleController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorizeCustomer();
+
         $validated = $request->validate([
             'sample_type' => ['required', 'string', 'max:255'],
             'sampling_location' => ['required', 'string', 'max:255'],
@@ -120,7 +131,7 @@ class SampleController extends Controller
                 'user_id' => auth()->id(),
                 'title' => 'Pengajuan Sampel Berhasil',
                 'message' => "Sampel {$sampleCode} ({$sample->sample_type}) telah diajukan dan sedang menunggu verifikasi penerimaan oleh staf laboratorium.",
-                'link' => '/customer/samples/'.$sample->id,
+                'link' => '/customer/samples/'.$sample->sample_code,
             ]);
 
             // Notify Staff & Admin
@@ -130,7 +141,7 @@ class SampleController extends Controller
                     'user_id' => $staff->id,
                     'title' => 'Pengajuan Sampel Baru',
                     'message' => "Pengajuan sampel {$sampleCode} dari ".auth()->user()->name,
-                    'link' => '/staff/samples/'.$sample->id,
+                    'link' => '/staff/samples/'.$sample->sample_code,
                 ]);
             }
         });
@@ -140,6 +151,8 @@ class SampleController extends Controller
 
     public function show(Sample $sample)
     {
+        $this->authorizeCustomer();
+
         if ($sample->customer_id !== auth()->id()) {
             abort(403, 'Anda tidak diizinkan melihat sampel ini.');
         }

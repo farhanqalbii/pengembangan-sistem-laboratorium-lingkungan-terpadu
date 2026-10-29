@@ -46,7 +46,7 @@
                                 @endif
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center space-x-1.5 whitespace-nowrap">
-                                <a href="{{ route('customer.invoices.download', $inv->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs">
+                                <a href="{{ route('customer.invoices.download', $inv) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs">
                                     <i class="fa-solid fa-file-pdf mr-1 text-[11px]"></i> Invoice PDF
                                 </a>
                                 @if($inv->status === 'Belum Lunas' && $inv->payment)

@@ -11,8 +11,15 @@ use Illuminate\Http\Request;
 
 class KepuasanPelangganController extends Controller
 {
+    protected function authorizeCustomer(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak: Hanya Customer yang berwenang mengisi survei kepuasan pelanggan.');
+    }
+
     public function create(Request $request)
     {
+        $this->authorizeCustomer();
+
         $serviceType = $request->get('type', 'Pengujian'); // Pengujian or Peminjaman Alat
         $serviceId = $request->get('id');
 
@@ -73,6 +80,8 @@ class KepuasanPelangganController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorizeCustomer();
+
         $validated = $request->validate([
             'service_type' => ['required', 'string', 'in:Pengujian,Peminjaman Alat'],
             'service_id' => ['required', 'integer'],

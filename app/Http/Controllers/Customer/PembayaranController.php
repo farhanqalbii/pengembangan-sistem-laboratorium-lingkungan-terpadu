@@ -13,6 +13,8 @@ class PembayaranController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak: Hanya Customer yang berwenang melihat riwayat pembayaran customer.');
+
         $invoices = Invoice::where('customer_id', auth()->id())
             ->with(['payment.sample', 'payment.borrowing'])
             ->latest()
@@ -27,6 +29,8 @@ class PembayaranController extends Controller
 
     public function process(Request $request, Pembayaran $payment)
     {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak.');
+
         if ($payment->customer_id !== auth()->id()) {
             abort(403, 'Akses ditolak. Anda tidak berhak memproses pembayaran ini.');
         }
@@ -97,6 +101,8 @@ class PembayaranController extends Controller
 
     public function checkStatus(Request $request, Pembayaran $payment)
     {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak.');
+
         if ($payment->customer_id !== auth()->id()) {
             abort(403, 'Akses ditolak.');
         }

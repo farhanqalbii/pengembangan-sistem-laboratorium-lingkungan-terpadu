@@ -13,6 +13,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak: Dashboard hanya dapat diakses oleh Customer.');
+
         $user = auth()->user();
 
         $activeSamples = Sample::where('customer_id', $user->id)

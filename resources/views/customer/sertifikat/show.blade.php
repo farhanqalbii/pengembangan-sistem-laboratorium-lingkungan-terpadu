@@ -15,7 +15,7 @@
             <a href="{{ route('customer.certificates.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer">
                 <i class="fa-solid fa-arrow-left text-[11px] text-slate-400"></i> Kembali
             </a>
-            <a href="{{ route('customer.certificates.download', $certificate->id) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors">
+            <a href="{{ route('customer.certificates.download', $certificate) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors">
                 <i class="fa-solid fa-file-pdf mr-2"></i> Unduh File PDF Resmi
             </a>
         </div>

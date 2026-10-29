@@ -39,10 +39,10 @@
                                 {{ $cert->issued_at->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center space-x-1.5 whitespace-nowrap">
-                                <a href="{{ route('customer.certificates.show', $cert->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs">
+                                <a href="{{ route('customer.certificates.show', $cert) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs">
                                     Lihat Detail
                                 </a>
-                                <a href="{{ route('customer.certificates.download', $cert->id) }}" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow-sm">
+                                <a href="{{ route('customer.certificates.download', $cert) }}" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow-sm">
                                     <i class="fa-solid fa-download mr-1 text-[11px]"></i> PDF
                                 </a>
                             </td>

@@ -24,13 +24,13 @@
 
         <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
             @if($borrowing->status === 'Diajukan')
-                <form action="{{ route('admin.borrowings.approve', $borrowing->id) }}" method="POST" class="w-full sm:w-auto">
+                <form action="{{ route('admin.borrowings.approve', $borrowing) }}" method="POST" class="w-full sm:w-auto">
                     @csrf
                     <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer text-center">
                         <i class="fa-solid fa-check mr-1"></i> Setujui
                     </button>
                 </form>
-                <form action="{{ route('admin.borrowings.reject', $borrowing->id) }}" method="POST" onsubmit="return confirm('Tolak pengajuan peminjaman ini?')" class="w-full sm:w-auto">
+                <form action="{{ route('admin.borrowings.reject', $borrowing) }}" method="POST" onsubmit="return confirm('Tolak pengajuan peminjaman ini?')" class="w-full sm:w-auto">
                     @csrf
                     <input type="hidden" name="notes" value="Ditolak oleh Administrator">
                     <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer text-center">
@@ -40,7 +40,7 @@
             @endif
 
             @if($borrowing->status === 'Dipinjam' && $borrowing->perpanjangan_diajukan && $borrowing->status_perpanjangan === 'Pending')
-                <form action="{{ route('admin.borrowings.approve-extension', $borrowing->id) }}" method="POST" onsubmit="return confirm('Setujui permohonan perpanjangan jadwal pengembalian ini?')" class="w-full sm:w-auto">
+                <form action="{{ route('admin.borrowings.approve-extension', $borrowing) }}" method="POST" onsubmit="return confirm('Setujui permohonan perpanjangan jadwal pengembalian ini?')" class="w-full sm:w-auto">
                     @csrf
                     <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer text-center">
                         <i class="fa-solid fa-check mr-1"></i> Setujui Perpanjangan
@@ -66,7 +66,7 @@
             Customer mengajukan perpanjangan tanggal pengembalian dari semula tanggal <strong>{{ $borrowing->end_date->format('d F Y') }}</strong> menjadi tanggal <strong>{{ $borrowing->extended_end_date ? $borrowing->extended_end_date->format('d F Y') : '-' }}</strong>.
         </p>
         <div class="pt-1 flex justify-end">
-            <form action="{{ route('admin.borrowings.approve-extension', $borrowing->id) }}" method="POST" onsubmit="return confirm('Setujui perpanjangan jadwal pengembalian alat ini?')" class="w-full sm:w-auto">
+            <form action="{{ route('admin.borrowings.approve-extension', $borrowing) }}" method="POST" onsubmit="return confirm('Setujui perpanjangan jadwal pengembalian alat ini?')" class="w-full sm:w-auto">
                 @csrf
                 <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer text-center">
                     <i class="fa-solid fa-check-double mr-1.5"></i> Setujui Perpanjangan Pengembalian

@@ -21,7 +21,7 @@
                 <i class="fa-solid fa-arrow-left text-[11px] text-slate-400"></i> Kembali
             </a>
             @if($sample->certificate)
-                <a href="{{ route('customer.certificates.download', $sample->certificate->id) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors">
+                <a href="{{ route('customer.certificates.download', $sample->certificate) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors">
                     <i class="fa-solid fa-file-pdf mr-2"></i> Unduh COA Resmi (PDF)
                 </a>
             @endif
@@ -31,7 +31,7 @@
                 </a>
             @endif
             @if($sample->payments->first() && $sample->payments->first()->invoice)
-                <a href="{{ route('customer.invoices.download', $sample->payments->first()->invoice->id) }}" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center transition-colors">
+                <a href="{{ route('customer.invoices.download', $sample->payments->first()->invoice) }}" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center transition-colors">
                     <i class="fa-solid fa-file-invoice mr-2"></i> Unduh Invoice
                 </a>
             @endif
@@ -110,7 +110,7 @@
 
                 <div class="flex flex-wrap items-center gap-3">
                     @if($invoice)
-                        <a href="{{ route('customer.invoices.download', $invoice->id) }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-2">
+                        <a href="{{ route('customer.invoices.download', $invoice) }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-2">
                             <i class="fa-solid fa-file-pdf text-rose-500"></i>
                             <span>Unduh Invoice (PDF)</span>
                         </a>

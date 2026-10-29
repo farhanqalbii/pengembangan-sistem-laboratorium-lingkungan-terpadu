@@ -25,7 +25,12 @@
         </div>
     @endif
 
-    @if($errors->any())
+    @if(session('error'))
+        <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+            <span>{{ session('error') }}</span>
+        </div>
+    @elseif($errors->any())
         <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-center gap-2">
             <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
             <span>{{ $errors->first() }}</span>

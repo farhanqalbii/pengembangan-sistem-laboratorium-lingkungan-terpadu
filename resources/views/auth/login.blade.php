@@ -40,31 +40,19 @@
 
             <!-- Tiga Fitur -->
             <div class="space-y-2.5 pt-2">
-                <div class="flex items-center gap-2.5 text-xs text-emerald-50">
-                    <div class="w-6 h-6 rounded-md bg-white/20 backdrop-blur-sm text-emerald-200 flex items-center justify-center shrink-0 border border-white/15">
-                        <i class="fa-solid fa-flask-vial text-[10px]"></i>
-                    </div>
+                <div class="flex items-center gap-2.5 text-xs text-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs"></span>
                     <span class="drop-shadow-sm">Pengujian Parameter Lingkungan</span>
                 </div>
-                <div class="flex items-center gap-2.5 text-xs text-emerald-50">
-                    <div class="w-6 h-6 rounded-md bg-white/20 backdrop-blur-sm text-emerald-200 flex items-center justify-center shrink-0 border border-white/15">
-                        <i class="fa-solid fa-microscope text-[10px]"></i>
-                    </div>
+                <div class="flex items-center gap-2.5 text-xs text-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs"></span>
                     <span class="drop-shadow-sm">Peminjaman Instrumen Laboratorium</span>
                 </div>
-                <div class="flex items-center gap-2.5 text-xs text-emerald-50">
-                    <div class="w-6 h-6 rounded-md bg-white/20 backdrop-blur-sm text-emerald-200 flex items-center justify-center shrink-0 border border-white/15">
-                        <i class="fa-solid fa-file-shield text-[10px]"></i>
-                    </div>
+                <div class="flex items-center gap-2.5 text-xs text-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs"></span>
                     <span class="drop-shadow-sm">Sertifikat Hasil Uji (LHU) Digital</span>
                 </div>
             </div>
-        </div>
-
-        <!-- Bagian Bawah: Footer UPTD -->
-        <div class="pt-3 border-t border-white/20 flex items-center gap-2 text-[11px] text-emerald-200/95 relative z-10">
-            <i class="fa-solid fa-shield-halved text-emerald-300 text-xs"></i>
-            <span>UPTD Laboratorium Lingkungan Hidup</span>
         </div>
     </div>
 
@@ -96,8 +84,8 @@
 
             <!-- Email Input -->
             <div>
-                <label for="email" class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                    <i class="fa-regular fa-envelope text-emerald-600 text-xs"></i> Alamat Email
+                <label for="email" class="block text-xs font-semibold text-slate-700 mb-1">
+                    Alamat Email
                 </label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
                     placeholder="nama@email.com"
@@ -106,8 +94,8 @@
 
             <!-- Password Input -->
             <div>
-                <label for="password" class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                    <i class="fa-solid fa-lock text-emerald-600 text-xs"></i> Kata Sandi
+                <label for="password" class="block text-xs font-semibold text-slate-700 mb-1">
+                    Kata Sandi
                 </label>
                 <div class="relative">
                     <input type="password" id="password" name="password" required
@@ -145,9 +133,8 @@
         <div class="mt-4 pt-3.5 border-t border-slate-100 text-center space-y-1.5">
             <p class="text-xs text-slate-500">Belum memiliki akun Customer?</p>
             <div>
-                <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors">
-                    <i class="fa-solid fa-user-plus text-xs"></i>
-                    <span>Daftar Akun Customer Baru &rarr;</span>
+                <a href="{{ route('register') }}" class="inline-block text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors">
+                    Daftar Akun Customer Baru
                 </a>
             </div>
         </div>

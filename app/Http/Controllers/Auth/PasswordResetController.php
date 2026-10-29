@@ -68,9 +68,62 @@ class PasswordResetController extends Controller
         ]);
     }
 
-    public function showResetForm(Request $request, string $token): View
+    public function showResetForm(Request $request, string $token): View|RedirectResponse
     {
         $email = $request->query('email');
+
+        if (! $email) {
+            $msg = 'Tautan pemulihan kata sandi tidak valid atau tidak lengkap. Silakan ajukan permohonan baru.';
+
+            return redirect()->route('password.request')
+                ->with('error', $msg)
+                ->withErrors(['email' => $msg]);
+        }
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $email)
+            ->first();
+
+        if (! $record) {
+            $msg = 'Tautan pemulihan kata sandi tidak valid atau telah digunakan. Silakan ajukan permohonan baru.';
+
+            return redirect()->route('password.request')
+                ->with('error', $msg)
+                ->withErrors(['email' => $msg]);
+        }
+
+        // Pastikan token cocok
+        if (! Hash::check($token, $record->token)) {
+            $msg = 'Tautan pemulihan kata sandi tidak valid atau telah diganti dengan permintaan baru. Silakan gunakan tautan terbaru atau ajukan kembali.';
+
+            return redirect()->route('password.request')
+                ->with('error', $msg)
+                ->withErrors(['email' => $msg]);
+        }
+
+        // Periksa masa berlaku token (60 menit)
+        if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+            // Hapus hanya record yang terbukti kedaluwarsa dan cocok ini
+            DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->where('created_at', $record->created_at)
+                ->delete();
+
+            $msg = 'Tautan pemulihan kata sandi telah kedaluwarsa (masa berlaku 60 menit). Silakan ajukan permohonan baru.';
+
+            return redirect()->route('password.request')
+                ->with('error', $msg)
+                ->withErrors(['email' => $msg]);
+        }
+
+        $user = User::where('email', $email)->first();
+        if (! $user) {
+            $msg = 'Akun pengguna tidak ditemukan. Silakan ajukan permohonan baru.';
+
+            return redirect()->route('password.request')
+                ->with('error', $msg)
+                ->withErrors(['email' => $msg]);
+        }
 
         return view('auth.reset-password', [
             'token' => $token,
@@ -89,44 +142,52 @@ class PasswordResetController extends Controller
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        $record = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->first();
+        return DB::transaction(function () use ($request) {
+            $record = DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->lockForUpdate()
+                ->first();
 
-        if (! $record) {
-            return back()->withErrors(['email' => 'Permintaan reset kata sandi tidak valid atau telah kedaluwarsa.'])->withInput();
-        }
+            if (! $record) {
+                return back()->withErrors(['email' => 'Permintaan reset kata sandi tidak valid atau telah kedaluwarsa.'])->withInput();
+            }
 
-        // Check if token expired (valid for 60 minutes)
-        if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+            // Validasi kecocokan token terlebih dahulu agar tidak menghapus token baru pengguna
+            if (! Hash::check($request->token, $record->token)) {
+                return back()->withErrors(['email' => 'Token reset kata sandi tidak cocok.'])->withInput();
+            }
+
+            // Periksa kedaluwarsa token (60 menit)
+            if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+                DB::table('password_reset_tokens')
+                    ->where('email', $request->email)
+                    ->where('created_at', $record->created_at)
+                    ->delete();
+
+                return back()->withErrors(['email' => 'Tautan reset kata sandi telah kedaluwarsa. Silakan ajukan kembali.'])->withInput();
+            }
+
+            $user = User::where('email', $request->email)->lockForUpdate()->first();
+            if (! $user) {
+                return back()->withErrors(['email' => 'Pengguna tidak ditemukan.'])->withInput();
+            }
+
+            $user->forceFill([
+                'password' => Hash::make($request->password),
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            // Token sekali pakai: hapus setelah sukses diubah
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-            return back()->withErrors(['email' => 'Tautan reset kata sandi telah kedaluwarsa. Silakan ajukan kembali.'])->withInput();
-        }
+            LogAktivitas::record(
+                'Reset Password Berhasil',
+                'Auth',
+                "Kata sandi akun {$user->name} ({$user->email}) berhasil diperbarui.",
+                $user->id
+            );
 
-        if (! Hash::check($request->token, $record->token)) {
-            return back()->withErrors(['email' => 'Token reset kata sandi tidak cocok.'])->withInput();
-        }
-
-        $user = User::where('email', $request->email)->first();
-        if (! $user) {
-            return back()->withErrors(['email' => 'Pengguna tidak ditemukan.'])->withInput();
-        }
-
-        $user->forceFill([
-            'password' => Hash::make($request->password),
-            'remember_token' => Str::random(60),
-        ])->save();
-
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-
-        LogAktivitas::record(
-            'Reset Password Berhasil',
-            'Auth',
-            "Kata sandi akun {$user->name} ({$user->email}) berhasil diperbarui.",
-            $user->id
-        );
-
-        return redirect()->route('login')->with('success', 'Kata sandi Anda berhasil diperbarui! Silakan masuk dengan kata sandi baru.');
+            return redirect()->route('login')->with('success', 'Kata sandi Anda berhasil diperbarui! Silakan masuk dengan kata sandi baru.');
+        });
     }
 }

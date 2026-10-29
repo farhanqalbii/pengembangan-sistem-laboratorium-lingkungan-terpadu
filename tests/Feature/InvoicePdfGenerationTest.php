@@ -182,7 +182,7 @@ class InvoicePdfGenerationTest extends TestCase
         ]);
 
         $borrowing = Peminjaman::create([
-            'borrow_code' => 'BRW-20261021-001',
+            'borrow_code' => 'BRW-'.uniqid(),
             'customer_id' => $this->customer->id,
             'start_date' => now()->toDateString(),
             'end_date' => now()->addDays(3)->toDateString(),
@@ -198,7 +198,7 @@ class InvoicePdfGenerationTest extends TestCase
         ]);
 
         $payment = Pembayaran::create([
-            'payment_code' => 'PAY-20261021-0003',
+            'payment_code' => 'PAY-'.uniqid(),
             'customer_id' => $this->customer->id,
             'borrowing_id' => $borrowing->id,
             'type' => 'Deposit Peminjaman',
@@ -210,7 +210,7 @@ class InvoicePdfGenerationTest extends TestCase
         ]);
 
         $invoice = Invoice::create([
-            'invoice_number' => 'INV/2026/10/0003',
+            'invoice_number' => 'INV/TEST/DEP/'.uniqid(),
             'customer_id' => $this->customer->id,
             'payment_id' => $payment->id,
             'subtotal' => 500000,
@@ -229,7 +229,7 @@ class InvoicePdfGenerationTest extends TestCase
     public function test_borrowing_fine_invoice_pdf_download(): void
     {
         $borrowing = Peminjaman::create([
-            'borrow_code' => 'BRW-20261021-002',
+            'borrow_code' => 'BRW-'.uniqid(),
             'customer_id' => $this->customer->id,
             'start_date' => now()->subDays(5)->toDateString(),
             'end_date' => now()->subDays(2)->toDateString(),
@@ -242,7 +242,7 @@ class InvoicePdfGenerationTest extends TestCase
         ]);
 
         $payment = Pembayaran::create([
-            'payment_code' => 'PAY-20261021-0004',
+            'payment_code' => 'PAY-'.uniqid(),
             'customer_id' => $this->customer->id,
             'borrowing_id' => $borrowing->id,
             'type' => 'Denda Peminjaman',
@@ -252,7 +252,7 @@ class InvoicePdfGenerationTest extends TestCase
         ]);
 
         $invoice = Invoice::create([
-            'invoice_number' => 'INV/2026/10/0004',
+            'invoice_number' => 'INV/TEST/FINE/'.uniqid(),
             'customer_id' => $this->customer->id,
             'payment_id' => $payment->id,
             'subtotal' => 0,

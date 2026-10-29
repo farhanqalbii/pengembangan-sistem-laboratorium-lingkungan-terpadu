@@ -64,11 +64,11 @@
                                 </span>
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center space-x-1.5 whitespace-nowrap">
-                                <a href="{{ route('customer.samples.show', $sample->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-all inline-flex items-center">
+                                <a href="{{ route('customer.samples.show', $sample) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-all inline-flex items-center">
                                     <i class="fa-solid fa-eye mr-1 text-[11px]"></i> Detail
                                 </a>
                                 @if($sample->certificate)
-                                    <a href="{{ route('customer.certificates.download', $sample->certificate->id) }}" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs shadow-sm transition-all inline-flex items-center">
+                                    <a href="{{ route('customer.certificates.download', $sample->certificate) }}" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs shadow-sm transition-all inline-flex items-center">
                                         <i class="fa-solid fa-file-pdf mr-1 text-[11px]"></i> COA PDF
                                     </a>
                                 @endif

@@ -10,8 +10,15 @@ use Illuminate\Http\Request;
 
 class ParameterController extends Controller
 {
+    protected function authorizeAdmin(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Fitur master parameter hanya dapat diakses oleh Administrator.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeAdmin();
+
         $query = Parameter::with('qualityStandard');
 
         if ($request->filled('category')) {
@@ -34,11 +41,15 @@ class ParameterController extends Controller
 
     public function create()
     {
+        $this->authorizeAdmin();
+
         return view('admin.parameters.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeAdmin();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string'],
@@ -76,6 +87,8 @@ class ParameterController extends Controller
 
     public function edit(Parameter $parameter)
     {
+        $this->authorizeAdmin();
+
         $parameter->load('qualityStandard');
 
         return view('admin.parameters.edit', compact('parameter'));
@@ -83,6 +96,8 @@ class ParameterController extends Controller
 
     public function update(Request $request, Parameter $parameter)
     {
+        $this->authorizeAdmin();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string'],
@@ -130,6 +145,8 @@ class ParameterController extends Controller
 
     public function destroy(Parameter $parameter)
     {
+        $this->authorizeAdmin();
+
         $name = $parameter->name;
         $parameter->delete();
 

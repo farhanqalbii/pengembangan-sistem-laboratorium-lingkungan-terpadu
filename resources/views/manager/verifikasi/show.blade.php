@@ -96,7 +96,7 @@
                     <i class="fa-solid fa-rotate-left mr-1.5"></i> Tolak / Minta Revisi
                 </button>
 
-                <form action="{{ route('manager.verifications.approve', $sample->id) }}" method="POST" x-data="{ submitting: false }" @submit="submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="w-full sm:w-auto">
+                <form action="{{ route('manager.verifications.approve', $sample) }}" method="POST" x-data="{ submitting: false }" @submit="submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="w-full sm:w-auto">
                     @csrf
                     <button type="submit" 
                         :disabled="submitting"
@@ -144,7 +144,7 @@
 
                 @if($sample->certificate)
                     <div class="shrink-0 w-full sm:w-auto">
-                        <a href="{{ route('customer.certificates.download', $sample->certificate->id) }}" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/40 transition-all flex items-center justify-center gap-2">
+                        <a href="{{ route('customer.certificates.download', $sample->certificate) }}" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/40 transition-all flex items-center justify-center gap-2">
                             <i class="fa-solid fa-file-pdf text-sm"></i> Unduh Dokumen COA (PDF)
                         </a>
                     </div>
@@ -208,7 +208,7 @@
                 </div>
                 <p class="text-xs text-slate-500">Berikan catatan perbaikan secara spesifik untuk staf teknis / analis laboratorium.</p>
 
-                <form action="{{ route('manager.verifications.reject', $sample->id) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="space-y-4">
+                <form action="{{ route('manager.verifications.reject', $sample) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Revisi <span class="text-rose-500">*</span></label>

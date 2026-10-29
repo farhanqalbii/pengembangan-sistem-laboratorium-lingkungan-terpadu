@@ -51,14 +51,18 @@
         </div>
     </div>
 
-    <!-- Pending Technical Verifications Table -->
+    <!-- Pending Technical Verifications Table & Cards -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden anim-fade-up anim-delay-2 card-hover">
-        <div class="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <h3 class="text-sm font-bold text-slate-800">Antrean Verifikasi Teknis & Penerbitan COA</h3>
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div>
+                <h3 class="text-sm font-bold text-slate-800">Antrean Verifikasi Teknis & Penerbitan COA</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Sampel dengan hasil uji selesai yang menunggu otorisasi Manajer Lab</p>
+            </div>
             <a href="{{ route('manager.verifications.index') }}" class="text-xs font-semibold text-emerald-600 hover:underline">Lihat Semua &rarr;</a>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (Hidden on mobile) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[720px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
@@ -73,8 +77,13 @@
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse($pendingVerifications as $s)
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 sm:px-5 py-3 font-mono font-bold text-emerald-600 bg-emerald-50/50">
-                                {{ $s->sample_code }}
+                            <td class="px-4 sm:px-5 py-3 whitespace-nowrap">
+                                <a href="{{ route('manager.verifications.show', $s) }}" 
+                                   class="font-mono font-bold text-xs text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 hover:underline transition-colors inline-flex items-center gap-1.5"
+                                   title="Verifikasi Sampel {{ $s->sample_code }}">
+                                    <i class="fa-solid fa-flask text-emerald-500/70 text-[11px]"></i>
+                                    <span>{{ $s->sample_code }}</span>
+                                </a>
                             </td>
                             <td class="px-4 sm:px-5 py-3">
                                 <div class="font-bold text-slate-800">{{ $s->customer->company_name ?? $s->customer->name }}</div>
@@ -102,7 +111,7 @@
                                 @endif
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center space-x-2">
-                                <a href="{{ route('manager.verifications.show', $s->id) }}" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm text-xs">
+                                <a href="{{ route('manager.verifications.show', $s) }}" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm text-xs">
                                     Review & Approval <i class="fa-solid fa-user-check ml-1"></i>
                                 </a>
                             </td>
@@ -115,9 +124,48 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Card View (Visible only on mobile) -->
+        <div class="block md:hidden p-4 space-y-3.5 divide-y divide-slate-100">
+            @forelse($pendingVerifications as $s)
+                <div class="pt-3.5 first:pt-0 space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono font-bold text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            {{ $s->sample_code }}
+                        </span>
+                        @php
+                            $nonCompliant = $s->sampleParameters->where('compliance_status', 'Tidak Memenuhi')->count();
+                        @endphp
+                        @if($nonCompliant > 0)
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                                {{ $nonCompliant }} Tidak Memenuhi BM
+                            </span>
+                        @else
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                Sesuai Baku Mutu
+                            </span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">{{ $s->customer->company_name ?? $s->customer->name }}</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">{{ $s->sample_type }} &bull; {{ $s->sampleParameters->count() }} Parameter</p>
+                    </div>
+
+                    <a href="{{ route('manager.verifications.show', $s) }}" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-xs text-xs flex items-center justify-center gap-1.5 transition-colors">
+                        <span>Review & Approval Teknis</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            @empty
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    Semua sampel telah diverifikasi. Antrean bersih!
+                </div>
+            @endforelse
+        </div>
     </div>
 
-    <!-- Recent Published COA Certificates Table -->
+    <!-- Recent Published COA Certificates Table & Cards -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden anim-fade-up anim-delay-3 card-hover">
         <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div class="flex items-center space-x-3">
@@ -134,7 +182,8 @@
             </span>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View (Hidden on mobile) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[700px]">
                 <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
@@ -168,7 +217,7 @@
                                 {{ $cert->issued_at ? $cert->issued_at->format('d M Y H:i') : $cert->created_at->format('d M Y H:i') }} WIB
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center">
-                                <a href="{{ route('customer.certificates.download', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all gap-1.5">
+                                <a href="{{ route('customer.certificates.download', $cert) }}" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all gap-1.5">
                                     <i class="fa-solid fa-file-pdf"></i> Unduh PDF
                                 </a>
                             </td>
@@ -180,6 +229,36 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Card View (Visible only on mobile) -->
+        <div class="block md:hidden p-4 space-y-3.5 divide-y divide-slate-100">
+            @forelse($recentCertificates as $cert)
+                <div class="pt-3.5 first:pt-0 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono font-bold text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            {{ $cert->certificate_number }}
+                        </span>
+                        <span class="text-[10px] text-slate-400">
+                            {{ $cert->issued_at ? $cert->issued_at->format('d/m/Y') : $cert->created_at->format('d/m/Y') }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">{{ $cert->customer?->company_name ?? $cert->customer?->name ?? '-' }}</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Sampel: {{ $cert->sample?->sample_code ?? '-' }} ({{ $cert->sample?->sample_type ?? '-' }})</p>
+                    </div>
+
+                    <a href="{{ route('customer.certificates.download', $cert) }}" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-xs text-xs flex items-center justify-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Unduh Sertifikat (PDF)</span>
+                    </a>
+                </div>
+            @empty
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    Belum ada sertifikat COA yang diterbitkan.
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

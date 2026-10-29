@@ -199,8 +199,8 @@
                 </span>
             </div>
             <div class="flex items-center gap-4 text-[11px] text-slate-300">
-                <span class="hidden md:inline"><i class="fa-solid fa-clock text-emerald-400 mr-1"></i> Jam Layanan: 08:00 - 15:30 WIB</span>
-                <a href="#kontak" class="hover:text-emerald-300 transition-colors"><i class="fa-solid fa-location-dot text-cyan-400 mr-1"></i> Kontak & Lokasi</a>
+                <span class="hidden md:inline">Jam Layanan: 08:00 - 15:30 WIB</span>
+                <a href="#kontak" class="hover:text-emerald-300 transition-colors">Kontak & Lokasi</a>
             </div>
         </div>
     </div>
@@ -245,15 +245,13 @@
                             };
                         @endphp
                         <a href="{{ $dashRoute }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl shadow-md btn-glow transition-all">
-                            <i class="fa-solid fa-gauge-high text-emerald-100"></i>
                             <span>Dashboard ({{ $roleLabel }})</span>
                         </a>
                     @else
                         <a href="{{ route('login') }}" class="px-3.5 py-2 text-xs font-bold text-brand-navy hover:text-emerald-700 transition-colors">
                             Masuk
                         </a>
-                        <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl shadow-md btn-glow transition-all">
-                            <i class="fa-solid fa-user-plus text-emerald-100"></i>
+                        <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl shadow-md btn-glow transition-all">
                             <span>Daftar Akun</span>
                         </a>
                     @endauth
@@ -320,11 +318,11 @@
                 <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-1">
                     @auth
                         <a href="{{ $dashRoute }}" class="px-6 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-700/20 transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-gauge-high"></i> Buka Dashboard ({{ $roleLabel }})
+                            <span>Buka Dashboard ({{ $roleLabel }})</span>
                         </a>
                     @else
                         <a href="{{ route('register') }}" class="px-6 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-700/20 hover:shadow-emerald-700/30 transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-flask"></i> Ajukan Pengujian Sampel
+                            <span>Ajukan Pengujian Sampel</span>
                         </a>
                     @endauth
 
@@ -370,14 +368,14 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                     <div class="lg:col-span-5 space-y-3 reveal-on-scroll reveal-left delay-100">
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
-                            <i class="fa-solid fa-magnifying-glass"></i> Cek Status Terkini
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
+                            Cek Status Terkini
                         </div>
                         <h2 class="text-xl sm:text-2xl font-black text-white">Lacak Pengujian Sampel Anda</h2>
                         <p class="text-xs text-slate-300 leading-relaxed">
                             Ketik kode sampel yang tertera pada bukti serah terima Anda, atau klik contoh: 
                             <button type="button" @click="trackCode = 'SMP-20260901-0001'" class="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-300 hover:text-white underline underline-offset-4 decoration-emerald-500/70 hover:decoration-white bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-500/40 cursor-pointer transition-all shadow-xs" title="Klik untuk mencoba contoh kode">
-                                <i class="fa-solid fa-arrow-pointer text-[10px]"></i> SMP-20260901-0001
+                                SMP-20260901-0001
                             </button>
                             untuk simulasi status instan.
                         </p>
@@ -405,15 +403,12 @@
                                 })
                         " class="flex flex-col sm:flex-row gap-2">
                             <div class="relative flex-grow">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                                    <i class="fa-solid fa-barcode"></i>
-                                </span>
                                 <input 
                                     type="text" 
                                     x-model="trackCode" 
                                     @input="trackCode = trackCode.toUpperCase()"
                                     placeholder="Masukkan Kode Sampel (contoh: SMP-20260901-0001)" 
-                                    class="w-full bg-slate-800/90 text-white placeholder-slate-400 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-xs font-mono uppercase tracking-wider focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                                    class="w-full bg-slate-800/90 text-white placeholder-slate-400 border border-slate-700 rounded-xl px-4 py-3 text-xs font-mono uppercase tracking-wider focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
                                     required
                                 >
                             </div>
@@ -512,9 +507,9 @@
                         Analisis parameter fisika dan kimia: BOD5, COD, TSS, Minyak & Lemak, pH, Amonia, serta kandungan Logam Berat (Pb, Cd, Hg, Cu) sesuai Permen LHK.
                     </p>
                     <ul class="text-[11px] text-slate-500 space-y-1.5 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> Air Limbah Domestik & Industri</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> Air Permukaan (Sungai & Danau)</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> Air Bersih & Air Minum Higiene</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Air Limbah Domestik & Industri</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Air Permukaan (Sungai & Danau)</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Air Bersih & Air Minum Higiene</li>
                     </ul>
                 </div>
 
@@ -528,9 +523,9 @@
                         Pemantauan kualitas udara ambien 24 jam dan uji emisi sumber tidak bergerak (cerobong pabrik/genset): SO2, NO2, CO, TSP/PM2.5, serta tingkat kebisingan.
                     </p>
                     <ul class="text-[11px] text-slate-500 space-y-1.5 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-600"></i> Udara Ambien Kawasan Industri</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-600"></i> Emisi Cerobong Industri & Boiler</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-600"></i> Uji Kebisingan & Getaran Lingkungan</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span> Udara Ambien Kawasan Industri</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span> Emisi Cerobong Industri & Boiler</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span> Uji Kebisingan & Getaran Lingkungan</li>
                     </ul>
                 </div>
 
@@ -544,9 +539,9 @@
                         Karakterisasi sedimen dan limbah padat: Uji TCLP (Toxicity Characteristic Leaching Procedure), Total Logam Berat, pH tanah, dan kesuburan tanah.
                     </p>
                     <ul class="text-[11px] text-slate-500 space-y-1.5 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-600"></i> Uji Toksisitas TCLP Limbah B3</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-600"></i> Analisis Kesuburan & Sifat Tanah</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-600"></i> Pemantauan Sedimen Muara & Pantai</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span> Uji Toksisitas TCLP Limbah B3</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span> Analisis Kesuburan & Sifat Tanah</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span> Pemantauan Sedimen Muara & Pantai</li>
                     </ul>
                 </div>
 
@@ -560,9 +555,9 @@
                         Fasilitas penyewaan instrumen ukur lapangan dan lab analitik untuk kegiatan riset universitas, instansi pemerintah, dan praktisi lingkungan.
                     </p>
                     <ul class="text-[11px] text-slate-500 space-y-1.5 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-teal-600"></i> Seluruh Alat Terkalibrasi Sah</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-teal-600"></i> Label QR Code & Tracking Status</li>
-                        <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-teal-600"></i> Tarif Resmi & Transparan</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span> Seluruh Alat Terkalibrasi Sah</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span> Label QR Code & Tracking Status</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span> Tarif Resmi & Transparan</li>
                     </ul>
                 </div>
 
@@ -745,7 +740,6 @@
                             </h3>
 
                             <p class="text-xs text-slate-500 flex items-center gap-1.5">
-                                <i class="fa-solid fa-tag text-slate-400"></i>
                                 <span>Merk / Brand: <strong class="text-slate-700">{{ $eq->brand ?: 'Standar Industri' }}</strong></span>
                             </p>
 
@@ -771,10 +765,10 @@
 
                         <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                             <a href="{{ route('equipment.detail', $eq->code) }}" class="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-circle-info"></i> Detail & QR
+                                Detail & QR
                             </a>
-                            <a href="{{ route('customer.borrowings.create') }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
-                                <i class="fa-solid fa-calendar-plus"></i> Pinjam Alat
+                            <a href="{{ route('customer.borrowings.create') }}" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center">
+                                Pinjam Alat
                             </a>
                         </div>
                     </div>
@@ -904,15 +898,13 @@
 
                 <div class="lg:col-span-6 reveal-on-scroll reveal-right delay-150">
                     <div class="p-8 rounded-3xl bg-slate-800/90 border border-slate-700/90 space-y-6 shadow-2xl">
-                        <h3 class="text-base font-bold text-white flex items-center gap-2 border-b border-slate-700 pb-3">
-                            <i class="fa-solid fa-handshake-angle text-emerald-400"></i> Komitmen Pelayanan Prima
+                        <h3 class="text-base font-bold text-white border-b border-slate-700 pb-3">
+                            Komitmen Pelayanan Prima
                         </h3>
 
                         <div class="space-y-4 text-xs">
                             <div class="flex items-start gap-3">
-                                <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 text-[11px] mt-0.5">
-                                    <i class="fa-solid fa-check"></i>
-                                </div>
+                                <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">01</span>
                                 <div>
                                     <strong class="text-white block font-semibold">Kecepatan & Ketepatan Penerbitan COA</strong>
                                     <span class="text-slate-400">Rata-rata waktu penyelesaian uji sesuai batas waktu baku mutu resmi.</span>
@@ -920,9 +912,7 @@
                             </div>
 
                             <div class="flex items-start gap-3">
-                                <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 text-[11px] mt-0.5">
-                                    <i class="fa-solid fa-check"></i>
-                                </div>
+                                <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">02</span>
                                 <div>
                                     <strong class="text-white block font-semibold">Validasi Digital Anti Pemalsuan</strong>
                                     <span class="text-slate-400">Sertifikat hasil uji dilengkapi QR Code dinamis untuk verifikasi keaslian dokumen secara online kapan pun.</span>
@@ -930,9 +920,7 @@
                             </div>
 
                             <div class="flex items-start gap-3">
-                                <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 text-[11px] mt-0.5">
-                                    <i class="fa-solid fa-check"></i>
-                                </div>
+                                <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">03</span>
                                 <div>
                                     <strong class="text-white block font-semibold">Penyimpanan Arsip Digital Terenkripsi</strong>
                                     <span class="text-slate-400">Riwayat pengujian pelanggan tersimpan aman di cloud server dengan pencatatan audit log aktivitas.</span>
@@ -1030,23 +1018,23 @@
 
                 <!-- Col 2: Navigasi Cepat -->
                 <div class="md:col-span-3 space-y-3.5 reveal-on-scroll delay-200">
-                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-compass text-emerald-400"></i> Navigasi Utama
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
+                        Navigasi Utama
                     </h4>
                     <ul class="text-xs text-slate-300 space-y-2.5">
-                        <li><a href="#layanan" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-emerald-500"></i> Layanan Pengujian</a></li>
-                        <li><a href="#parameter" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-emerald-500"></i> Katalog Parameter SNI</a></li>
-                        <li><a href="#peminjaman" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-emerald-500"></i> Peminjaman Alat Lab</a></li>
-                        <li><a href="#alur" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-emerald-500"></i> Alur 4 Langkah Uji</a></li>
-                        <li><a href="#tracking" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-emerald-500"></i> Cek Status Sampel</a></li>
+                        <li><a href="#layanan" class="hover:text-emerald-300 transition-colors">Layanan Pengujian</a></li>
+                        <li><a href="#parameter" class="hover:text-emerald-300 transition-colors">Katalog Parameter SNI</a></li>
+                        <li><a href="#peminjaman" class="hover:text-emerald-300 transition-colors">Peminjaman Alat Lab</a></li>
+                        <li><a href="#alur" class="hover:text-emerald-300 transition-colors">Alur 4 Langkah Uji</a></li>
+                        <li><a href="#tracking" class="hover:text-emerald-300 transition-colors">Cek Status Sampel</a></li>
                         <li><a href="{{ route('equipment.scan') }}" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-qrcode text-[10px] text-emerald-400"></i> Scanner QR Instrumen</a></li>
                     </ul>
                 </div>
 
                 <!-- Col 3: Informasi Kontak -->
                 <div class="md:col-span-4 space-y-3.5 reveal-on-scroll delay-300">
-                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-building-circle-check text-emerald-400"></i> Alamat & Kontak Layanan
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
+                        Alamat & Kontak Layanan
                     </h4>
                     <div class="text-xs text-slate-300 space-y-3">
                         <p class="flex items-start gap-2.5">
@@ -1156,31 +1144,31 @@
                     </div>
                     <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 text-slate-700 leading-relaxed space-y-1">
                         <p class="font-bold text-emerald-800 text-[11px]">UPTD Laboratorium Lingkungan</p>
-                        <p>Halo! 👋 Ada yang bisa kami bantu seputar uji sampel baku mutu air, udara, tanah atau peminjaman alat lab?</p>
+                        <p>Halo, selamat datang. Ada yang bisa kami bantu seputar uji sampel baku mutu air, udara, tanah, atau peminjaman alat lab?</p>
                         <p class="text-[9px] text-slate-400 text-right mt-1" x-text="currentTime"></p>
                     </div>
                 </div>
 
                 <!-- Quick Prompt Chips -->
                 <div class="pt-2">
-                    <p class="text-[10px] text-slate-500 font-medium mb-1.5 flex items-center gap-1">
-                        <i class="fa-solid fa-bolt text-amber-500 text-[10px]"></i> Pertanyaan Cepat:
+                    <p class="text-[10px] text-slate-500 font-medium mb-1.5">
+                        Pertanyaan Cepat:
                     </p>
                     <div class="flex flex-wrap gap-1.5">
                         <button type="button" 
                                 @click="setQuickMessage('Halo Admin, saya ingin konsultasi mengenai biaya & prosedur pengujian sampel air/udara.')"
-                                class="text-[11px] bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 px-2.5 py-1 rounded-full transition-all text-left shadow-xs">
-                            🧪 Tanya Uji Sampel
+                                class="text-[11px] bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 px-3 py-1 rounded-full transition-all text-left shadow-xs flex items-center">
+                            <span>Tanya Uji Sampel</span>
                         </button>
                         <button type="button" 
                                 @click="setQuickMessage('Halo Admin, saya ingin menanyakan ketersediaan dan syarat peminjaman alat laboratorium.')"
-                                class="text-[11px] bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 px-2.5 py-1 rounded-full transition-all text-left shadow-xs">
-                            🔬 Peminjaman Alat
+                                class="text-[11px] bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 px-3 py-1 rounded-full transition-all text-left shadow-xs flex items-center">
+                            <span>Peminjaman Alat</span>
                         </button>
                         <button type="button" 
                                 @click="setQuickMessage('Halo Admin, saya ingin cek status progres sampel yang sedang diuji.')"
-                                class="text-[11px] bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 px-2.5 py-1 rounded-full transition-all text-left shadow-xs">
-                            📋 Cek Status Sampel
+                                class="text-[11px] bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 px-3 py-1 rounded-full transition-all text-left shadow-xs flex items-center">
+                            <span>Cek Status Sampel</span>
                         </button>
                     </div>
                 </div>

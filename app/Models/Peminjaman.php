@@ -96,4 +96,16 @@ class Peminjaman extends Model
             default => 'bg-gray-100 text-gray-800 border-gray-300',
         };
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'kode_peminjaman';
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        $field = $field ?? 'kode_peminjaman';
+
+        return $this->where($field, $value)->first();
+    }
 }

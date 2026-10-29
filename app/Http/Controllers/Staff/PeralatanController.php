@@ -15,8 +15,15 @@ use Illuminate\Support\Facades\Storage;
 
 class PeralatanController extends Controller
 {
+    protected function authorizeStaffOrAdmin(): void
+    {
+        abort_unless(auth()->user() && in_array(auth()->user()->role, ['staff', 'admin']), 403, 'Akses ditolak: Hanya Staf dan Administrator yang berwenang mengelola peralatan laboratorium.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeStaffOrAdmin();
+
         $query = Peralatan::query();
 
         if ($request->filled('category')) {
@@ -45,11 +52,15 @@ class PeralatanController extends Controller
 
     public function create()
     {
+        $this->authorizeStaffOrAdmin();
+
         return view('staff.peralatan.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeStaffOrAdmin();
+
         $validated = $request->validate([
             'code' => ['required', 'string', 'unique:peralatan,kode'],
             'name' => ['required', 'string', 'max:255'],
@@ -110,6 +121,8 @@ class PeralatanController extends Controller
 
     public function show(Peralatan $equipment)
     {
+        $this->authorizeStaffOrAdmin();
+
         $equipment->load(['calibrations' => function ($q) {
             $q->latest();
         }, 'serviceHistories' => function ($q) {
@@ -123,11 +136,15 @@ class PeralatanController extends Controller
 
     public function edit(Peralatan $equipment)
     {
+        $this->authorizeStaffOrAdmin();
+
         return view('staff.peralatan.edit', compact('equipment'));
     }
 
     public function update(Request $request, Peralatan $equipment)
     {
+        $this->authorizeStaffOrAdmin();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string'],
@@ -206,6 +223,8 @@ class PeralatanController extends Controller
 
     public function destroy(Peralatan $equipment)
     {
+        $this->authorizeStaffOrAdmin();
+
         $activeBorrowingExists = DetailPeminjaman::where('id_peralatan', $equipment->id)
             ->whereHas('borrowing', function ($q) {
                 $q->whereIn('status', ['Diajukan', 'Disetujui', 'Dipinjam', 'Terlambat']);
@@ -228,6 +247,8 @@ class PeralatanController extends Controller
 
     public function recordCalibration(Request $request, Peralatan $equipment)
     {
+        $this->authorizeStaffOrAdmin();
+
         $result = $request->input('result') ?? $request->input('status');
         $notes = $request->input('notes');
         $noteParts = [];
@@ -272,6 +293,8 @@ class PeralatanController extends Controller
 
     public function recordService(Request $request, Peralatan $equipment)
     {
+        $this->authorizeStaffOrAdmin();
+
         $technician = $request->input('technician') ?? $request->input('technician_name');
         $notes = $request->input('notes') ?? $request->input('description');
         if ($request->filled('cost') && (float) $request->input('cost') > 0) {

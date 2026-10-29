@@ -10,6 +10,8 @@ class LogAktivitasController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Log aktivitas hanya dapat diakses oleh Administrator.');
+
         $query = LogAktivitas::with('user');
 
         if ($request->filled('module')) {

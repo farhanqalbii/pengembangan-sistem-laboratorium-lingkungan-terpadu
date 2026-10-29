@@ -57,7 +57,7 @@ class SendLaboratoryReminders extends Command
                     'user_id' => $borrowing->customer_id,
                     'title' => "Pengingat Pengembalian Alat: {$borrowing->borrow_code}",
                     'message' => "Peminjaman alat {$borrowing->borrow_code} memiliki batas pengembalian pada {$borrowing->end_date->format('d/m/Y')}. Mohon kembalikan tepat waktu untuk menghindari denda keterlambatan.",
-                    'link' => '/customer/borrowings/'.$borrowing->id,
+                    'link' => '/customer/borrowings/'.($borrowing->kode_peminjaman ?? $borrowing->borrow_code),
                 ]);
                 $returnCount++;
             }

@@ -12,6 +12,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user() && auth()->user()->role === 'manager', 403, 'Akses ditolak. Dashboard ini hanya untuk Manajer Laboratorium.');
+
         $pendingVerifications = Sample::where('status', 'Menunggu Verifikasi')
             ->with(['customer', 'sampleParameters.parameter', 'sampleParameters.analyst'])
             ->latest()

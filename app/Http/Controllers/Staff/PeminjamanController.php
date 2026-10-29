@@ -18,21 +18,46 @@ use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
+    protected function authorizeStaff(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isStaff(), 403, 'Akses ditolak: Hanya Staf yang berwenang memproses operasional peminjaman alat.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeStaff();
+
         $query = Peminjaman::with(['customer', 'borrowingDetails.equipment', 'payments']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $borrowings = $query->latest()->paginate(10);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_peminjaman', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%")
+                            ->orWhere('company_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('borrowingDetails.equipment', function ($eq) use ($search) {
+                        $eq->where('nama', 'like', "%{$search}%")
+                            ->orWhere('kode', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $borrowings = $query->latest()->paginate(10)->withQueryString();
 
         return view('staff.peminjaman.index', compact('borrowings'));
     }
 
     public function show(Peminjaman $borrowing)
     {
+        $this->authorizeStaff();
+
         $borrowing->load(['customer', 'borrowingDetails.equipment', 'payments.invoice']);
 
         return view('staff.peminjaman.show', compact('borrowing'));
@@ -40,6 +65,8 @@ class PeminjamanController extends Controller
 
     public function approve(Peminjaman $borrowing)
     {
+        $this->authorizeStaff();
+
         if ($borrowing->status !== 'Diajukan') {
             return back()->with('error', "Pengajuan peminjaman tidak dapat disetujui karena status saat ini adalah '{$borrowing->status}'.")
                 ->withErrors(['status' => "Status peminjaman bukan 'Diajukan'."]);
@@ -111,7 +138,7 @@ class PeminjamanController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Pengajuan Peminjaman Disetujui!',
                     'message' => "Pengajuan peminjaman {$lockedBorrowing->borrow_code} telah diverifikasi dan disetujui staf. Silakan lakukan pembayaran deposit.",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {
@@ -123,6 +150,8 @@ class PeminjamanController extends Controller
 
     public function reject(Request $request, Peminjaman $borrowing)
     {
+        $this->authorizeStaff();
+
         if ($borrowing->status !== 'Diajukan') {
             return back()->with('error', "Pengajuan peminjaman tidak dapat ditolak karena status saat ini adalah '{$borrowing->status}'.")
                 ->withErrors(['status' => "Status peminjaman bukan 'Diajukan'."]);
@@ -153,7 +182,7 @@ class PeminjamanController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Pengajuan Peminjaman Ditolak',
                     'message' => "Pengajuan peminjaman {$lockedBorrowing->borrow_code} ditolak oleh staf. Alasan: {$validated['notes']}",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {
@@ -165,6 +194,8 @@ class PeminjamanController extends Controller
 
     public function processReturn(Request $request, Peminjaman $borrowing)
     {
+        $this->authorizeStaff();
+
         if (! in_array($borrowing->status, ['Dipinjam', 'Terlambat'])) {
             return back()->with('error', "Pengembalian tidak dapat diproses karena status peminjaman saat ini adalah '{$borrowing->status}'.")
                 ->withErrors(['status' => 'Status peminjaman tidak valid untuk pengembalian.']);
@@ -338,7 +369,7 @@ class PeminjamanController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Pengembalian Alat Dicatat',
                     'message' => "Pengembalian alat peminjaman {$lockedBorrowing->borrow_code} telah dicatat oleh staf laboratorium.",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {

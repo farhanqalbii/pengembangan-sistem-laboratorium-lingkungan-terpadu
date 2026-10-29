@@ -93,7 +93,7 @@
                         </div>
                         <div class="mt-3 pt-3 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                             <span class="text-slate-400">Tgl Pengajuan: {{ $sample->request_date ? $sample->request_date->format('d/m/Y') : '-' }}</span>
-                            <a href="{{ route('customer.samples.show', $sample->id) }}" class="font-semibold text-emerald-600 hover:underline">Lacak Status &rarr;</a>
+                            <a href="{{ route('customer.samples.show', $sample) }}" class="font-semibold text-emerald-600 hover:underline">Lacak Status &rarr;</a>
                         </div>
                     </div>
                 @empty
@@ -128,7 +128,7 @@
                         </div>
                         <div class="mt-3 pt-3 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                             <span class="text-slate-400">Deposit: Rp {{ number_format($borrowing->deposit_amount, 0, ',', '.') }}</span>
-                            <a href="{{ route('customer.borrowings.show', $borrowing->id) }}" class="font-semibold text-emerald-600 hover:underline">Detail Peminjaman &rarr;</a>
+                            <a href="{{ route('customer.borrowings.show', $borrowing) }}" class="font-semibold text-emerald-600 hover:underline">Detail Peminjaman &rarr;</a>
                         </div>
                     </div>
                 @empty

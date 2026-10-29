@@ -5,29 +5,55 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
-        <form action="{{ route('staff.equipment.index') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama/kode/merk/lokasi..." class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-4 py-2 text-slate-800 w-full sm:w-64 focus:outline-none focus:border-emerald-500">
-            <select name="category" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 w-full sm:w-auto focus:outline-none focus:border-emerald-500">
-                <option value="">-- Semua Kategori --</option>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                @endforeach
-            </select>
-            <select name="status" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 w-full sm:w-auto focus:outline-none focus:border-emerald-500">
-                <option value="">-- Semua Status --</option>
-                <option value="Tersedia" {{ request('status') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                <option value="Dipinjam" {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                <option value="Dalam Servis" {{ request('status') === 'Dalam Servis' ? 'selected' : '' }}>Dalam Servis</option>
-                <option value="Dalam Kalibrasi" {{ request('status') === 'Dalam Kalibrasi' ? 'selected' : '' }}>Dalam Kalibrasi</option>
-            </select>
-            <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-700 w-full sm:w-auto">Filter</button>
+    <!-- Header Bar & Filter -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
+        <form action="{{ request()->routeIs('admin.*') ? route('admin.equipment.index') : route('staff.equipment.index') }}" method="GET" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto flex-1">
+            <div class="relative flex-1 min-w-[200px]">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" 
+                       name="search" 
+                       value="{{ request('search') }}" 
+                       placeholder="Cari nama, kode, merk, lokasi..." 
+                       class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl pl-9 pr-4 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all">
+            </div>
+
+            <div class="w-full sm:w-auto">
+                <select name="category" onchange="this.form.submit()" class="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-emerald-500">
+                    <option value="">-- Semua Kategori --</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="w-full sm:w-auto">
+                <select name="status" onchange="this.form.submit()" class="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-emerald-500">
+                    <option value="">-- Semua Status --</option>
+                    <option value="Tersedia" {{ request('status') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
+                    <option value="Dipinjam" {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                    <option value="Dalam Servis" {{ request('status') === 'Dalam Servis' ? 'selected' : '' }}>Dalam Servis</option>
+                    <option value="Dalam Kalibrasi" {{ request('status') === 'Dalam Kalibrasi' ? 'selected' : '' }}>Dalam Kalibrasi</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="submit" class="flex-1 sm:flex-initial px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-700 transition-colors">
+                    Filter
+                </button>
+                @if(request()->filled('search') || request()->filled('category') || request()->filled('status'))
+                    <a href="{{ request()->routeIs('admin.*') ? route('admin.equipment.index') : route('staff.equipment.index') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition-colors" title="Reset Filter">
+                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                    </a>
+                @endif
+            </div>
         </form>
 
-        <a href="{{ route('staff.equipment.create') }}" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center w-full sm:w-auto">
-            <i class="fa-solid fa-plus-circle mr-2"></i> Tambah Alat Baru
-        </a>
+        @if(auth()->user()->isStaff())
+            <a href="{{ route('staff.equipment.create') }}" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 w-full lg:w-auto shrink-0 transition-colors">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>Tambah Alat Baru</span>
+            </a>
+        @endif
     </div>
 
     <!-- Equipment Grid -->
@@ -78,19 +104,24 @@
                     </div>
                 </div>
 
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <a href="{{ route('equipment.detail', $eq->code) }}" target="_blank" class="text-slate-500 hover:text-emerald-600">
-                        <i class="fa-solid fa-qrcode mr-1"></i> QR / Barcode
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <a href="{{ route('equipment.detail', $eq->code) }}" target="_blank" class="inline-flex items-center text-slate-500 hover:text-emerald-600 font-medium py-1">
+                        <i class="fa-solid fa-qrcode mr-1.5"></i> QR / Barcode
                     </a>
-                    <div class="space-x-2">
-                        <a href="{{ route('staff.equipment.edit', $eq->id) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg">Edit</a>
-                        <a href="{{ route('staff.equipment.show', $eq->id) }}" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm">Detail</a>
+                    <div class="flex items-center gap-1.5">
+                        @if(auth()->user()->isStaff())
+                            <a href="{{ route('staff.equipment.edit', $eq) }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">Edit</a>
+                        @endif
+                        <a href="{{ request()->routeIs('admin.*') ? route('admin.equipment.show', $eq) : route('staff.equipment.show', $eq) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-xs transition-colors">Detail</a>
                     </div>
                 </div>
             </div>
         @empty
             <div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-200">
-                Belum ada data instrumen / alat laboratorium.
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <i class="fa-solid fa-microscope text-3xl text-slate-300"></i>
+                    <p class="font-semibold text-slate-500">Belum ada data instrumen / alat laboratorium.</p>
+                </div>
             </div>
         @endforelse
     </div>

@@ -11,10 +11,10 @@
             <h1 class="text-base sm:text-lg font-bold text-slate-800 mt-1">{{ $sample->sample_type }}</h1>
             <p class="text-xs text-slate-500">Customer: {{ $sample->customer->company_name ?? $sample->customer->name }} | Lokasi: {{ $sample->sampling_location }}</p>
         </div>
-        <a href="{{ route('staff.samples.show', $sample->id) }}" class="self-start sm:self-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">Kembali</a>
+        <a href="{{ route('staff.samples.show', $sample) }}" class="self-start sm:self-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">Kembali</a>
     </div>
 
-    <form action="{{ route('staff.samples.store-results', $sample->id) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-5">
+    <form action="{{ route('staff.samples.store-results', $sample) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-5">
         @csrf
 
         <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50">

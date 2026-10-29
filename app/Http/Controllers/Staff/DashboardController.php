@@ -13,6 +13,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user() && auth()->user()->isStaff(), 403, 'Akses ditolak: Dashboard hanya dapat diakses oleh Staff Analis.');
+
         $assignedSamplesCount = SampleParameter::where('analyst_id', auth()->id())
             ->where('status', 'Draft')
             ->count();

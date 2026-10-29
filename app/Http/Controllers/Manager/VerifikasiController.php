@@ -13,8 +13,17 @@ use Illuminate\Support\Facades\DB;
 
 class VerifikasiController extends Controller
 {
+    protected function authorizeManager(): void
+    {
+        if (! auth()->check() || auth()->user()->role !== 'manager') {
+            abort(403, 'Akses ditolak. Hanya Manajer Laboratorium yang berwenang melakukan verifikasi teknis sampel.');
+        }
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeManager();
+
         $currentStatus = $request->get('status', 'Menunggu Verifikasi');
 
         $query = Sample::query()
@@ -45,6 +54,8 @@ class VerifikasiController extends Controller
 
     public function show(Sample $sample)
     {
+        $this->authorizeManager();
+
         $sample->load(['customer', 'sampleParameters.parameter.qualityStandard', 'sampleParameters.equipment', 'sampleParameters.analyst', 'certificate']);
 
         return view('manager.verifikasi.show', compact('sample'));
@@ -52,6 +63,8 @@ class VerifikasiController extends Controller
 
     public function approve(Sample $sample)
     {
+        $this->authorizeManager();
+
         if ($sample->status !== 'Menunggu Verifikasi') {
             return back()->withErrors(['error' => 'Sampel ini tidak dalam status Menunggu Verifikasi.']);
         }
@@ -119,6 +132,8 @@ class VerifikasiController extends Controller
 
     public function reject(Request $request, Sample $sample)
     {
+        $this->authorizeManager();
+
         $validated = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
@@ -137,7 +152,7 @@ class VerifikasiController extends Controller
                 'user_id' => $staff->id,
                 'title' => 'Revisi Hasil Uji Sampel',
                 'message' => "Manajer Lab meminta revisi hasil uji sampel {$sample->sample_code}: {$validated['rejection_reason']}",
-                'link' => '/staff/samples/'.$sample->id,
+                'link' => '/staff/samples/'.$sample->sample_code,
             ]);
         }
 

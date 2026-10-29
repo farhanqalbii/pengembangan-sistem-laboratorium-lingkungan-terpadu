@@ -175,4 +175,20 @@ class Peralatan extends Model
 
         return max(0, (int) $this->jumlah - (int) $reserved);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'kode';
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        if (is_numeric($value)) {
+            return null;
+        }
+
+        $field = $field ?? $this->getRouteKeyName();
+
+        return $this->where($field, $value)->first();
+    }
 }

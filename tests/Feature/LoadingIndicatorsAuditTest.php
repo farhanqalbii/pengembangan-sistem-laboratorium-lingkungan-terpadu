@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class LoadingIndicatorsAuditTest extends TestCase
@@ -31,7 +33,17 @@ class LoadingIndicatorsAuditTest extends TestCase
         $response->assertSee('Mengirim Permintaan...');
 
         // Reset Password View
-        $response = $this->get(route('password.reset', ['token' => 'dummy-token']));
+        $user = User::where('role', 'customer')->first() ?? User::factory()->create(['role' => 'customer']);
+        $resetToken = 'valid-test-token-'.uniqid();
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'token' => Hash::make($resetToken),
+                'created_at' => now(),
+            ]
+        );
+
+        $response = $this->get(route('password.reset', ['token' => $resetToken, 'email' => $user->email]));
         $response->assertStatus(200);
         $response->assertSee('fa-spinner fa-spin');
         $response->assertSee('submitting');

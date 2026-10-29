@@ -661,8 +661,8 @@ class PostAuditImprovementsTest extends TestCase
         $response = $this->actingAs($this->staff)->get(route('staff.borrowings.show', $borrowing));
         $response->assertStatus(200);
         $response->assertSee('Verifikasi Kesiapan Fisik Alat');
-        $response->assertSee(route('staff.borrowings.approve', $borrowing->id));
-        $response->assertSee(route('staff.borrowings.reject', $borrowing->id));
+        $response->assertSee(route('staff.borrowings.approve', $borrowing));
+        $response->assertSee(route('staff.borrowings.reject', $borrowing));
     }
 
     public function test_admin_peminjaman_show_renders_extension_approval_form(): void
@@ -676,7 +676,7 @@ class PostAuditImprovementsTest extends TestCase
 
         $response = $this->actingAs($this->admin)->get(route('admin.borrowings.show', $borrowing));
         $response->assertStatus(200);
-        $response->assertSee(route('admin.borrowings.approve-extension', $borrowing->id));
+        $response->assertSee(route('admin.borrowings.approve-extension', $borrowing));
         $response->assertSee('Permintaan Perpanjangan Jadwal Pengembalian Alat');
     }
 

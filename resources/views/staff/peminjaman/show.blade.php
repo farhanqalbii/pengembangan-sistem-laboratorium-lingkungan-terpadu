@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Inspeksi & Pengembalian ' . $borrowing->borrow_code . ' - Staff')
-@section('page-title', 'Pemeriksaan Fisik & Pengembalian Alat')
+@section('title', 'Detail Peminjaman ' . $borrowing->borrow_code . ' - Staff')
+@section('page-title', 'Pemeriksaan & Otorisasi Peminjaman Alat')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-5xl mx-auto space-y-6">
     <!-- Header Card -->
     <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -13,52 +13,193 @@
                 <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $borrowing->status_badge_class }}">{{ $borrowing->status }}</span>
             </div>
             <h1 class="text-lg sm:text-xl font-bold text-slate-800">{{ $borrowing->customer->company_name ?? $borrowing->customer->name }}</h1>
-            <p class="text-xs text-slate-500 mt-1">Target Kembali: <strong>{{ $borrowing->end_date->format('d F Y') }}</strong> (Deposit: Rp {{ number_format($borrowing->deposit_amount, 0, ',', '.') }})</p>
+            <p class="text-xs text-slate-500 mt-1">
+                Target Kembali: <strong>{{ ($borrowing->extended_end_date ?? $borrowing->end_date)->format('d F Y') }}</strong>
+                &bull; Deposit: <strong>Rp {{ number_format($borrowing->deposit_amount, 0, ',', '.') }}</strong>
+            </p>
         </div>
 
-        <a href="{{ route('staff.borrowings.index') }}" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">Kembali</a>
+        <a href="{{ route('staff.borrowings.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors self-start md:self-center">
+            <i class="fa-solid fa-arrow-left text-[11px]"></i> Kembali ke Daftar
+        </a>
     </div>
 
+    <!-- Informasi Peminjam & Jadwal (Always Visible) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Kartu Identitas Peminjam -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+            <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Informasi Peminjam</h3>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Nama Kontak:</span>
+                    <span class="font-bold text-slate-800">{{ $borrowing->customer->name }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Instansi / Perusahaan:</span>
+                    <span class="font-semibold text-slate-700">{{ $borrowing->customer->company_name ?? '-' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Nomor Telepon:</span>
+                    <span class="font-mono text-slate-700">{{ $borrowing->customer->phone ?? '-' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Alamat Email:</span>
+                    <span class="text-slate-700">{{ $borrowing->customer->email }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kartu Jadwal & Tujuan -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+            <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Jadwal & Tujuan Peminjaman</h3>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Tanggal Mulai:</span>
+                    <span class="font-bold text-slate-800">{{ $borrowing->start_date->format('d F Y') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Batas Pengembalian:</span>
+                    <span class="font-bold text-slate-800">{{ $borrowing->end_date->format('d F Y') }}</span>
+                </div>
+                @if($borrowing->extended_end_date)
+                    <div class="flex justify-between text-amber-700 font-semibold">
+                        <span>Perpanjangan Disetujui:</span>
+                        <span>{{ $borrowing->extended_end_date->format('d F Y') }}</span>
+                    </div>
+                @endif
+                @if($borrowing->actual_return_date)
+                    <div class="flex justify-between text-emerald-700 font-semibold">
+                        <span>Tanggal Kembali Aktual:</span>
+                        <span>{{ $borrowing->actual_return_date->format('d F Y') }}</span>
+                    </div>
+                @endif
+                <div class="pt-1 border-t border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Tujuan Penggunaan:</span>
+                    <p class="font-medium text-slate-700 italic">{{ $borrowing->purpose ?: 'Tidak ada keterangan khusus.' }}</p>
+                </div>
+                @if($borrowing->notes)
+                    <div class="pt-1">
+                        <span class="text-slate-400 block mb-0.5">Catatan Tambahan:</span>
+                        <p class="text-slate-600">{{ $borrowing->notes }}</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar Alat Laboratorium Dipinjam (Always Visible) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-microscope text-slate-500"></i>
+                <h3 class="text-sm font-bold text-slate-800">Daftar Instrumen & Alat yang Diajukan</h3>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600">
+                {{ $borrowing->borrowingDetails->count() }} Macam Alat
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs min-w-[550px]">
+                <thead class="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider">
+                    <tr>
+                        <th class="px-4 sm:px-5 py-3">Instrumen Laboratorium</th>
+                        <th class="px-4 sm:px-5 py-3">Jumlah Diminta</th>
+                        <th class="px-4 sm:px-5 py-3">Stok Lab Saat Ini</th>
+                        <th class="px-4 sm:px-5 py-3">Status Alat</th>
+                        @if($borrowing->status === 'Dikembalikan')
+                            <th class="px-4 sm:px-5 py-3">Kondisi Kembali</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    @foreach($borrowing->borrowingDetails as $detail)
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-4 sm:px-5 py-3">
+                                <div class="font-bold text-slate-800">{{ $detail->equipment->name }}</div>
+                                <div class="text-[11px] text-slate-400">Kode: {{ $detail->equipment->code }} &bull; Merk: {{ $detail->equipment->brand ?? 'N/A' }}</div>
+                            </td>
+                            <td class="px-4 sm:px-5 py-3 font-bold text-blue-600">
+                                {{ $detail->quantity }} Unit
+                            </td>
+                            <td class="px-4 sm:px-5 py-3 font-bold {{ $detail->equipment->quantity < $detail->quantity ? 'text-rose-600' : 'text-emerald-600' }}">
+                                {{ $detail->equipment->quantity }} Unit
+                            </td>
+                            <td class="px-4 sm:px-5 py-3">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold {{ $detail->equipment->status === 'Tersedia' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                    {{ $detail->equipment->status }}
+                                </span>
+                            </td>
+                            @if($borrowing->status === 'Dikembalikan')
+                                <td class="px-4 sm:px-5 py-3">
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-bold {{ $detail->condition_return === 'Baik' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                        {{ $detail->condition_return ?? 'Baik' }}
+                                    </span>
+                                </td>
+                            @endif
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Ringkasan Keuangan & Deposit (Always Visible) -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-receipt text-slate-400"></i> Ringkasan Deposit & Tagihan Peminjaman
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="text-slate-500 block">Deposit Jaminan (Awal)</span>
+                <span class="text-base font-extrabold text-slate-800 mt-0.5 block">Rp {{ number_format($borrowing->deposit_amount, 0, ',', '.') }}</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">Wajib dibayar customer sebelum alat diambil</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200">
+                <span class="text-rose-700 font-bold block">Total Denda</span>
+                <span class="text-base font-extrabold text-rose-800 mt-0.5 block">Rp {{ number_format($borrowing->fine_amount, 0, ',', '.') }}</span>
+                <span class="text-[10px] text-rose-600 block mt-0.5">{{ $borrowing->fine_reason ?: 'Tidak ada denda tercatat' }}</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                <span class="text-emerald-700 font-bold block">Deposit Refundable</span>
+                <span class="text-base font-extrabold text-emerald-800 mt-0.5 block">Rp {{ number_format($borrowing->refund_amount, 0, ',', '.') }}</span>
+                <span class="text-[10px] text-emerald-600 block mt-0.5 font-semibold">Status: {{ $borrowing->refund_status ?? 'Belum Diproses' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Specific Actions / Alerts -->
     @if(in_array($borrowing->status, ['Diajukan', 'Menunggu']))
     <!-- Staff Approval & Physical Readiness Check Card -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
-        <div class="p-4 sm:p-5 border-b border-slate-200 bg-emerald-50/50 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-200 bg-emerald-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
                 <h3 class="text-sm font-bold text-slate-800">Verifikasi Kesiapan Fisik Alat & Otorisasi Peminjaman</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Periksa ketersediaan fisik instrumen alat sebelum menyetujui permohonan.</p>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 self-start sm:self-auto">
                 Menunggu Otorisasi
             </span>
         </div>
 
         <div class="p-4 sm:p-5 space-y-4">
-            <div class="border border-slate-200 rounded-xl overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[500px]">
-                    <thead class="bg-slate-100 text-slate-600 font-bold">
-                        <tr>
-                            <th class="px-4 py-2.5">Alat Laboratorium</th>
-                            <th class="px-4 py-2.5">Jumlah Diminta</th>
-                            <th class="px-4 py-2.5">Stok Fisik Tersedia</th>
-                            <th class="px-4 py-2.5">Status Alat</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach($borrowing->borrowingDetails as $detail)
-                        <tr>
-                            <td class="px-4 py-3 font-bold text-slate-800">{{ $detail->equipment->name }} ({{ $detail->equipment->code }})</td>
-                            <td class="px-4 py-3 font-bold text-blue-600">{{ $detail->quantity }} Unit</td>
-                            <td class="px-4 py-3 font-bold text-emerald-600">{{ $detail->equipment->quantity }} Unit</td>
-                            <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800">{{ $detail->equipment->status }}</span></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Pastikan seluruh instrumen yang diminta dalam kondisi prima, bersih, dan tidak sedang dalam jadwal kalibrasi atau perbaikan sebelum memberikan persetujuan.
+            </p>
 
             <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
                 <!-- Reject Button & Form -->
-                <form action="{{ route('staff.borrowings.reject', $borrowing->id) }}" method="POST" x-data="{ submitting: false }" @submit="if (!confirm('Yakin ingin menolak pengajuan peminjaman ini?')) { $event.preventDefault(); return false; } submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="inline-flex gap-2">
+                <form action="{{ route('staff.borrowings.reject', $borrowing) }}" method="POST" x-data="{ submitting: false }" @submit="if (!confirm('Yakin ingin menolak pengajuan peminjaman ini?')) { $event.preventDefault(); return false; } submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="inline-flex gap-2">
                     @csrf
                     <input type="hidden" name="notes" value="Alat tidak memenuhi syarat kesiapan fisik atau sedang dijadwalkan maintenance.">
                     <button type="submit" 
@@ -72,7 +213,7 @@
                 </form>
 
                 <!-- Approve Button -->
-                <form action="{{ route('staff.borrowings.approve', $borrowing->id) }}" method="POST" x-data="{ submitting: false }" @submit="if (!confirm('Kesiapan fisik alat telah dipastikan? Lanjutkan persetujuan?')) { $event.preventDefault(); return false; } submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)">
+                <form action="{{ route('staff.borrowings.approve', $borrowing) }}" method="POST" x-data="{ submitting: false }" @submit="if (!confirm('Kesiapan fisik alat telah dipastikan? Lanjutkan persetujuan?')) { $event.preventDefault(); return false; } submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)">
                     @csrf
                     <button type="submit" 
                         :disabled="submitting"
@@ -86,11 +227,20 @@
             </div>
         </div>
     </div>
-    @endif
-
-    @if(in_array($borrowing->status, ['Dipinjam', 'Terlambat']))
+    @elseif($borrowing->status === 'Disetujui')
+    <!-- Status Disetujui: Menunggu Pembayaran Deposit & Serah Terima Fisik -->
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-2">
+        <div class="flex items-center gap-2 text-blue-900 font-bold text-sm">
+            <i class="fa-solid fa-circle-check text-blue-600"></i>
+            <span>Peminjaman Telah Disetujui Staf / Admin</span>
+        </div>
+        <p class="text-xs text-blue-800 leading-relaxed">
+            Permohonan peminjaman ini telah diotorisasi. Status akan otomatis berubah menjadi <strong>Dipinjam</strong> setelah customer menyelesaikan pembayaran deposit jaminan melalui payment gateway, atau saat penyerahan alat fisik dikonfirmasi.
+        </p>
+    </div>
+    @elseif(in_array($borrowing->status, ['Dipinjam', 'Terlambat']))
     <!-- Return Form -->
-    <form action="{{ route('staff.borrowings.return', $borrowing->id) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-5">
+    <form action="{{ route('staff.borrowings.return', $borrowing) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-5">
         @csrf
 
         <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
@@ -175,9 +325,7 @@
             </button>
         </div>
     </form>
-    @endif
-
-    @if($borrowing->status === 'Dikembalikan')
+    @elseif($borrowing->status === 'Dikembalikan')
     <!-- Returned Inspection Results Summary Card -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
         <div class="p-4 sm:p-5 border-b border-slate-200 bg-emerald-50/70 flex items-center justify-between">
@@ -196,7 +344,7 @@
                     <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                         <div>
                             <h4 class="font-bold text-slate-800 text-sm">{{ $detail->equipment->name }} ({{ $detail->equipment->code }})</h4>
-                            <p class="text-slate-500 mt-0.5">Catatan Inspeksi: <em>{{ $detail->condition_notes ?: 'Kondisi normal terverifikasi.' }}</em></p>
+                            <p class="text-slate-500 mt-0.5">Catatan Inspeksi: <em>{{ $detail->condition_notes ?: ($detail->notes ?: 'Kondisi normal terverifikasi.') }}</em></p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="px-2.5 py-1 rounded-lg text-xs font-bold {{ $detail->condition_return === 'Baik' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
@@ -209,26 +357,30 @@
                     </div>
                 @endforeach
             </div>
-
-            <!-- Financial Summary Box -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2">
-                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                    <span class="text-slate-500 block">Deposit Awal</span>
-                    <span class="text-base font-extrabold text-slate-800 mt-0.5 block">Rp {{ number_format($borrowing->deposit_amount, 0, ',', '.') }}</span>
-                </div>
-                <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200">
-                    <span class="text-rose-700 font-bold block">Total Denda</span>
-                    <span class="text-base font-extrabold text-rose-800 mt-0.5 block">Rp {{ number_format($borrowing->fine_amount, 0, ',', '.') }}</span>
-                </div>
-                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
-                    <span class="text-emerald-700 font-bold block">Deposit Refundable</span>
-                    <span class="text-base font-extrabold text-emerald-800 mt-0.5 block">Rp {{ number_format($borrowing->refund_amount, 0, ',', '.') }}</span>
-                    <span class="text-[10px] text-emerald-600 block mt-0.5 font-semibold">Status: {{ $borrowing->refund_status }}</span>
-                </div>
-            </div>
         </div>
+    </div>
+    @elseif($borrowing->status === 'Ditolak')
+    <!-- Status Ditolak Banner -->
+    <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-2">
+        <div class="flex items-center gap-2 text-rose-900 font-bold text-sm">
+            <i class="fa-solid fa-ban text-rose-600"></i>
+            <span>Pengajuan Peminjaman Telah Ditolak</span>
+        </div>
+        <p class="text-xs text-rose-800 leading-relaxed">
+            Catatan Penolakan: <em>{{ $borrowing->notes ?: 'Alat laboratorium tidak memenuhi syarat kesiapan fisik atau sedang dijadwalkan perawatan/kalibrasi.' }}</em>
+        </p>
+    </div>
+    @elseif($borrowing->status === 'Dibatalkan')
+    <!-- Status Dibatalkan Banner -->
+    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-2">
+        <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+            <i class="fa-solid fa-circle-xmark text-slate-500"></i>
+            <span>Peminjaman Dibatalkan</span>
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed">
+            Transaksi peminjaman ini telah dibatalkan dan tidak lagi aktif.
+        </p>
     </div>
     @endif
 </div>
 @endsection
-

@@ -56,7 +56,7 @@ Route::get('/equipment/scan', [PeralatanScanController::class, 'scan'])->name('e
 Route::get('/equipment/detail/{code}', [PeralatanScanController::class, 'detail'])->name('equipment.detail');
 
 // Shared Auth Routes (Notifications & Profile)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/counts', [NotificationController::class, 'getCounts'])->name('notifications.counts');
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // CUSTOMER ROUTES
-Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+Route::middleware(['auth', 'prevent-back-history', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
     // Samples
@@ -88,10 +88,13 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
 
     // Certificates
     Route::get('/certificates', [CustomerSertifikatController::class, 'index'])->name('certificates.index');
-    Route::get('/certificates/{certificate}', [CustomerSertifikatController::class, 'show'])->name('certificates.show');
     Route::get('/certificates/{certificate}/download', [CustomerSertifikatController::class, 'download'])
         ->withoutMiddleware('role:customer')
-        ->name('certificates.download');
+        ->name('certificates.download')
+        ->where('certificate', '[A-Za-z0-9\/\-]+');
+    Route::get('/certificates/{certificate}', [CustomerSertifikatController::class, 'show'])
+        ->name('certificates.show')
+        ->where('certificate', '[A-Za-z0-9\/\-]+');
 
     // Payments & Invoices
     Route::get('/payments', [CustomerPembayaranController::class, 'index'])->name('payments.index');
@@ -99,7 +102,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::post('/payments/{payment}/check-status', [CustomerPembayaranController::class, 'checkStatus'])->name('payments.check-status');
     Route::get('/invoices/{invoice}/download', [CustomerPembayaranController::class, 'downloadInvoice'])
         ->withoutMiddleware('role:customer')
-        ->name('invoices.download');
+        ->name('invoices.download')
+        ->where('invoice', '[A-Za-z0-9\/\-]+');
 
     // Satisfaction Feedback
     Route::get('/satisfaction', [CustomerKepuasanPelangganController::class, 'create'])->name('satisfaction.create');
@@ -107,7 +111,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
 });
 
 // STAFF / ANALYST ROUTES
-Route::middleware(['auth', 'role:staff,admin'])->prefix('staff')->name('staff.')->group(function () {
+Route::middleware(['auth', 'prevent-back-history', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
     Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
 
     // Samples
@@ -119,9 +123,9 @@ Route::middleware(['auth', 'role:staff,admin'])->prefix('staff')->name('staff.')
     Route::post('/samples/{sample}/store-results', [StaffSampleController::class, 'storeResults'])->name('samples.store-results');
 
     // Equipment & Inventory
-    Route::resource('equipment', StaffPeralatanController::class);
-    Route::post('/equipment/{equipment}/calibration', [StaffPeralatanController::class, 'recordCalibration'])->name('equipment.calibration');
-    Route::post('/equipment/{equipment}/service', [StaffPeralatanController::class, 'recordService'])->name('equipment.service');
+    Route::resource('equipment', StaffPeralatanController::class)->parameters(['equipment' => 'equipment:kode']);
+    Route::post('/equipment/{equipment:kode}/calibration', [StaffPeralatanController::class, 'recordCalibration'])->name('equipment.calibration');
+    Route::post('/equipment/{equipment:kode}/service', [StaffPeralatanController::class, 'recordService'])->name('equipment.service');
 
     // Borrowings Return & Approval Processing
     Route::get('/borrowings', [StaffPeminjamanController::class, 'index'])->name('borrowings.index');
@@ -131,8 +135,8 @@ Route::middleware(['auth', 'role:staff,admin'])->prefix('staff')->name('staff.')
     Route::post('/borrowings/{borrowing}/return', [StaffPeminjamanController::class, 'processReturn'])->name('borrowings.return');
 });
 
-// MANAGER LAB ROUTES
-Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->name('manager.')->group(function () {
+// MANAGER LAB ROUTES (Khusus role manager - AUT-08)
+Route::middleware(['auth', 'prevent-back-history', 'role:manager'])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/dashboard', [ManagerDashboardController::class, 'index'])->name('dashboard');
 
     // Verifications (GATE for COA generation!)
@@ -146,14 +150,15 @@ Route::middleware(['auth', 'role:manager,admin'])->prefix('manager')->name('mana
 });
 
 // ADMIN ROUTES
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'prevent-back-history', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // User Management
     Route::resource('users', UserController::class)->except(['show']);
 
-    // Equipment Master (Admin link to staff equipment)
+    // Equipment Master (Admin catalog view)
     Route::get('/equipment', [StaffPeralatanController::class, 'index'])->name('equipment.index');
+    Route::get('/equipment/{equipment:kode}', [StaffPeralatanController::class, 'show'])->name('equipment.show');
 
     // Borrowing Approval & Extension
     Route::get('/borrowings', [AdminPeminjamanController::class, 'index'])->name('borrowings.index');

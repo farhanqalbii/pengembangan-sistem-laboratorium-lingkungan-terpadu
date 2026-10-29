@@ -132,11 +132,11 @@
                             </td>
                             <td class="px-5 py-4 whitespace-nowrap text-right">
                                 <div class="inline-flex items-center gap-2">
-                                    <a href="{{ route('staff.samples.show', $sample->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg transition-colors shadow-2xs">
+                                    <a href="{{ route('staff.samples.show', $sample) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg transition-colors shadow-2xs">
                                         <i class="fa-regular fa-eye text-[11px] text-slate-400"></i> Detail
                                     </a>
                                     @if(in_array($sample->status, ['Diterima', 'Diproses', 'Diuji', 'Revisi']))
-                                        <a href="{{ route('staff.samples.input-results', $sample->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all hover:shadow-emerald-600/20 whitespace-nowrap">
+                                        <a href="{{ route('staff.samples.input-results', $sample) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all hover:shadow-emerald-600/20 whitespace-nowrap">
                                             <i class="fa-solid fa-pen-to-square text-[11px]"></i> Input Hasil
                                         </a>
                                     @endif

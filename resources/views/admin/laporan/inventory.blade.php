@@ -11,7 +11,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Kelola data alat, cetak label stiker QR code, atau unduh laporan aset.</p>
         </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
-            <a href="{{ route('staff.equipment.index') }}" class="w-full sm:w-auto px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <a href="{{ route('admin.equipment.index') }}" class="w-full sm:w-auto px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-microscope text-xs"></i>
                 <span>Master Inventori Alat & QR</span>
             </a>
@@ -64,7 +64,7 @@
                                 Rp {{ number_format($eq->rental_price_per_day, 0, ',', '.') }}
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center">
-                                <a href="{{ route('staff.equipment.show', $eq->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/90 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs">
+                                <a href="{{ route('admin.equipment.show', $eq) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/90 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs">
                                     <i class="fa-solid fa-qrcode text-[11px]"></i>
                                     <span>Detail & QR</span>
                                 </a>

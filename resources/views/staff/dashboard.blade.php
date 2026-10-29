@@ -83,10 +83,10 @@
                             </p>
                         </div>
                         <div class="shrink-0 flex items-center gap-2 self-end sm:self-center">
-                            <a href="{{ route('staff.samples.show', $s->id) }}" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg transition-colors shadow-2xs">
+                            <a href="{{ route('staff.samples.show', $s) }}" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg transition-colors shadow-2xs">
                                 Detail
                             </a>
-                            <a href="{{ route('staff.samples.input-results', $s->id) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all hover:shadow-emerald-600/20">
+                            <a href="{{ route('staff.samples.input-results', $s) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all hover:shadow-emerald-600/20">
                                 <i class="fa-solid fa-pen-to-square text-[11px]"></i> Input Hasil
                             </a>
                         </div>
@@ -126,7 +126,7 @@
                                 <span class="font-bold text-indigo-950 block text-xs">{{ $cal->equipment->name }}</span>
                                 <span class="text-[11px] text-indigo-700">Jadwal: {{ $cal->next_calibration_date ? $cal->next_calibration_date->format('d F Y') : '-' }}</span>
                             </div>
-                            <a href="{{ route('staff.equipment.show', $cal->equipment_id) }}" class="self-start sm:self-auto px-2.5 py-1 bg-white border border-indigo-200 hover:bg-indigo-100/50 text-indigo-700 font-bold text-xs rounded-lg transition-colors">
+                            <a href="{{ route('staff.equipment.show', $cal->equipment) }}" class="self-start sm:self-auto px-2.5 py-1 bg-white border border-indigo-200 hover:bg-indigo-100/50 text-indigo-700 font-bold text-xs rounded-lg transition-colors">
                                 Detail Alat
                             </a>
                         </div>
@@ -164,7 +164,7 @@
                                 <span class="font-bold text-rose-950 block text-xs">{{ $eq->name }} ({{ $eq->code }})</span>
                                 <span class="text-[11px] text-rose-700">Tersisa: <strong>{{ $eq->quantity }} unit</strong> (Min: {{ $eq->min_stock }})</span>
                             </div>
-                            <a href="{{ route('staff.equipment.edit', $eq->id) }}" class="self-start sm:self-auto px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
+                            <a href="{{ route('staff.equipment.edit', $eq) }}" class="self-start sm:self-auto px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
                                 Restok
                             </a>
                         </div>

@@ -286,6 +286,66 @@
         }
 
         /* =========================================================================
+           Standardized Dropdown & Select Styling (Mentor Evaluation Poin 3)
+           ========================================================================= */
+        select,
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.15em 1.15em;
+            padding-right: 2.5rem !important;
+            padding-left: 0.875rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem;
+            font-size: 0.8125rem;
+            line-height: 1.25rem;
+            min-height: 2.375rem;
+            color: #1e293b;
+            background-color: #ffffff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+
+        select:hover:not(:disabled),
+        .form-select:hover:not(:disabled) {
+            border-color: #94a3b8;
+        }
+
+        select:focus,
+        .form-select:focus {
+            outline: none !important;
+            border-color: #168975 !important;
+            box-shadow: 0 0 0 3px rgba(22, 137, 117, 0.18) !important;
+        }
+
+        select:disabled,
+        .form-select:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        html.dark select,
+        html.dark .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            border-color: #334155;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+
+        html.dark select:focus,
+        html.dark .form-select:focus {
+            border-color: #3ebca8 !important;
+            box-shadow: 0 0 0 3px rgba(62, 188, 168, 0.25) !important;
+        }
+
+        /* =========================================================================
            Sidebar Navigation Theming
            Light Mode: Soft Blue (#EAF2F8)
            Dark Mode:  Midnight  (#071521)
@@ -589,7 +649,7 @@
                                 <i class="fa-solid fa-sliders w-4 text-center"></i>
                                 <span>Parameter & Baku Mutu</span>
                             </a>
-                            <a href="{{ route('staff.equipment.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('staff.equipment.*') ? 'is-active' : '' }}">
+                            <a href="{{ route('admin.equipment.index') }}" class="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold app-sidebar-link {{ request()->routeIs('admin.equipment.*') ? 'is-active' : '' }}">
                                 <div class="flex items-center space-x-2.5">
                                     <i class="fa-solid fa-microscope w-4 text-center"></i>
                                     <span>Inventori Alat</span>
@@ -597,7 +657,7 @@
                                 <span 
                                     x-show="($store?.notifications?.counts?.equipment ?? 0) > 0" 
                                     x-text="$store?.notifications?.counts?.equipment ?? 0"
-                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('staff.equipment.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full {{ request()->routeIs('admin.equipment.*') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }} min-w-[18px] h-[18px] shadow-xs"
                                     @if(($unreadCounts['equipment'] ?? 0) === 0) style="display: none;" @endif
                                 >{{ $unreadCounts['equipment'] ?? 0 }}</span>
                             </a>
@@ -1062,7 +1122,10 @@
                 }
             });
 
-            window.addEventListener('pageshow', function() {
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
                 stopLoading();
             });
 

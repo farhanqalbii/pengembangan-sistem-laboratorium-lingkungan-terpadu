@@ -80,13 +80,14 @@ class AllRoutesHealthTest extends TestCase
     {
         $this->actingAs($this->staff);
 
-        $eqId = Peralatan::first()?->id ?? 1;
+        $eq = Peralatan::first();
+        $eqCode = $eq?->kode ?? 'EQP-SPE-001';
 
         $routes = [
             '/staff/dashboard',
             '/staff/samples',
             '/staff/equipment',
-            '/staff/equipment/'.$eqId,
+            '/staff/equipment/'.$eqCode,
             '/staff/equipment/create',
             '/staff/borrowings',
         ];
@@ -97,10 +98,15 @@ class AllRoutesHealthTest extends TestCase
         }
 
         // Test staff equipment detail contains QR & Cetak Stiker
-        $res = $this->get('/staff/equipment/'.$eqId);
+        $res = $this->get('/staff/equipment/'.$eqCode);
         $res->assertSee('Cetak Stiker Label');
         $res->assertSee('qrcode-display');
         $res->assertSee('barcode-display');
+
+        // Test numeric ID is rejected with 404
+        if ($eq) {
+            $this->get('/staff/equipment/'.$eq->id)->assertStatus(404);
+        }
     }
 
     public function test_manager_routes_render_ok(): void

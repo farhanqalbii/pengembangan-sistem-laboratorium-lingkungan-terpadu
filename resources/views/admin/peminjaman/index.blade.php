@@ -28,7 +28,7 @@
                     @forelse($borrowings as $b)
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-4 sm:px-5 py-3">
-                                <a href="{{ route('admin.borrowings.show', $b->id) }}" class="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline">
+                                <a href="{{ route('admin.borrowings.show', $b) }}" class="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline">
                                     {{ $b->borrow_code }}
                                 </a>
                                 @if($b->perpanjangan_diajukan && $b->status_perpanjangan === 'Pending')
@@ -58,24 +58,24 @@
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center space-x-1.5 whitespace-nowrap">
                                 @if($b->status === 'Diajukan')
-                                    <form action="{{ route('admin.borrowings.approve', $b->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('admin.borrowings.approve', $b) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer">
                                             Approve
                                         </button>
                                     </form>
-                                    <form action="{{ route('admin.borrowings.reject', $b->id) }}" method="POST" class="inline" onsubmit="return confirm('Tolak permohonan pinjam ini?')">
+                                    <form action="{{ route('admin.borrowings.reject', $b) }}" method="POST" class="inline" onsubmit="return confirm('Tolak permohonan pinjam ini?')">
                                         @csrf
                                         <button type="submit" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer">
                                             Tolak
                                         </button>
                                     </form>
                                 @elseif($b->perpanjangan_diajukan && $b->status_perpanjangan === 'Pending')
-                                    <a href="{{ route('admin.borrowings.show', $b->id) }}" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-lg shadow-sm inline-block">
+                                    <a href="{{ route('admin.borrowings.show', $b) }}" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-lg shadow-sm inline-block">
                                         Perpanjangan
                                     </a>
                                 @else
-                                    <a href="{{ route('admin.borrowings.show', $b->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs inline-block">
+                                    <a href="{{ route('admin.borrowings.show', $b) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs inline-block">
                                         Detail
                                     </a>
                                 @endif

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Sample;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -171,5 +172,94 @@ class AuthenticationAuditTest extends TestCase
         $response->assertRedirect(route('home'));
         $response->assertSessionHas('success', 'Anda telah berhasil keluar dari sistem.');
         $this->assertGuest();
+    }
+
+    public function test_authenticated_private_pages_send_no_cache_headers_to_prevent_back_history(): void
+    {
+        $customer = User::where('role', 'customer')->first();
+        $response = $this->actingAs($customer)->get(route('customer.dashboard'));
+
+        $response->assertStatus(200);
+        $cacheControl = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('no-cache', $cacheControl);
+        $this->assertStringContainsString('no-store', $cacheControl);
+        $this->assertStringContainsString('must-revalidate', $cacheControl);
+        $this->assertEquals('no-cache', $response->headers->get('Pragma'));
+        $this->assertEquals('0', $response->headers->get('Expires'));
+    }
+
+    public function test_after_logout_session_is_invalidated_and_private_access_is_rejected(): void
+    {
+        $customer = User::where('role', 'customer')->first();
+        $this->actingAs($customer);
+        $this->assertAuthenticated();
+
+        $logoutRes = $this->post(route('logout'));
+        $logoutRes->assertRedirect(route('home'));
+        $this->assertGuest();
+
+        // Attempting to reopen private dashboard must redirect to login
+        $reopenRes = $this->get(route('customer.dashboard'));
+        $reopenRes->assertRedirect(route('login'));
+
+        // Attempting to access other private dashboards also redirects
+        $this->get(route('staff.dashboard'))->assertRedirect(route('login'));
+        $this->get(route('manager.dashboard'))->assertRedirect(route('login'));
+        $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
+    }
+
+    public function test_admin_is_strictly_forbidden_from_manager_technical_verifications(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+        $manager = User::where('role', 'manager')->first();
+        $customer = User::where('role', 'customer')->first();
+
+        $sample = Sample::create([
+            'sample_code' => 'SMP-RBAC-'.uniqid(),
+            'customer_id' => $customer->id,
+            'sample_type' => 'Air Limbah',
+            'sampling_location' => 'Outlet Pabrik',
+            'sampling_date' => now()->subDay(),
+            'request_date' => now(),
+            'status' => 'Menunggu Verifikasi',
+        ]);
+
+        // 1. Admin GET manager dashboard -> 403
+        $this->actingAs($admin)->get(route('manager.dashboard'))->assertStatus(403);
+
+        // 2. Admin GET verifications list -> 403
+        $this->actingAs($admin)->get(route('manager.verifications.index'))->assertStatus(403);
+
+        // 3. Admin GET verification detail -> 403
+        $this->actingAs($admin)->get(route('manager.verifications.show', $sample))->assertStatus(403);
+
+        // 4. Admin POST approve -> 403
+        $this->actingAs($admin)->post(route('manager.verifications.approve', $sample))->assertStatus(403);
+        $this->assertEquals('Menunggu Verifikasi', $sample->fresh()->status);
+
+        // 5. Admin POST reject -> 403
+        $this->actingAs($admin)->post(route('manager.verifications.reject', $sample), [
+            'alasan_penolakan' => 'Uji coba penolakan oleh admin',
+        ])->assertStatus(403);
+        $this->assertEquals('Menunggu Verifikasi', $sample->fresh()->status);
+
+        // 6. Manager CAN access all these endpoints
+        $this->actingAs($manager)->get(route('manager.dashboard'))->assertStatus(200);
+        $this->actingAs($manager)->get(route('manager.verifications.index'))->assertStatus(200);
+        $this->actingAs($manager)->get(route('manager.verifications.show', $sample))->assertStatus(200);
+    }
+
+    public function test_admin_and_manager_can_both_access_satisfaction_reports_per_srs(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+        $manager = User::where('role', 'manager')->first();
+
+        // Admin must be able to view satisfaction report on admin module
+        $adminRes = $this->actingAs($admin)->get(route('admin.reports.satisfaction'));
+        $adminRes->assertStatus(200);
+
+        // Manager must be able to view satisfaction report on manager module
+        $mgrRes = $this->actingAs($manager)->get(route('manager.reports.satisfaction'));
+        $mgrRes->assertStatus(200);
     }
 }

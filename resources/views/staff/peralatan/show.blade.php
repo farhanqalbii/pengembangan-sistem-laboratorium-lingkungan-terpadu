@@ -26,7 +26,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-            <a href="{{ route('staff.equipment.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer">
+            <a href="{{ request()->routeIs('admin.*') ? route('admin.equipment.index') : route('staff.equipment.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer">
                 <i class="fa-solid fa-arrow-left text-[11px] text-slate-400"></i> Kembali
             </a>
             <button type="button" @click="showLabelModal = true" class="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-700/20 transition-all flex items-center gap-1.5 cursor-pointer">
@@ -35,9 +35,11 @@
             <a href="{{ route('equipment.detail', $equipment->code) }}" target="_blank" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow transition-colors">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Pratinjau Halaman QR
             </a>
-            <a href="{{ route('staff.equipment.edit', $equipment->id) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-colors">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Data Alat
-            </a>
+            @if(auth()->user()->isStaff())
+                <a href="{{ route('staff.equipment.edit', $equipment) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-colors">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Data Alat
+                </a>
+            @endif
         </div>
     </div>
 
@@ -127,7 +129,7 @@
         <!-- Tab 1: Kalibrasi -->
         <div x-show="tab === 'calibration'" class="mt-6 space-y-6">
             <!-- Form Catat Kalibrasi Baru -->
-            <form action="{{ route('staff.equipment.calibration', $equipment->id) }}" method="POST" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+            <form action="{{ route('staff.equipment.calibration', $equipment) }}" method="POST" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
                 @csrf
                 <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider"><i class="fa-solid fa-plus-circle mr-1 text-emerald-600"></i> Catat Hasil Kalibrasi Baru</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -196,7 +198,7 @@
 
         <!-- Tab 2: Servis -->
         <div x-show="tab === 'service'" class="mt-6 space-y-6">
-            <form action="{{ route('staff.equipment.service', $equipment->id) }}" method="POST" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+            <form action="{{ route('staff.equipment.service', $equipment) }}" method="POST" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
                 @csrf
                 <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider"><i class="fa-solid fa-plus-circle mr-1 text-emerald-600"></i> Catat Log Pemeliharaan / Perbaikan Servis</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">

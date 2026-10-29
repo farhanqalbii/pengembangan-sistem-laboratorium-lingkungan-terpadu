@@ -16,8 +16,15 @@ use Illuminate\Validation\Rule;
 
 class SampleController extends Controller
 {
+    protected function authorizeStaff(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isStaff(), 403, 'Akses ditolak: Hanya Staf Analis yang berwenang mengelola sampel.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeStaff();
+
         $query = Sample::with(['customer', 'sampleParameters.parameter', 'certificate', 'payments']);
 
         if ($request->filled('status')) {
@@ -43,6 +50,8 @@ class SampleController extends Controller
 
     public function show(Sample $sample)
     {
+        $this->authorizeStaff();
+
         $sample->load(['customer', 'sampleParameters.parameter.qualityStandard', 'sampleParameters.equipment', 'sampleParameters.analyst', 'certificate', 'payments.invoice']);
 
         $assignedAnalystIds = $sample->sampleParameters->pluck('analyst_id')->filter()->all();
@@ -60,6 +69,8 @@ class SampleController extends Controller
 
     public function receive(Request $request, Sample $sample)
     {
+        $this->authorizeStaff();
+
         if ($sample->status !== 'Diajukan') {
             return back()->withErrors(['error' => "Sampel tidak dapat diterima karena saat ini berstatus '{$sample->status}' (hanya sampel 'Diajukan' yang dapat diterima)."]);
         }
@@ -117,7 +128,7 @@ class SampleController extends Controller
                     'user_id' => $lockedSample->customer_id,
                     'title' => 'Sampel Telah Diterima',
                     'message' => "Sampel {$lockedSample->sample_code} telah disetujui & diterima oleh staf laboratorium dan siap diproses ke tahap pengujian.",
-                    'link' => '/customer/samples/'.$lockedSample->id,
+                    'link' => '/customer/samples/'.$lockedSample->sample_code,
                 ]);
             });
         } catch (\Throwable $e) {
@@ -129,6 +140,8 @@ class SampleController extends Controller
 
     public function assign(Request $request, Sample $sample)
     {
+        $this->authorizeStaff();
+
         if (! in_array($sample->status, ['Diterima', 'Diproses', 'Diuji', 'Revisi'])) {
             return back()->withInput()->withErrors(['error' => "Alokasi analis/alat hanya dapat dilakukan untuk sampel berstatus 'Diterima', 'Diproses', 'Diuji', atau 'Revisi' (saat ini: {$sample->status})."]);
         }
@@ -207,15 +220,17 @@ class SampleController extends Controller
                 'user_id' => $sample->customer_id,
                 'title' => 'Sampel Sedang Diuji',
                 'message' => "Sampel {$sample->sample_code} telah dialokasikan ke analis dan instrumen laboratorium untuk proses pengujian.",
-                'link' => '/customer/samples/'.$sample->id,
+                'link' => '/customer/samples/'.$sample->sample_code,
             ]);
         });
 
-        return redirect()->route('staff.samples.show', $sample->id)->with('success', 'Penugasan analis dan pengalokasian alat berhasil disimpan.');
+        return redirect()->route('staff.samples.show', $sample)->with('success', 'Penugasan analis dan pengalokasian alat berhasil disimpan.');
     }
 
     public function editResults(Sample $sample)
     {
+        $this->authorizeStaff();
+
         $sample->load(['sampleParameters.parameter.qualityStandard', 'sampleParameters.equipment', 'sampleParameters.analyst']);
         $equipmentList = Peralatan::where('status', 'Tersedia')->get();
 
@@ -224,6 +239,8 @@ class SampleController extends Controller
 
     public function storeResults(Request $request, Sample $sample)
     {
+        $this->authorizeStaff();
+
         if (! in_array($sample->status, ['Diproses', 'Diuji', 'Revisi'])) {
             return back()->withErrors(['error' => "Hasil pengujian hanya dapat disimpan jika sampel berstatus 'Diproses', 'Diuji', atau 'Revisi' (saat ini: {$sample->status})."]);
         }
@@ -279,7 +296,7 @@ class SampleController extends Controller
                 'user_id' => $sample->customer_id,
                 'title' => 'Hasil Uji Selesai Diinput',
                 'message' => "Hasil uji untuk sampel {$sample->sample_code} telah selesai diinput dan sedang menunggu verifikasi Manajer Lab.",
-                'link' => '/customer/samples/'.$sample->id,
+                'link' => '/customer/samples/'.$sample->sample_code,
             ]);
         });
 

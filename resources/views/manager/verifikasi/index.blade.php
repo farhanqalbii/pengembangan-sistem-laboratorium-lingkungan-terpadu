@@ -82,8 +82,13 @@
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse($samples as $sample)
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 sm:px-5 py-3 font-mono font-bold text-emerald-600 bg-emerald-50/50">
-                                {{ $sample->sample_code }}
+                            <td class="px-4 sm:px-5 py-3 whitespace-nowrap">
+                                <a href="{{ route('manager.verifications.show', $sample) }}" 
+                                   class="font-mono font-bold text-xs text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 hover:underline transition-colors inline-flex items-center gap-1.5"
+                                   title="Lihat Detail Verifikasi {{ $sample->sample_code }}">
+                                    <i class="fa-solid fa-flask text-emerald-500/70 text-[11px]"></i>
+                                    <span>{{ $sample->sample_code }}</span>
+                                </a>
                             </td>
                             <td class="px-4 sm:px-5 py-3 font-bold text-slate-800">
                                 {{ $sample->customer->company_name ?? $sample->customer->name }}
@@ -120,22 +125,22 @@
                             </td>
                             <td class="px-4 sm:px-5 py-3 text-center whitespace-nowrap">
                                 @if($sample->status === 'Menunggu Verifikasi')
-                                    <a href="{{ route('manager.verifications.show', $sample->id) }}" 
+                                    <a href="{{ route('manager.verifications.show', $sample) }}" 
                                        class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow-sm inline-flex items-center gap-1.5 transition-all">
                                         <i class="fa-solid fa-user-check"></i> Periksa & Approve
                                     </a>
                                 @elseif($sample->status === 'Selesai')
-                                    <a href="{{ route('manager.verifications.show', $sample->id) }}" 
+                                    <a href="{{ route('manager.verifications.show', $sample) }}" 
                                        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-xs shadow-sm inline-flex items-center gap-1.5 transition-all">
                                         <i class="fa-solid fa-file-lines text-emerald-400"></i> Detail / COA
                                     </a>
                                 @elseif($sample->status === 'Revisi')
-                                    <a href="{{ route('manager.verifications.show', $sample->id) }}" 
+                                    <a href="{{ route('manager.verifications.show', $sample) }}" 
                                        class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg text-xs shadow-sm inline-flex items-center gap-1.5 transition-all">
                                         <i class="fa-solid fa-rotate-left"></i> Catatan Revisi
                                     </a>
                                 @else
-                                    <a href="{{ route('manager.verifications.show', $sample->id) }}" 
+                                    <a href="{{ route('manager.verifications.show', $sample) }}" 
                                        class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs shadow-sm inline-flex items-center gap-1.5 transition-all">
                                         <i class="fa-solid fa-eye"></i> Detail
                                     </a>

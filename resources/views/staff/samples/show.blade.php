@@ -42,7 +42,7 @@
                     $isPaid = $sample->calculateTotalPrice() <= 0 || ($samplePay && $samplePay->status === 'Berhasil');
                 @endphp
                 @if($isPaid)
-                    <form action="{{ route('staff.samples.receive', $sample->id) }}" method="POST">
+                    <form action="{{ route('staff.samples.receive', $sample) }}" method="POST">
                         @csrf
                         <input type="hidden" name="received_date" value="{{ date('Y-m-d H:i:s') }}">
                         <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors cursor-pointer">
@@ -57,7 +57,7 @@
             @endif
 
             @if(in_array($sample->status, ['Diterima', 'Diproses', 'Diuji', 'Revisi']))
-                <a href="{{ route('staff.samples.input-results', $sample->id) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors cursor-pointer">
+                <a href="{{ route('staff.samples.input-results', $sample) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 flex items-center transition-colors cursor-pointer">
                     <i class="fa-solid fa-pen-to-square mr-2"></i> Input Hasil Pengujian
                 </a>
             @endif
@@ -113,7 +113,7 @@
             </div>
         @endif
 
-        <form action="{{ route('staff.samples.assign', $sample->id) }}" method="POST">
+        <form action="{{ route('staff.samples.assign', $sample) }}" method="POST">
             @csrf
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs min-w-[760px]">

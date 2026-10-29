@@ -40,31 +40,19 @@
 
             <!-- Tiga Fitur -->
             <div class="space-y-2.5 pt-1">
-                <div class="flex items-center gap-2.5 text-xs text-emerald-50">
-                    <div class="w-6 h-6 rounded-md bg-white/20 backdrop-blur-sm text-emerald-200 flex items-center justify-center shrink-0 border border-white/15">
-                        <i class="fa-solid fa-flask-vial text-[10px]"></i>
-                    </div>
+                <div class="flex items-center gap-2.5 text-xs text-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs"></span>
                     <span class="drop-shadow-sm">Pengujian Parameter Lingkungan</span>
                 </div>
-                <div class="flex items-center gap-2.5 text-xs text-emerald-50">
-                    <div class="w-6 h-6 rounded-md bg-white/20 backdrop-blur-sm text-emerald-200 flex items-center justify-center shrink-0 border border-white/15">
-                        <i class="fa-solid fa-microscope text-[10px]"></i>
-                    </div>
+                <div class="flex items-center gap-2.5 text-xs text-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs"></span>
                     <span class="drop-shadow-sm">Peminjaman Instrumen Laboratorium</span>
                 </div>
-                <div class="flex items-center gap-2.5 text-xs text-emerald-50">
-                    <div class="w-6 h-6 rounded-md bg-white/20 backdrop-blur-sm text-emerald-200 flex items-center justify-center shrink-0 border border-white/15">
-                        <i class="fa-solid fa-file-shield text-[10px]"></i>
-                    </div>
+                <div class="flex items-center gap-2.5 text-xs text-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs"></span>
                     <span class="drop-shadow-sm">Sertifikat Hasil Uji (LHU) Digital</span>
                 </div>
             </div>
-        </div>
-
-        <!-- Bagian Bawah: Footer UPTD -->
-        <div class="pt-3 border-t border-white/20 flex items-center gap-2 text-[11px] text-emerald-200/95 relative z-10">
-            <i class="fa-solid fa-shield-halved text-emerald-300 text-xs"></i>
-            <span>UPTD Laboratorium Lingkungan Hidup</span>
         </div>
     </div>
 
@@ -95,8 +83,8 @@
             <!-- Baris 1: Nama Lengkap & Alamat Email -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                        <i class="fa-regular fa-user text-emerald-600 text-xs"></i> Nama Lengkap / Penanggung Jawab
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                        Nama Lengkap / Penanggung Jawab
                     </label>
                     <input type="text" name="name" value="{{ old('name') }}" required autofocus
                         placeholder="Nama lengkap Anda"
@@ -104,8 +92,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                        <i class="fa-regular fa-envelope text-emerald-600 text-xs"></i> Alamat Email
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                        Alamat Email
                     </label>
                     <input type="email" name="email" value="{{ old('email') }}" required
                         placeholder="nama@email.com"
@@ -116,8 +104,8 @@
             <!-- Baris 2: Nomor WhatsApp & Nama Perusahaan -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                        <i class="fa-brands fa-whatsapp text-emerald-600 text-xs"></i> Nomor WhatsApp / Telepon
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                        Nomor WhatsApp / Telepon
                     </label>
                     <input type="text" name="phone" value="{{ old('phone') }}" required
                         placeholder="Contoh: 081234567890"
@@ -126,9 +114,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">
-                            <i class="fa-regular fa-building text-emerald-600 text-xs"></i> Nama Perusahaan / Instansi
-                        </span>
+                        <span>Nama Perusahaan / Instansi</span>
                         <span class="text-[10px] text-slate-400 font-normal px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200">Opsional</span>
                     </label>
                     <input type="text" name="company_name" value="{{ old('company_name') }}"
@@ -139,8 +125,8 @@
 
             <!-- Baris 3: Alamat Lengkap / Domisili -->
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                    <i class="fa-solid fa-location-dot text-emerald-600 text-xs"></i> Alamat Lengkap / Domisili
+                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                    Alamat Lengkap / Domisili
                 </label>
                 <textarea name="address" rows="2" placeholder="Alamat jalan, gedung, kota, atau kawasan industri..."
                     class="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all">{{ old('address') }}</textarea>
@@ -148,8 +134,8 @@
 
             <!-- Baris 4: Keamanan Kata Sandi -->
             <div class="pt-2 border-t border-slate-100">
-                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> Keamanan Kata Sandi
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Keamanan Kata Sandi
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -193,9 +179,8 @@
         <div class="mt-3.5 pt-2.5 border-t border-slate-100 text-center space-y-1">
             <p class="text-xs text-slate-500">Sudah memiliki akun terdaftar?</p>
             <div>
-                <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors">
-                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
-                    <span>Masuk ke Halaman Login &rarr;</span>
+                <a href="{{ route('login') }}" class="inline-block text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors">
+                    Masuk ke Halaman Login
                 </a>
             </div>
         </div>

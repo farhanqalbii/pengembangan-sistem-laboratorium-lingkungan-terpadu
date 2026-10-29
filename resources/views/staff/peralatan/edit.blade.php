@@ -9,7 +9,7 @@
         <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Edit Data Alat: {{ $equipment->name }}</h2>
         <p class="text-xs text-slate-500 mb-5">Perbarui detail spesifikasi atau lakukan perubahan jumlah stok.</p>
 
-        <form id="update-equipment-form" action="{{ route('staff.equipment.update', $equipment->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form id="update-equipment-form" action="{{ route('staff.equipment.update', $equipment) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
             @csrf
             @method('PUT')
 
@@ -156,7 +156,7 @@
                 </button>
 
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
-                    <a href="{{ route('staff.equipment.show', $equipment->id) }}" class="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors text-center">Batal</a>
+                    <a href="{{ route('staff.equipment.show', $equipment) }}" class="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors text-center">Batal</a>
                     <button type="submit" form="update-equipment-form" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 text-center">
                         Simpan Perubahan Data <i class="fa-solid fa-save ml-1"></i>
                     </button>
@@ -164,7 +164,7 @@
             </div>
         </form>
 
-        <form id="delete-equipment-form" action="{{ route('staff.equipment.destroy', $equipment->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus alat ini dari inventori?')" class="hidden">
+        <form id="delete-equipment-form" action="{{ route('staff.equipment.destroy', $equipment) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus alat ini dari inventori?')" class="hidden">
             @csrf
             @method('DELETE')
         </form>

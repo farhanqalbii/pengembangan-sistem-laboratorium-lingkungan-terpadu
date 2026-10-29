@@ -10,6 +10,8 @@ class SertifikatController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak.');
+
         $certificates = Sertifikat::where('customer_id', auth()->id())
             ->with(['sample', 'verifier'])
             ->latest()
@@ -20,6 +22,8 @@ class SertifikatController extends Controller
 
     public function show(Sertifikat $certificate)
     {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak.');
+
         if ($certificate->customer_id !== auth()->id()) {
             abort(403, 'Akses ditolak.');
         }

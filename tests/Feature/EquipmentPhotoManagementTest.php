@@ -191,7 +191,7 @@ class EquipmentPhotoManagementTest extends TestCase
             // Tidak mengirim input 'photo'
         ];
 
-        $response = $this->actingAs($this->staff)->put(route('staff.equipment.update', $equipment->id), $updatePayload);
+        $response = $this->actingAs($this->staff)->put(route('staff.equipment.update', $equipment), $updatePayload);
 
         $response->assertRedirect();
         $equipment->refresh();
@@ -236,7 +236,7 @@ class EquipmentPhotoManagementTest extends TestCase
             'photo' => $newImage,
         ];
 
-        $response = $this->actingAs($this->staff)->put(route('staff.equipment.update', $equipment->id), $updatePayload);
+        $response = $this->actingAs($this->staff)->put(route('staff.equipment.update', $equipment), $updatePayload);
 
         $response->assertRedirect();
         $equipment->refresh();
@@ -338,7 +338,7 @@ class EquipmentPhotoManagementTest extends TestCase
         ]);
         $customerStore->assertStatus(403);
 
-        $customerUpdate = $this->actingAs($this->customer)->put(route('staff.equipment.update', $equipment->id), [
+        $customerUpdate = $this->actingAs($this->customer)->put(route('staff.equipment.update', $equipment), [
             'name' => 'Hacked Device',
         ]);
         $customerUpdate->assertStatus(403);
@@ -380,7 +380,7 @@ class EquipmentPhotoManagementTest extends TestCase
             'photo' => $newImage,
         ];
 
-        $response = $this->actingAs($this->staff)->put(route('staff.equipment.update', $equipment->id), $invalidPayload);
+        $response = $this->actingAs($this->staff)->put(route('staff.equipment.update', $equipment), $invalidPayload);
 
         $response->assertSessionHasErrors('quantity');
 
@@ -430,7 +430,7 @@ class EquipmentPhotoManagementTest extends TestCase
     {
         $equipment = Peralatan::first();
 
-        $response = $this->actingAs($this->staff)->get(route('staff.equipment.show', $equipment->id));
+        $response = $this->actingAs($this->staff)->get(route('staff.equipment.show', $equipment));
 
         $response->assertStatus(200);
         $response->assertSee('Pratinjau Halaman QR');

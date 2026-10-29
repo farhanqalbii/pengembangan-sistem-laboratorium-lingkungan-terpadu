@@ -48,7 +48,7 @@
 
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span class="text-[11px] text-slate-400">Peminjaman {{ $borrowing->created_at->diffForHumans() }}</span>
-                    <a href="{{ route('customer.borrowings.show', $borrowing->id) }}" class="text-xs font-bold text-emerald-600 hover:underline">
+                    <a href="{{ route('customer.borrowings.show', $borrowing) }}" class="text-xs font-bold text-emerald-600 hover:underline">
                         Lihat Detail &rarr;
                     </a>
                 </div>

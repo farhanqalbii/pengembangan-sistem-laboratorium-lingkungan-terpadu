@@ -96,4 +96,16 @@ class Sample extends Model
             default => 'bg-gray-100 text-gray-800 border-gray-300',
         };
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'sample_code';
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        $field = $field ?? 'sample_code';
+
+        return $this->where($field, $value)->first();
+    }
 }

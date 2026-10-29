@@ -285,7 +285,7 @@ class PaymentGatewayService
                                 'user_id' => $ad->id,
                                 'title' => 'Peringatan: Stok Tidak Mencukupi Saat Settlement!',
                                 'message' => "Deposit peminjaman {$borrowing->borrow_code} lunas, tetapi stok (".implode(', ', $insufficientEquipments).') tidak mencukupi. Segera atur penyesuaian atau pengembalian.',
-                                'link' => '/admin/borrowings/'.$borrowing->id,
+                                'link' => '/admin/borrowings/'.($borrowing->kode_peminjaman ?? $borrowing->borrow_code),
                             ]);
                         }
 
@@ -294,7 +294,7 @@ class PaymentGatewayService
                             'user_id' => $borrowing->customer_id,
                             'title' => 'Pembayaran Berhasil - Menunggu Ketersediaan Alat',
                             'message' => "Pembayaran deposit peminjaman {$borrowing->borrow_code} telah diterima. Namun saat ini ketersediaan unit sedang terkendala. Staf kami akan segera menghubungi Anda.",
-                            'link' => '/customer/borrowings/'.$borrowing->id,
+                            'link' => '/customer/borrowings/'.($borrowing->kode_peminjaman ?? $borrowing->borrow_code),
                         ]);
                     }
                 }
@@ -307,7 +307,7 @@ class PaymentGatewayService
                     'user_id' => $lockedPayment->customer_id,
                     'title' => 'Pembayaran Sampel Terkonfirmasi',
                     'message' => "Pembayaran tagihan sampel {$lockedPayment->sample->sample_code} telah berhasil diverifikasi. Sampel Anda menunggu pemeriksaan & persetujuan penerimaan oleh staf lab.",
-                    'link' => '/customer/samples/'.$lockedPayment->sample->id,
+                    'link' => '/customer/samples/'.$lockedPayment->sample->sample_code,
                 ]);
 
                 // Notifikasi ke Staf & Admin: pembayaran lunas, siap diperiksa dan diterima
@@ -317,7 +317,7 @@ class PaymentGatewayService
                         'user_id' => $st->id,
                         'title' => 'Sampel Siap Diterima (Lunas)',
                         'message' => "Pembayaran sampel {$lockedPayment->sample->sample_code} dari {$lockedPayment->customer->name} telah lunas. Sampel siap diverifikasi dan diterima.",
-                        'link' => '/staff/samples/'.$lockedPayment->sample->id,
+                        'link' => '/staff/samples/'.$lockedPayment->sample->sample_code,
                     ]);
                 }
             }
@@ -365,7 +365,7 @@ class PaymentGatewayService
                     'user_id' => $lockedPayment->customer_id,
                     'title' => 'Pembayaran Sampel '.$normalizedStatus,
                     'message' => "Pembayaran untuk sampel {$lockedPayment->sample->sample_code} berstatus {$normalizedStatus}. Silakan lakukan pembayaran ulang melalui portal customer.",
-                    'link' => '/customer/samples/'.$lockedPayment->sample->id,
+                    'link' => '/customer/samples/'.$lockedPayment->sample->sample_code,
                 ]);
             }
 
@@ -404,12 +404,14 @@ class PaymentGatewayService
 
         try {
             $response = Http::withBasicAuth($this->serverKey, '')
-                ->timeout(10)
+                ->timeout(20)
+                ->retry(2, 200)
                 ->get("{$apiBaseUrl}/{$activeOrderId}/status");
 
             if ($response->status() === 404 && $activeOrderId !== $payment->payment_code) {
                 $response = Http::withBasicAuth($this->serverKey, '')
-                    ->timeout(10)
+                    ->timeout(20)
+                    ->retry(2, 200)
                     ->get("{$apiBaseUrl}/{$payment->payment_code}/status");
             }
 

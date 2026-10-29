@@ -14,8 +14,15 @@ use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
+    protected function authorizeCustomer(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isCustomer(), 403, 'Akses ditolak: Hanya Customer yang berwenang mengakses fitur peminjaman ini.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeCustomer();
+
         $query = Peminjaman::where('customer_id', auth()->id())
             ->with(['borrowingDetails.equipment', 'payments']);
 
@@ -30,6 +37,8 @@ class PeminjamanController extends Controller
 
     public function create(Request $request)
     {
+        $this->authorizeCustomer();
+
         $query = Peralatan::where('status', 'Tersedia')
             ->where('jumlah', '>', 0);
 
@@ -54,6 +63,8 @@ class PeminjamanController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorizeCustomer();
+
         $validated = $request->validate([
             'equipment_id' => ['required', 'exists:peralatan,id'],
             'quantity' => ['required', 'integer', 'min:1'],
@@ -120,7 +131,7 @@ class PeminjamanController extends Controller
                         'user_id' => $staff->id,
                         'title' => 'Pengajuan Peminjaman Alat',
                         'message' => "Pengajuan peminjaman {$code} dari ".auth()->user()->name,
-                        'link' => '/admin/borrowings/'.$borrowing->id,
+                        'link' => '/admin/borrowings/'.($borrowing->kode_peminjaman ?? $borrowing->borrow_code ?? $code),
                     ]);
                 }
             });
@@ -134,6 +145,8 @@ class PeminjamanController extends Controller
 
     public function show(Peminjaman $borrowing)
     {
+        $this->authorizeCustomer();
+
         if ($borrowing->customer_id !== auth()->id()) {
             abort(403, 'Akses ditolak.');
         }
@@ -145,6 +158,8 @@ class PeminjamanController extends Controller
 
     public function requestExtension(Request $request, Peminjaman $borrowing)
     {
+        $this->authorizeCustomer();
+
         if ($borrowing->customer_id !== auth()->id()) {
             abort(403);
         }

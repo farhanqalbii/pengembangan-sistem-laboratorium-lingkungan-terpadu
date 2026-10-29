@@ -153,6 +153,7 @@ html.dark table tbody tr:hover {
 html.dark table tbody td {
     color: #cbd5e1 !important;
     border-bottom-color: #1c3752 !important;
+    background-color: transparent;
 }
 
 /* 8. Kotak Ikon Kartu Statistik (KPI) & Akses Cepat */
@@ -162,7 +163,9 @@ html.dark .bg-purple-100 {
     color: #c084fc !important;
 }
 html.dark .bg-blue-50,
-html.dark .bg-blue-100 {
+html.dark .bg-blue-100,
+html.dark [class*="bg-blue-50"],
+html.dark [class*="bg-blue-100"] {
     background-color: rgba(59, 130, 246, 0.18) !important;
     color: #60a5fa !important;
 }

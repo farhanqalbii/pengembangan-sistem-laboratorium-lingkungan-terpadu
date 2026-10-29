@@ -80,4 +80,22 @@ class Sertifikat extends Model
             && ! empty($this->tanggal_verifikasi)
             && $this->sample?->status === 'Selesai';
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'nomor_sertifikat';
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        if (is_numeric($value)) {
+            return null;
+        }
+
+        $field = $field ?? $this->getRouteKeyName();
+
+        return $this->where($field, $value)
+            ->orWhere($field, str_replace('-', '/', $value))
+            ->first();
+    }
 }

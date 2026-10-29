@@ -12,8 +12,15 @@ use Illuminate\Support\Facades\DB;
 
 class KeuanganController extends Controller
 {
+    protected function authorizeAdmin(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Fitur keuangan hanya dapat diakses oleh Administrator.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeAdmin();
+
         $query = Pembayaran::with(['customer', 'invoice', 'sample', 'borrowing']);
 
         if ($request->filled('type')) {
@@ -39,6 +46,8 @@ class KeuanganController extends Controller
 
     public function processRefund(Request $request, Peminjaman $borrowing)
     {
+        $this->authorizeAdmin();
+
         try {
             DB::transaction(function () use ($borrowing) {
                 $lockedBorrowing = Peminjaman::where('id', $borrowing->id)
@@ -76,7 +85,7 @@ class KeuanganController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Refund Deposit Berhasil!',
                     'message' => 'Pengembalian deposit (refund) sebesar Rp '.number_format($lockedBorrowing->refund_amount, 0, ',', '.')." untuk peminjaman {$lockedBorrowing->borrow_code} telah dikirim.",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {

@@ -14,8 +14,15 @@ use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
+    protected function authorizeAdmin(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Fitur peminjaman admin hanya dapat diakses oleh Administrator.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeAdmin();
+
         $query = Peminjaman::with(['customer', 'borrowingDetails.equipment', 'payments']);
 
         if ($request->filled('status')) {
@@ -29,6 +36,8 @@ class PeminjamanController extends Controller
 
     public function show(Peminjaman $borrowing)
     {
+        $this->authorizeAdmin();
+
         $borrowing->load(['customer', 'borrowingDetails.equipment', 'payments.invoice']);
 
         return view('admin.peminjaman.show', compact('borrowing'));
@@ -36,6 +45,8 @@ class PeminjamanController extends Controller
 
     public function approve(Peminjaman $borrowing)
     {
+        $this->authorizeAdmin();
+
         if ($borrowing->status !== 'Diajukan') {
             return back()->with('error', "Pengajuan peminjaman tidak dapat disetujui karena status saat ini adalah '{$borrowing->status}'.")
                 ->withErrors(['status' => "Status peminjaman bukan 'Diajukan'."]);
@@ -107,7 +118,7 @@ class PeminjamanController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Pengajuan Peminjaman Disetujui!',
                     'message' => "Pengajuan peminjaman {$lockedBorrowing->borrow_code} telah disetujui. Silakan lakukan pembayaran deposit.",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {
@@ -119,6 +130,8 @@ class PeminjamanController extends Controller
 
     public function reject(Request $request, Peminjaman $borrowing)
     {
+        $this->authorizeAdmin();
+
         if ($borrowing->status !== 'Diajukan') {
             return back()->with('error', "Pengajuan peminjaman tidak dapat ditolak karena status saat ini adalah '{$borrowing->status}'.")
                 ->withErrors(['status' => "Status peminjaman bukan 'Diajukan'."]);
@@ -149,7 +162,7 @@ class PeminjamanController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Pengajuan Peminjaman Ditolak',
                     'message' => "Pengajuan peminjaman {$lockedBorrowing->borrow_code} ditolak. Alasan: {$validated['notes']}",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {
@@ -161,6 +174,8 @@ class PeminjamanController extends Controller
 
     public function approveExtension(Peminjaman $borrowing)
     {
+        $this->authorizeAdmin();
+
         if ($borrowing->status !== 'Dipinjam') {
             return back()->with('error', "Perpanjangan tidak dapat disetujui karena status peminjaman saat ini adalah '{$borrowing->status}'.")
                 ->withErrors(['status' => "Status peminjaman bukan 'Dipinjam'."]);
@@ -197,7 +212,7 @@ class PeminjamanController extends Controller
                     'user_id' => $lockedBorrowing->customer_id,
                     'title' => 'Perpanjangan Peminjaman Disetujui',
                     'message' => "Perpanjangan masa pinjam {$lockedBorrowing->borrow_code} disetujui hingga {$lockedBorrowing->end_date->format('d/m/Y')}.",
-                    'link' => '/customer/borrowings/'.$lockedBorrowing->id,
+                    'link' => '/customer/borrowings/'.($lockedBorrowing->kode_peminjaman ?? $lockedBorrowing->borrow_code),
                 ]);
             });
         } catch (\DomainException $e) {

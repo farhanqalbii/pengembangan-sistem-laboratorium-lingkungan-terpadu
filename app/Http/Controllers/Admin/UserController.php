@@ -11,8 +11,14 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    protected function authorizeAdmin(): void
+    {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Fitur manajemen pengguna hanya dapat diakses oleh Administrator.');
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeAdmin();
         $query = User::query();
 
         if ($request->filled('role')) {
@@ -44,11 +50,15 @@ class UserController extends Controller
 
     public function create()
     {
+        $this->authorizeAdmin();
+
         return view('admin.users.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeAdmin();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -75,11 +85,15 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorizeAdmin();
+
         return view('admin.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
+        $this->authorizeAdmin();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
@@ -119,6 +133,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorizeAdmin();
+
         if ($user->id === auth()->id()) {
             return back()->withErrors(['error' => 'Anda tidak dapat menghapus akun Anda sendiri.']);
         }

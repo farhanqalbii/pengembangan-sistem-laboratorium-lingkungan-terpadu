@@ -13,6 +13,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user() && auth()->user()->isAdmin(), 403, 'Akses ditolak: Dashboard hanya dapat diakses oleh Administrator.');
+
         $totalUsers = User::count();
         $pendingBorrowingsCount = Peminjaman::where('status', 'Diajukan')->count();
         $totalIncome = Pembayaran::where('status', 'Berhasil')->sum('jumlah_bayar');
