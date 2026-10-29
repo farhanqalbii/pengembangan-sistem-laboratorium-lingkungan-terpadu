@@ -187,23 +187,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased font-sans selection:bg-emerald-500 selection:text-white" x-data="{ mobileMenuOpen: false, trackCode: '', trackingLoading: false, trackResult: null, trackError: '' }">
 
-    <!-- Top Announcement Bar -->
-    <div class="bg-gradient-to-r from-brand-navy via-slate-900 to-brand-navy text-white text-xs py-2 px-4 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5"></span> ISO/IEC 17025:2017
-                </span>
-                <span class="text-slate-300 text-[11px] sm:text-xs">
-                    Sistem Informasi Manajemen Laboratorium (LIMS) & Peminjaman Alat UPTD Laboratorium Lingkungan Hidup
-                </span>
-            </div>
-            <div class="flex items-center gap-4 text-[11px] text-slate-300">
-                <span class="hidden md:inline">Jam Layanan: 08:00 - 15:30 WIB</span>
-                <a href="#kontak" class="hover:text-emerald-300 transition-colors">Kontak & Lokasi</a>
-            </div>
-        </div>
-    </div>
 
     <!-- Sticky Main Navigation -->
     <header class="sticky top-0 z-50 glass-header">
@@ -295,14 +278,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-4xl mx-auto space-y-3.5 sm:space-y-4 reveal-on-scroll">
                 
-                <!-- Pill Tag -->
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 border border-emerald-200/90 text-emerald-800 text-xs font-bold shadow-2xs backdrop-blur-md">
-                    <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    <span>Sistem Terintegrasi LIMS &bull; Akreditasi KAN ISO/IEC 17025</span>
-                </div>
 
                 <!-- Main Heading -->
                 <h1 class="text-2xl sm:text-4xl lg:text-[38px] xl:text-[40px] font-black text-slate-900 tracking-tight leading-[1.2] max-w-3xl mx-auto">
