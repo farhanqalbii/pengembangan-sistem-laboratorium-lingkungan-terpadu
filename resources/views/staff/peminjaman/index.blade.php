@@ -6,7 +6,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Filter & Search Bar -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+    <div class="relative z-20 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
         <form action="{{ route('staff.borrowings.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <div class="relative flex-1">
@@ -19,15 +19,23 @@
                 </div>
 
                 <div class="w-full sm:w-48">
-                    <select name="status" onchange="this.form.submit()" class="w-full text-xs rounded-xl px-3 py-2.5 bg-slate-50 border border-slate-300 text-slate-800 focus:outline-none focus:border-emerald-500">
-                        <option value="">-- Semua Status --</option>
-                        <option value="Diajukan" {{ request('status') === 'Diajukan' ? 'selected' : '' }}>Diajukan</option>
-                        <option value="Disetujui" {{ request('status') === 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
-                        <option value="Dipinjam" {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                        <option value="Dikembalikan" {{ request('status') === 'Dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
-                        <option value="Terlambat" {{ request('status') === 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
-                        <option value="Ditolak" {{ request('status') === 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-                    </select>
+                    <x-custom-select 
+                        name="status" 
+                        :options="[
+                            '' => '-- Semua Status --',
+                            'Diajukan' => 'Diajukan',
+                            'Disetujui' => 'Disetujui',
+                            'Dipinjam' => 'Dipinjam',
+                            'Dikembalikan' => 'Dikembalikan',
+                            'Terlambat' => 'Terlambat',
+                            'Ditolak' => 'Ditolak'
+                        ]"
+                        :selected="request('status')"
+                        auto-submit
+                        container-class="w-full"
+                        button-class="py-2.5"
+                        aria-label="Filter berdasarkan Status Peminjaman"
+                    />
                 </div>
             </div>
 
@@ -45,7 +53,7 @@
     </div>
 
     <!-- Main List Card -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="relative z-10 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
                 <h3 class="text-sm font-bold text-slate-800">Daftar Peminjaman Instrumen Laboratorium</h3>

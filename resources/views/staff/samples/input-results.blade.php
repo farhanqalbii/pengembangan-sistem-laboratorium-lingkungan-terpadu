@@ -11,7 +11,7 @@
             <h1 class="text-base sm:text-lg font-bold text-slate-800 mt-1">{{ $sample->sample_type }}</h1>
             <p class="text-xs text-slate-500">Customer: {{ $sample->customer->company_name ?? $sample->customer->name }} | Lokasi: {{ $sample->sampling_location }}</p>
         </div>
-        <a href="{{ route('staff.samples.show', $sample) }}" class="self-start sm:self-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">Kembali</a>
+        <a href="{{ route('staff.samples.show', $sample) }}" class="self-start sm:self-auto px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 font-bold text-xs rounded-xl transition-colors">Kembali</a>
     </div>
 
     <form action="{{ route('staff.samples.store-results', $sample) }}" method="POST" x-data="{ submitting: false }" @submit="if ($el.checkValidity()) submitting = true" x-init="window.addEventListener('pageshow', () => submitting = false)" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-5">
@@ -43,23 +43,23 @@
                             <span class="font-bold text-sm text-slate-800 block">{{ $sp->parameter->name ?? 'Parameter' }}</span>
                             <span class="text-xs text-slate-500 block">Metode: {{ $sp->test_method }}</span>
                         </div>
-                        <div class="bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-xs">
+                        <div class="bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
                             <span class="text-slate-400">Baku Mutu:</span>
-                            <span class="font-mono font-bold text-slate-700 ml-1">{{ $sp->quality_standard_summary }}</span>
+                            <span class="font-mono font-bold text-slate-700 dark:text-slate-200 ml-1">{{ $sp->quality_standard_summary }}</span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nilai Hasil Pengujian <span class="text-rose-500">*</span></label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">Nilai Hasil Pengujian <span class="text-rose-500">*</span></label>
                             <div class="flex items-center space-x-2">
-                                <input type="text" name="results[{{ $idx }}][test_value]" value="{{ old("results.{$idx}.test_value", $sp->test_value) }}" placeholder="Contoh: 7.4 atau 18.5..." required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-emerald-500">
-                                <span class="text-xs font-bold text-slate-500 min-w-[40px]">{{ $sp->parameter->unit ?? '-' }}</span>
+                                <input type="text" name="results[{{ $idx }}][test_value]" value="{{ old("results.{$idx}.test_value", $sp->test_value) }}" placeholder="Contoh: 7.4 atau 18.5..." required class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 min-w-[40px]">{{ $sp->parameter->unit ?? '-' }}</span>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Analisis (Opsional)</label>
-                            <input type="text" name="results[{{ $idx }}][notes]" value="{{ old("results.{$idx}.notes", $sp->notes) }}" placeholder="Keterangan pengujian..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">Catatan Analisis (Opsional)</label>
+                            <input type="text" name="results[{{ $idx }}][notes]" value="{{ old("results.{$idx}.notes", $sp->notes) }}" placeholder="Keterangan pengujian..." class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500">
                         </div>
                     </div>
                 </div>

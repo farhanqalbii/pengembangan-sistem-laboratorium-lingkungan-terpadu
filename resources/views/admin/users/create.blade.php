@@ -22,12 +22,18 @@
 
         <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Role Hak Akses</label>
-            <select name="role" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold">
-                <option value="customer" {{ old('role') === 'customer' ? 'selected' : '' }}>Customer</option>
-                <option value="staff" {{ old('role') === 'staff' ? 'selected' : '' }}>Staff / Analis Lab</option>
-                <option value="manager" {{ old('role') === 'manager' ? 'selected' : '' }}>Manajer Lab</option>
-                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
-            </select>
+            <x-custom-select 
+                name="role" 
+                :options="[
+                    'customer' => 'Customer',
+                    'staff' => 'Staff / Analis Lab',
+                    'manager' => 'Manajer Lab',
+                    'admin' => 'Administrator'
+                ]"
+                :selected="old('role', 'customer')"
+                required
+                aria-label="Pilih Role Hak Akses Pengguna"
+            />
             @error('role') <span class="text-rose-500 text-[11px]">{{ $message }}</span> @enderror
         </div>
 

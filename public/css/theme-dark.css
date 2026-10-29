@@ -195,21 +195,29 @@ html.dark .bg-indigo-100 {
     color: #818cf8 !important;
 }
 
-/* 9. Tombol Interaktif, Akses Cepat & Hover Effects */
-html.dark a.bg-slate-50,
+/* 9. Tombol Interaktif, Akses Cepat, Secondary & Disabled Buttons */
 html.dark a.bg-white,
-html.dark button.bg-white {
-    background-color: #0a1827 !important;
-    color: #e2e8f0 !important;
-    border-color: #1c3752 !important;
+html.dark button.bg-white,
+html.dark .bg-white.border-slate-300,
+html.dark .bg-white.border-slate-200 {
+    background-color: #0d1e2f !important;
+    color: #cbd5e1 !important;
+    border-color: #1e3852 !important;
 }
-html.dark a.bg-slate-50:hover,
+html.dark a.bg-slate-50,
+html.dark button.bg-slate-50 {
+    background-color: #0b1a2a !important;
+    color: #cbd5e1 !important;
+    border-color: #1a3248 !important;
+}
 html.dark a.bg-white:hover,
 html.dark button.bg-white:hover,
+html.dark a.bg-slate-50:hover,
+html.dark button.bg-slate-50:hover,
 html.dark .hover\:bg-slate-50:hover,
 html.dark .hover\:bg-slate-100:hover {
     background-color: #142a42 !important;
-    border-color: #204163 !important;
+    border-color: #24466b !important;
     color: #ffffff !important;
 }
 html.dark .hover\:bg-emerald-50\/50:hover,
@@ -221,36 +229,194 @@ html.dark .hover\:border-emerald-400:hover {
     border-color: #168975 !important;
 }
 
-/* 10. Status Badges & Alerts */
+/* Disabled & Locked Buttons (Fixes bright clashing rectangles in dark mode) */
+html.dark button:disabled,
+html.dark button[disabled],
+html.dark a[disabled],
+html.dark .cursor-not-allowed,
+html.dark button.bg-slate-300,
+html.dark button.bg-slate-200,
+html.dark button.bg-slate-100 {
+    background-color: #122234 !important;
+    color: #64748b !important;
+    border-color: #1c354e !important;
+    box-shadow: none !important;
+    opacity: 0.8 !important;
+}
+html.dark button:disabled i,
+html.dark button[disabled] i,
+html.dark .cursor-not-allowed i {
+    color: #64748b !important;
+}
+
+/* 10. Status Badges, Labels & Alert Boxes (High Contrast & Comfortable Harmony) */
+html.dark .text-emerald-600,
 html.dark .text-emerald-700,
 html.dark .text-emerald-800,
-html.dark .text-emerald-600 {
+html.dark .text-emerald-900,
+html.dark .text-emerald-950 {
     color: #34d399 !important;
 }
+html.dark .text-blue-600,
 html.dark .text-blue-700,
 html.dark .text-blue-800,
-html.dark .text-blue-600 {
+html.dark .text-blue-900,
+html.dark .text-blue-950 {
     color: #60a5fa !important;
 }
+html.dark .text-amber-600,
 html.dark .text-amber-700,
 html.dark .text-amber-800,
-html.dark .text-amber-600 {
+html.dark .text-amber-900,
+html.dark .text-amber-950 {
     color: #fbbf24 !important;
 }
+html.dark .text-rose-600,
 html.dark .text-rose-700,
 html.dark .text-rose-800,
-html.dark .text-rose-600 {
+html.dark .text-rose-900,
+html.dark .text-rose-950 {
     color: #fb7185 !important;
 }
+html.dark .text-purple-600,
 html.dark .text-purple-700,
 html.dark .text-purple-800,
-html.dark .text-purple-600 {
+html.dark .text-purple-900,
+html.dark .text-purple-950 {
     color: #c084fc !important;
 }
+html.dark .text-indigo-600,
 html.dark .text-indigo-700,
 html.dark .text-indigo-800,
-html.dark .text-indigo-600 {
+html.dark .text-indigo-900,
+html.dark .text-indigo-950 {
     color: #818cf8 !important;
+}
+html.dark .text-teal-600,
+html.dark .text-teal-700,
+html.dark .text-teal-800,
+html.dark .text-teal-900 {
+    color: #2dd4bf !important;
+}
+html.dark .text-cyan-600,
+html.dark .text-cyan-700,
+html.dark .text-cyan-800,
+html.dark .text-cyan-900 {
+    color: #38bdf8 !important;
+}
+
+/* Alert Boxes & Notification Banners */
+html.dark .bg-amber-50,
+html.dark .bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: #fde68a !important;
+}
+html.dark .bg-amber-50 h1,
+html.dark .bg-amber-50 h2,
+html.dark .bg-amber-50 h3,
+html.dark .bg-amber-50 h4,
+html.dark .bg-amber-50 strong,
+html.dark .bg-amber-100 h1,
+html.dark .bg-amber-100 h2,
+html.dark .bg-amber-100 h3,
+html.dark .bg-amber-100 h4,
+html.dark .bg-amber-100 strong {
+    color: #fef08a !important;
+}
+html.dark .bg-amber-50 p,
+html.dark .bg-amber-100 p {
+    color: #fde68a !important;
+}
+
+html.dark .bg-rose-50,
+html.dark .bg-rose-100 {
+    background-color: rgba(244, 63, 94, 0.12) !important;
+    border-color: rgba(244, 63, 94, 0.3) !important;
+    color: #fecdd3 !important;
+}
+html.dark .bg-rose-50 h1,
+html.dark .bg-rose-50 h2,
+html.dark .bg-rose-50 h3,
+html.dark .bg-rose-50 h4,
+html.dark .bg-rose-50 strong,
+html.dark .bg-rose-100 h1,
+html.dark .bg-rose-100 h2,
+html.dark .bg-rose-100 h3,
+html.dark .bg-rose-100 h4,
+html.dark .bg-rose-100 strong {
+    color: #ffe4e6 !important;
+}
+html.dark .bg-rose-50 p,
+html.dark .bg-rose-100 p {
+    color: #fecdd3 !important;
+}
+
+html.dark .bg-indigo-50,
+html.dark .bg-indigo-100 {
+    background-color: rgba(99, 102, 241, 0.12) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    color: #c7d2fe !important;
+}
+html.dark .bg-indigo-50 h1,
+html.dark .bg-indigo-50 h2,
+html.dark .bg-indigo-50 h3,
+html.dark .bg-indigo-50 h4,
+html.dark .bg-indigo-50 strong,
+html.dark .bg-indigo-100 h1,
+html.dark .bg-indigo-100 h2,
+html.dark .bg-indigo-100 h3,
+html.dark .bg-indigo-100 h4,
+html.dark .bg-indigo-100 strong {
+    color: #e0e7ff !important;
+}
+html.dark .bg-indigo-50 p,
+html.dark .bg-indigo-100 p {
+    color: #c7d2fe !important;
+}
+
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    color: #a7f3d0 !important;
+}
+
+/* Subtle Badge Borders in Dark Mode */
+html.dark .border-amber-200,
+html.dark .border-amber-300 {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+}
+html.dark .border-rose-200,
+html.dark .border-rose-300 {
+    border-color: rgba(244, 63, 94, 0.35) !important;
+}
+html.dark .border-emerald-200,
+html.dark .border-emerald-300 {
+    border-color: rgba(16, 185, 129, 0.35) !important;
+}
+html.dark .border-blue-200,
+html.dark .border-blue-300 {
+    border-color: rgba(59, 130, 246, 0.35) !important;
+}
+html.dark .border-indigo-200,
+html.dark .border-indigo-300 {
+    border-color: rgba(99, 102, 241, 0.35) !important;
+}
+html.dark .border-purple-200,
+html.dark .border-purple-300 {
+    border-color: rgba(168, 85, 247, 0.35) !important;
+}
+html.dark .border-teal-200,
+html.dark .border-teal-300 {
+    border-color: rgba(20, 184, 166, 0.35) !important;
+}
+html.dark .border-cyan-200,
+html.dark .border-cyan-300 {
+    border-color: rgba(6, 182, 212, 0.35) !important;
+}
+html.dark .border-dashed {
+    border-color: #1e3852 !important;
 }
 
 /* 11. Header, Topbar, & Navigasi */
@@ -382,4 +548,28 @@ html.dark .guest-gradient-bg {
 html.dark #app-watermark img,
 html.dark .fixed.inset-0 img[src*="logo_icon"] {
     opacity: 0.015 !important;
+}
+
+/* 16. Custom Select & Dropdown Styling (Mentor Evaluation Poin 3) */
+html.dark [role="listbox"] {
+    background-color: #0f2236 !important;
+    border-color: #1c3752 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.7) !important;
+}
+html.dark [role="option"]:hover {
+    background-color: rgba(22, 137, 117, 0.25) !important;
+    color: #34d399 !important;
+}
+html.dark [role="option"][aria-selected="true"] {
+    background-color: rgba(22, 137, 117, 0.35) !important;
+    color: #5eead4 !important;
+}
+
+/* 17. Stacking Context Elevation for Open Dropdowns */
+html.dark :has(> [data-dropdown-open="true"]),
+html.dark :has([data-dropdown-open="true"]),
+html.dark .card-hover:has([data-dropdown-open="true"]),
+html.dark form:has([data-dropdown-open="true"]) {
+    z-index: 50 !important;
+    position: relative !important;
 }

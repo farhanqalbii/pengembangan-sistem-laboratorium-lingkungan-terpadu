@@ -57,13 +57,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Status Alat <span class="text-rose-500">*</span></label>
-                    <select name="status" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
-                        <option value="Tersedia" {{ $equipment->status === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                        <option value="Dipinjam" {{ $equipment->status === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                        <option value="Dalam Servis" {{ $equipment->status === 'Dalam Servis' ? 'selected' : '' }}>Dalam Servis</option>
-                        <option value="Dalam Kalibrasi" {{ $equipment->status === 'Dalam Kalibrasi' ? 'selected' : '' }}>Dalam Kalibrasi</option>
-                        <option value="Tidak Tersedia" {{ $equipment->status === 'Tidak Tersedia' ? 'selected' : '' }}>Tidak Tersedia</option>
-                    </select>
+                    <x-custom-select 
+                        name="status" 
+                        :options="[
+                            'Tersedia' => 'Tersedia',
+                            'Dipinjam' => 'Dipinjam',
+                            'Dalam Servis' => 'Dalam Servis',
+                            'Dalam Kalibrasi' => 'Dalam Kalibrasi',
+                            'Tidak Tersedia' => 'Tidak Tersedia'
+                        ]"
+                        :selected="old('status', $equipment->status)"
+                        required
+                        aria-label="Pilih Status Alat"
+                    />
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Harga Sewa / Hari (Rp) <span class="text-rose-500">*</span></label>

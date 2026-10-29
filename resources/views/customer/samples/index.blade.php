@@ -6,18 +6,26 @@
 @section('content')
 <div class="space-y-6">
     <!-- Action & Filter Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
+    <div class="relative z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
         <form action="{{ route('customer.samples.index') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode/jenis sampel/lokasi..." class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-4 py-2 text-slate-800 w-full sm:w-64 focus:outline-none focus:border-emerald-500">
-            <select name="status" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 w-full sm:w-auto focus:outline-none focus:border-emerald-500">
-                <option value="">-- Semua Status --</option>
-                <option value="Diajukan" {{ request('status') === 'Diajukan' ? 'selected' : '' }}>Diajukan</option>
-                <option value="Diterima" {{ request('status') === 'Diterima' ? 'selected' : '' }}>Diterima</option>
-                <option value="Diproses" {{ request('status') === 'Diproses' ? 'selected' : '' }}>Diproses</option>
-                <option value="Diuji" {{ request('status') === 'Diuji' ? 'selected' : '' }}>Diuji</option>
-                <option value="Menunggu Verifikasi" {{ request('status') === 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                <option value="Selesai" {{ request('status') === 'Selesai' ? 'selected' : '' }}>Selesai</option>
-            </select>
+            <x-custom-select 
+                name="status" 
+                :options="[
+                    '' => '-- Semua Status --',
+                    'Diajukan' => 'Diajukan',
+                    'Diterima' => 'Diterima',
+                    'Diproses' => 'Diproses',
+                    'Diuji' => 'Diuji',
+                    'Menunggu Verifikasi' => 'Menunggu Verifikasi',
+                    'Selesai' => 'Selesai'
+                ]"
+                :selected="request('status')"
+                auto-submit
+                container-class="w-full sm:w-48"
+                button-class="py-2"
+                aria-label="Filter berdasarkan Status Sampel"
+            />
             <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-700 w-full sm:w-auto">Filter</button>
         </form>
 
@@ -27,7 +35,7 @@
     </div>
 
     <!-- Samples Table Card -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden anim-fade-up anim-delay-2 card-hover">
+    <div class="relative z-10 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden anim-fade-up anim-delay-2 card-hover">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[650px]">
                 <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">

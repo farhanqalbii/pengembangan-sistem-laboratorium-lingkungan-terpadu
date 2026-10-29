@@ -153,11 +153,16 @@
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Status / Hasil</label>
-                        <select name="result" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2">
-                            <option value="Lulus">Lulus (Akurat & Layak Pakai)</option>
-                            <option value="Perlu Penyesuaian">Perlu Penyesuaian / Drift</option>
-                            <option value="Gagal">Gagal / Rusak</option>
-                        </select>
+                        <x-custom-select 
+                            name="result" 
+                            :options="[
+                                'Lulus' => 'Lulus (Akurat & Layak Pakai)',
+                                'Perlu Penyesuaian' => 'Perlu Penyesuaian / Drift',
+                                'Gagal' => 'Gagal / Rusak'
+                            ]"
+                            :selected="old('result', 'Lulus')"
+                            aria-label="Status Hasil Kalibrasi"
+                        />
                     </div>
                 </div>
                 <div class="text-right">
@@ -208,11 +213,16 @@
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Status Servis</label>
-                        <select name="status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2">
-                            <option value="Selesai">Selesai</option>
-                            <option value="Dalam Proses">Dalam Proses</option>
-                            <option value="Menunggu Suku Cadang">Menunggu Suku Cadang</option>
-                        </select>
+                        <x-custom-select 
+                            name="status" 
+                            :options="[
+                                'Selesai' => 'Selesai',
+                                'Dalam Proses' => 'Dalam Proses',
+                                'Menunggu Suku Cadang' => 'Menunggu Suku Cadang'
+                            ]"
+                            :selected="old('status', 'Selesai')"
+                            aria-label="Status Servis Pemeliharaan"
+                        />
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Penyedia Jasa / Teknisi</label>

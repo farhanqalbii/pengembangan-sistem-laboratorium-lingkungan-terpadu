@@ -6,16 +6,24 @@
 @section('content')
 <div class="space-y-6" x-data="{ showModal: false, editUser: null, showDeleteModal: false, deleteUrl: '', deleteName: '' }" x-effect="document.body.classList.toggle('overflow-hidden', showModal || showDeleteModal); document.body.classList.toggle('modal-open', showModal || showDeleteModal)">
     <!-- Action Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="relative z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <form action="{{ route('admin.users.index') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama/email/perusahaan..." class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-4 py-2 text-slate-800 w-full sm:w-64 focus:outline-none focus:border-emerald-500">
-            <select name="role" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-emerald-500">
-                <option value="">-- Semua Role --</option>
-                <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="manager" {{ request('role') === 'manager' ? 'selected' : '' }}>Manajer Lab</option>
-                <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>Staff / Analis</option>
-                <option value="customer" {{ request('role') === 'customer' ? 'selected' : '' }}>Customer</option>
-            </select>
+            <x-custom-select 
+                name="role" 
+                :options="[
+                    '' => '-- Semua Role --',
+                    'admin' => 'Admin',
+                    'manager' => 'Manajer Lab',
+                    'staff' => 'Staff / Analis',
+                    'customer' => 'Customer'
+                ]"
+                :selected="request('role')"
+                auto-submit
+                container-class="w-full sm:w-48"
+                button-class="py-2"
+                aria-label="Filter berdasarkan Role Pengguna"
+            />
             <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-700">Filter</button>
         </form>
 
@@ -25,7 +33,7 @@
     </div>
 
     <!-- Users Table -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="relative z-10 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs min-w-[700px]">
                 <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
@@ -172,12 +180,20 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Role Hak Akses</label>
-                        <select name="role" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold">
-                            <option value="customer" :selected="editUser?.role === 'customer'">Customer</option>
-                            <option value="staff" :selected="editUser?.role === 'staff'">Staff / Analis Lab</option>
-                            <option value="manager" :selected="editUser?.role === 'manager'">Manajer Lab</option>
-                            <option value="admin" :selected="editUser?.role === 'admin'">Administrator</option>
-                        </select>
+                        <x-custom-select 
+                            name="role" 
+                            id="modal_user_role"
+                            :options="[
+                                'customer' => 'Customer',
+                                'staff' => 'Staff / Analis Lab',
+                                'manager' => 'Manajer Lab',
+                                'admin' => 'Administrator'
+                            ]"
+                            :selected="old('role', 'customer')"
+                            alpine-model="editUser ? editUser.role : 'customer'"
+                            required
+                            aria-label="Pilih Role Hak Akses Pengguna"
+                        />
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

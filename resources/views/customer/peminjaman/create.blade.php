@@ -6,19 +6,28 @@
 @section('content')
 <div class="space-y-6">
     <!-- Filter & Search Bar -->
-    <form action="{{ route('customer.borrowings.create') }}" method="GET" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-3 items-center">
+    <form action="{{ route('customer.borrowings.create') }}" method="GET" class="relative z-20 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-3 items-center">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama alat/merk/tipe..." class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-4 py-2 text-slate-800 w-full sm:w-64 focus:outline-none focus:border-emerald-500">
-        <select name="category" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 w-full sm:w-auto focus:outline-none focus:border-emerald-500">
-            <option value="">-- Semua Kategori --</option>
-            @foreach($categories as $cat)
-                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
-            @endforeach
-        </select>
+        @php
+            $catOptions = ['' => '-- Semua Kategori --'];
+            foreach($categories as $cat) {
+                $catOptions[$cat] = $cat;
+            }
+        @endphp
+        <x-custom-select 
+            name="category" 
+            :options="$catOptions"
+            :selected="request('category')"
+            auto-submit
+            container-class="w-full sm:w-48"
+            button-class="py-2"
+            aria-label="Filter berdasarkan Kategori Alat"
+        />
         <button type="submit" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold hover:bg-slate-700 w-full sm:w-auto">Cari</button>
     </form>
 
     <!-- Available Equipment Catalog Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" x-data="{ selectedEquipment: null, showModal: false, submitting: false }" x-init="window.addEventListener('pageshow', () => submitting = false)" x-effect="document.body.classList.toggle('overflow-hidden', showModal); document.body.classList.toggle('modal-open', showModal)">
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" x-data="{ selectedEquipment: null, showModal: false, submitting: false }" x-init="window.addEventListener('pageshow', () => submitting = false)" x-effect="document.body.classList.toggle('overflow-hidden', showModal); document.body.classList.toggle('modal-open', showModal)">
         @forelse($equipmentList as $eq)
             <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
                 <div>

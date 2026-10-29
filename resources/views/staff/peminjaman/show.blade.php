@@ -272,48 +272,54 @@
                             <h4 class="font-bold text-slate-800 text-sm">{{ $detail->equipment->name }}</h4>
                             <p class="text-xs text-slate-500">Kode: {{ $detail->equipment->code }} | Merk: {{ $detail->equipment->brand ?? 'N/A' }}</p>
                         </div>
-                        <span class="text-xs font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-lg">
                             Jumlah Dikembalikan: {{ $detail->quantity }} Unit
                         </span>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Kondisi Saat Dikembalikan <span class="text-rose-500">*</span></label>
-                            <select name="conditions[{{ $idx }}][condition_return]" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 cursor-pointer">
-                                <option value="Baik" {{ ($detail->condition_return ?? 'Baik') === 'Baik' ? 'selected' : '' }}>Baik & Lengkap (Tanpa Kerusakan)</option>
-                                <option value="Rusak Ringan" {{ $detail->condition_return === 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan (Bisa Diperbaiki)</option>
-                                <option value="Rusak Berat" {{ $detail->condition_return === 'Rusak Berat' ? 'selected' : '' }}>Rusak Berat</option>
-                                <option value="Hilang" {{ $detail->condition_return === 'Hilang' ? 'selected' : '' }}>Hilang</option>
-                            </select>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">Kondisi Saat Dikembalikan <span class="text-rose-500">*</span></label>
+                            <x-custom-select 
+                                name="conditions[{{ $idx }}][condition_return]"
+                                :options="[
+                                    'Baik' => 'Baik & Lengkap (Tanpa Kerusakan)',
+                                    'Rusak Ringan' => 'Rusak Ringan (Bisa Diperbaiki)',
+                                    'Rusak Berat' => 'Rusak Berat',
+                                    'Hilang' => 'Hilang'
+                                ]"
+                                :selected="old('conditions.'.$idx.'.condition_return', $detail->condition_return ?? 'Baik')"
+                                required
+                                aria-label="Kondisi Saat Dikembalikan"
+                            />
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Inspeksi Staff</label>
-                            <input type="text" name="conditions[{{ $idx }}][notes]" value="{{ $detail->notes }}" placeholder="Keterangan kondisi fisik..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">Catatan Inspeksi Staff</label>
+                            <input type="text" name="conditions[{{ $idx }}][notes]" value="{{ $detail->notes }}" placeholder="Keterangan kondisi fisik..." class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500">
                         </div>
                     </div>
                 </div>
             @endforeach
 
             <!-- Financial Adjustments (Fine / Penalty) -->
-            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-3">
-                <h4 class="font-bold text-amber-900 text-xs uppercase tracking-wider"><i class="fa-solid fa-calculator mr-1"></i> Perhitungan Denda & Pengembalian Deposit</h4>
+            <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 space-y-3">
+                <h4 class="font-bold text-amber-900 dark:text-amber-200 text-xs uppercase tracking-wider"><i class="fa-solid fa-calculator mr-1 text-amber-600 dark:text-amber-400"></i> Perhitungan Denda & Pengembalian Deposit</h4>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Denda Keterlambatan / Kerusakan (Rp)</label>
-                        <input type="number" name="fine_amount" min="0" step="10000" value="{{ old('fine_amount', $borrowing->fine_amount) }}" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 font-bold text-rose-700 text-xs">
-                        <span class="text-[11px] text-slate-500 mt-1 block">Diisi jika ada denda keterlambatan atau klaim biaya perbaikan.</span>
+                        <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">Denda Keterlambatan / Kerusakan (Rp)</label>
+                        <input type="number" name="fine_amount" min="0" step="10000" value="{{ old('fine_amount', $borrowing->fine_amount) }}" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 font-bold text-rose-700 dark:text-rose-400 text-xs">
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">Diisi jika ada denda keterlambatan atau klaim biaya perbaikan.</span>
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Catatan Denda (Opsional)</label>
-                        <input type="text" name="fine_reason" value="{{ old('fine_reason', $borrowing->fine_reason) }}" placeholder="Contoh: Terlambat 2 hari / Ganti rugi kabel adaptor..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
+                        <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">Catatan Denda (Opsional)</label>
+                        <input type="text" name="fine_reason" value="{{ old('fine_reason', $borrowing->fine_reason) }}" placeholder="Contoh: Terlambat 2 hari / Ganti rugi kabel adaptor..." class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="p-4 bg-slate-50 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span class="text-xs text-slate-500 font-semibold"><i class="fa-solid fa-boxes-packing text-emerald-600 mr-1"></i> Stok akan dikembalikan ke inventori secara otomatis</span>
             <button type="submit" 
                 :disabled="submitting"

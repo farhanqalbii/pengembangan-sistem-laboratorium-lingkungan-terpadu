@@ -9,7 +9,7 @@
     <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="flex flex-wrap items-center gap-2 mb-1">
-                <span class="font-mono font-bold text-base sm:text-lg text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">{{ $sample->sample_code }}</span>
+                <span class="font-mono font-bold text-base sm:text-lg text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/60">{{ $sample->sample_code }}</span>
                 <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $sample->status_badge_class }}">{{ $sample->status }}</span>
                 @php
                     $samplePay = $sample->payments->first();
@@ -33,7 +33,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <a href="{{ route('staff.samples.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer">
+            <a href="{{ route('staff.samples.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer">
                 <i class="fa-solid fa-arrow-left text-[11px] text-slate-400"></i> Kembali
             </a>
 
@@ -107,15 +107,27 @@
         @endif
 
         @if(!in_array($sample->status, ['Diterima', 'Diproses', 'Diuji', 'Revisi']))
-            <div class="p-4 text-xs text-amber-800 bg-amber-50 border-b border-amber-200 flex items-center gap-2">
-                <i class="fa-solid fa-circle-info text-amber-600"></i>
-                <span>Status sampel saat ini <strong>{{ $sample->status }}</strong>. Form penugasan hanya dapat diperbarui ketika sampel berstatus <strong>Diterima</strong>, <strong>Diproses</strong>, <strong>Diuji</strong>, atau <strong>Revisi</strong>.</span>
+            <div class="p-4 text-xs text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800/50 flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-info text-amber-600 dark:text-amber-400 text-sm shrink-0"></i>
+                <span>Status sampel saat ini <strong class="font-bold text-amber-950 dark:text-amber-100">{{ $sample->status }}</strong>. Form penugasan hanya dapat diperbarui ketika sampel berstatus <strong>Diterima</strong>, <strong>Diproses</strong>, <strong>Diuji</strong>, atau <strong>Revisi</strong>.</span>
             </div>
         @endif
 
+        @php
+            $analystOptions = ['' => '-- Pilih Analis (Wajib) --'];
+            foreach($analysts as $an) {
+                $analystOptions[$an->id] = $an->name . ' (' . ucfirst($an->role) . ')';
+            }
+
+            $equipmentOptions = ['' => '-- Pilih Instrumen/Alat (Wajib) --'];
+            foreach($equipmentList as $eq) {
+                $equipmentOptions[$eq->id] = ($eq->name ?? $eq->nama) . ' (' . ($eq->code ?? $eq->kode) . ') - ' . $eq->status;
+            }
+        @endphp
+
         <form action="{{ route('staff.samples.assign', $sample) }}" method="POST">
             @csrf
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto min-h-[380px] pb-36">
                 <table class="w-full text-left text-xs min-w-[760px]">
                     <thead class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                         <tr>
@@ -137,34 +149,32 @@
                                     <div class="font-semibold text-slate-700">{{ $sp->test_method ?: ($sp->parameter->test_method ?? '-') }}</div>
                                     <div class="text-[11px] text-slate-400">BM: {{ $sp->quality_standard_summary ?: ($sp->parameter->qualityStandard->summary ?? 'N/A') }}</div>
                                 </td>
-                                <td class="px-4 sm:px-5 py-3 min-w-[200px]">
-                                    <select name="assignments[{{ $idx }}][analyst_id]" required class="bg-white border @error("assignments.{$idx}.analyst_id") border-rose-500 @else border-slate-300 @enderror rounded-lg px-2.5 py-1.5 text-xs text-slate-800 w-full focus:ring-2 focus:ring-emerald-500">
-                                        <option value="" disabled {{ old("assignments.{$idx}.analyst_id", $sp->analyst_id) ? '' : 'selected' }}>-- Pilih Analis (Wajib) --</option>
-                                        @foreach($analysts as $an)
-                                            <option value="{{ $an->id }}" {{ old("assignments.{$idx}.analyst_id", $sp->analyst_id) == $an->id ? 'selected' : '' }}>
-                                                {{ $an->name }} ({{ ucfirst($an->role) }})
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <td class="px-4 sm:px-5 py-3 min-w-[220px]">
+                                    <x-custom-select 
+                                        name="assignments[{{ $idx }}][analyst_id]"
+                                        :options="$analystOptions"
+                                        :selected="old('assignments.'.$idx.'.analyst_id', $sp->analyst_id)"
+                                        required
+                                        aria-label="Pilih Analis Penanggung Jawab"
+                                    />
                                     @error("assignments.{$idx}.analyst_id")
                                         <p class="text-rose-500 text-[11px] mt-1 font-semibold">{{ $message }}</p>
                                     @enderror
                                 </td>
-                                <td class="px-4 sm:px-5 py-3 min-w-[220px]">
-                                    <select name="assignments[{{ $idx }}][equipment_id]" required class="bg-white border @error("assignments.{$idx}.equipment_id") border-rose-500 @else border-slate-300 @enderror rounded-lg px-2.5 py-1.5 text-xs text-slate-800 w-full focus:ring-2 focus:ring-emerald-500">
-                                        <option value="" disabled {{ old("assignments.{$idx}.equipment_id", $sp->equipment_id ?? $sp->id_peralatan) ? '' : 'selected' }}>-- Pilih Instrumen/Alat (Wajib) --</option>
-                                        @foreach($equipmentList as $eq)
-                                            <option value="{{ $eq->id }}" {{ old("assignments.{$idx}.equipment_id", $sp->equipment_id ?? $sp->id_peralatan) == $eq->id ? 'selected' : '' }}>
-                                                {{ $eq->name ?? $eq->nama }} ({{ $eq->code ?? $eq->kode }}) - {{ $eq->status }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <td class="px-4 sm:px-5 py-3 min-w-[240px]">
+                                    <x-custom-select 
+                                        name="assignments[{{ $idx }}][equipment_id]"
+                                        :options="$equipmentOptions"
+                                        :selected="old('assignments.'.$idx.'.equipment_id', $sp->equipment_id ?? $sp->id_peralatan)"
+                                        required
+                                        aria-label="Pilih Instrumen/Alat Pengujian"
+                                    />
                                     @error("assignments.{$idx}.equipment_id")
                                         <p class="text-rose-500 text-[11px] mt-1 font-semibold">{{ $message }}</p>
                                     @enderror
                                 </td>
                                 <td class="px-4 sm:px-5 py-3 text-center font-semibold text-slate-600">
-                                    <span class="px-2 py-0.5 rounded-full text-[11px] bg-slate-100 text-slate-700">
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                         {{ $sp->status }}
                                     </span>
                                 </td>
@@ -186,8 +196,8 @@
                         <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Penugasan Analis & Alat
                     </button>
                 @else
-                    <button type="button" disabled class="px-5 py-2 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed">
-                        Penugasan Dikunci (Status: {{ $sample->status }})
+                    <button type="button" disabled class="px-5 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-400 font-bold text-xs rounded-xl cursor-not-allowed shadow-2xs">
+                        <i class="fa-solid fa-lock mr-1.5 text-slate-400"></i> Penugasan Dikunci (Status: {{ $sample->status }})
                     </button>
                 @endif
             </div>

@@ -62,41 +62,41 @@
                         <p class="text-xs text-slate-400">Daftar sampel yang siap diuji atau menunggu input data</p>
                     </div>
                 </div>
-                <a href="{{ route('staff.samples.index') }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">Kelola Semua &rarr;</a>
+                <a href="{{ route('staff.samples.index') }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:underline">Kelola Semua &rarr;</a>
             </div>
 
             <div class="space-y-3">
                 @forelse($processingSamples as $s)
-                    <div class="p-4 rounded-xl bg-slate-50/70 hover:bg-slate-50 border border-slate-200/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="p-4 rounded-xl bg-slate-50/70 hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/60 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="space-y-1.5 min-w-0">
                             <div class="flex items-center gap-2">
-                                <span class="font-mono font-bold text-xs text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded border border-emerald-200/70">{{ $s->sample_code }}</span>
+                                <span class="font-mono font-bold text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200/70 dark:border-emerald-800/60">{{ $s->sample_code }}</span>
                                 <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $s->status_badge_class }}">{{ $s->status }}</span>
                             </div>
-                            <h4 class="font-bold text-slate-800 text-sm truncate">{{ $s->sample_type }}</h4>
-                            <p class="text-xs text-slate-500 flex items-center gap-2">
+                            <h4 class="font-bold text-slate-800 dark:text-slate-100 text-sm truncate">{{ $s->sample_type }}</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
                                 <span class="truncate"><i class="fa-regular fa-building text-[10px] mr-1 text-slate-400"></i>{{ $s->customer->company_name ?? $s->customer->name }}</span>
                                 @if($s->sampleParameters->count() > 0)
-                                    <span class="text-slate-300">•</span>
+                                    <span class="text-slate-300 dark:text-slate-600">•</span>
                                     <span class="text-slate-400 shrink-0"><i class="fa-solid fa-vials text-[10px] mr-1 text-slate-400"></i>{{ $s->sampleParameters->count() }} Parameter</span>
                                 @endif
                             </p>
                         </div>
                         <div class="shrink-0 flex items-center gap-2 self-end sm:self-center">
-                            <a href="{{ route('staff.samples.show', $s) }}" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg transition-colors shadow-2xs">
+                            <a href="{{ route('staff.samples.show', $s) }}" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-lg transition-colors shadow-2xs">
                                 Detail
                             </a>
-                            <a href="{{ route('staff.samples.input-results', $s) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all hover:shadow-emerald-600/20">
+                            <a href="{{ route('staff.samples.input-results', $s) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all hover:shadow-emerald-600/30">
                                 <i class="fa-solid fa-pen-to-square text-[11px]"></i> Input Hasil
                             </a>
                         </div>
                     </div>
                 @empty
-                    <div class="rounded-xl border border-dashed border-slate-200 py-10 px-4 text-center bg-slate-50/50">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-sm mb-2 border border-emerald-100">
+                    <div class="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 py-10 px-4 text-center bg-slate-50/50 dark:bg-slate-900/30">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-sm mb-2 border border-emerald-100 dark:border-emerald-800/50">
                             <i class="fa-solid fa-circle-check"></i>
                         </div>
-                        <p class="text-xs font-bold text-slate-700">Antrean Bersih</p>
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Antrean Bersih</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">Tidak ada sampel aktif yang perlu diproses saat ini.</p>
                     </div>
                 @endforelse
@@ -131,11 +131,11 @@
                             </a>
                         </div>
                     @empty
-                        <div class="rounded-xl border border-dashed border-slate-200 py-6 px-4 text-center bg-slate-50/50">
-                            <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-sm mb-2 border border-emerald-100">
+                        <div class="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 py-6 px-4 text-center bg-slate-50/50 dark:bg-slate-900/30">
+                            <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-sm mb-2 border border-emerald-100 dark:border-emerald-800/50">
                                 <i class="fa-solid fa-circle-check"></i>
                             </div>
-                            <p class="text-xs font-bold text-slate-700">Semua Instrumen Terkalibrasi</p>
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Semua Instrumen Terkalibrasi</p>
                             <p class="text-[11px] text-slate-400 mt-0.5">Tidak ada jadwal kalibrasi mendesak dalam 30 hari ke depan.</p>
                         </div>
                     @endforelse
@@ -154,7 +154,7 @@
                             <p class="text-xs text-slate-400">Peralatan yang perlu pengadaan / penambahan unit</p>
                         </div>
                     </div>
-                    <a href="{{ route('staff.equipment.index') }}" class="text-xs font-semibold text-rose-600 hover:underline">Inventori &rarr;</a>
+                    <a href="{{ route('staff.equipment.index') }}" class="text-xs font-semibold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 hover:underline">Inventori &rarr;</a>
                 </div>
 
                 <div class="space-y-2.5">
@@ -169,11 +169,11 @@
                             </a>
                         </div>
                     @empty
-                        <div class="rounded-xl border border-dashed border-slate-200 py-6 px-4 text-center bg-slate-50/50">
-                            <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-sm mb-2 border border-emerald-100">
+                        <div class="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 py-6 px-4 text-center bg-slate-50/50 dark:bg-slate-900/30">
+                            <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-sm mb-2 border border-emerald-100 dark:border-emerald-800/50">
                                 <i class="fa-solid fa-boxes-stacked"></i>
                             </div>
-                            <p class="text-xs font-bold text-slate-700">Kapasitas Stok Aman</p>
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Kapasitas Stok Aman</p>
                             <p class="text-[11px] text-slate-400 mt-0.5">Semua stok peralatan laboratorium berada di atas batas minimum.</p>
                         </div>
                     @endforelse

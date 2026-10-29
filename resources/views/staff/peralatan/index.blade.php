@@ -6,7 +6,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header Bar & Filter -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
+    <div class="relative z-20 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm anim-fade-up anim-delay-1 card-hover">
         <form action="{{ request()->routeIs('admin.*') ? route('admin.equipment.index') : route('staff.equipment.index') }}" method="GET" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto flex-1">
             <div class="relative flex-1 min-w-[200px]">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -17,23 +17,40 @@
                        class="w-full bg-slate-50 border border-slate-300 text-xs rounded-xl pl-9 pr-4 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all">
             </div>
 
-            <div class="w-full sm:w-auto">
-                <select name="category" onchange="this.form.submit()" class="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-emerald-500">
-                    <option value="">-- Semua Kategori --</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                    @endforeach
-                </select>
+            @php
+                $catOptions = ['' => '-- Semua Kategori --'];
+                foreach($categories as $cat) {
+                    $catOptions[$cat] = $cat;
+                }
+            @endphp
+            <div class="w-full sm:w-48">
+                <x-custom-select 
+                    name="category" 
+                    :options="$catOptions"
+                    :selected="request('category')"
+                    auto-submit
+                    container-class="w-full"
+                    button-class="py-2"
+                    aria-label="Filter berdasarkan Kategori Peralatan"
+                />
             </div>
 
-            <div class="w-full sm:w-auto">
-                <select name="status" onchange="this.form.submit()" class="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-emerald-500">
-                    <option value="">-- Semua Status --</option>
-                    <option value="Tersedia" {{ request('status') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                    <option value="Dipinjam" {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                    <option value="Dalam Servis" {{ request('status') === 'Dalam Servis' ? 'selected' : '' }}>Dalam Servis</option>
-                    <option value="Dalam Kalibrasi" {{ request('status') === 'Dalam Kalibrasi' ? 'selected' : '' }}>Dalam Kalibrasi</option>
-                </select>
+            <div class="w-full sm:w-48">
+                <x-custom-select 
+                    name="status" 
+                    :options="[
+                        '' => '-- Semua Status --',
+                        'Tersedia' => 'Tersedia',
+                        'Dipinjam' => 'Dipinjam',
+                        'Dalam Servis' => 'Dalam Servis',
+                        'Dalam Kalibrasi' => 'Dalam Kalibrasi'
+                    ]"
+                    :selected="request('status')"
+                    auto-submit
+                    container-class="w-full"
+                    button-class="py-2"
+                    aria-label="Filter berdasarkan Status Peralatan"
+                />
             </div>
 
             <div class="flex items-center gap-2">
@@ -57,7 +74,7 @@
     </div>
 
     <!-- Equipment Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 stagger-grid anim-fade-up anim-delay-2">
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 stagger-grid anim-fade-up anim-delay-2">
         @forelse($equipmentList as $eq)
             <div class="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-sm card-hover flex flex-col justify-between">
                 <div>

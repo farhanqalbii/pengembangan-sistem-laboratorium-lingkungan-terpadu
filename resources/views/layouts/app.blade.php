@@ -176,7 +176,7 @@
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: none;
             }
         }
         @keyframes fadeInUp {
@@ -186,12 +186,21 @@
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: none;
             }
         }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        /* Dynamic Dropdown Stacking Context Elevation (prevents any clipping from sibling cards/tables) */
+        :has(> [data-dropdown-open="true"]),
+        :has([data-dropdown-open="true"]),
+        .card-hover:has([data-dropdown-open="true"]),
+        form:has([data-dropdown-open="true"]) {
+            z-index: 50 !important;
+            position: relative !important;
         }
         @keyframes pulseSoft {
             0%, 100% { transform: scale(1); opacity: 1; }
@@ -285,6 +294,11 @@
             pointer-events: none !important;
         }
 
+        /* Alpine.js Cloak utility */
+        [x-cloak] {
+            display: none !important;
+        }
+
         /* =========================================================================
            Standardized Dropdown & Select Styling (Mentor Evaluation Poin 3)
            ========================================================================= */
@@ -293,7 +307,7 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2310b981' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.75rem center;
             background-repeat: no-repeat;
             background-size: 1.15em 1.15em;
@@ -308,12 +322,20 @@
             min-height: 2.375rem;
             color: #1e293b;
             background-color: #ffffff;
+            cursor: pointer;
             transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+
+        select option {
+            background-color: #ffffff;
+            color: #1e293b;
+            padding: 8px 12px;
+            font-size: 0.8125rem;
         }
 
         select:hover:not(:disabled),
         .form-select:hover:not(:disabled) {
-            border-color: #94a3b8;
+            border-color: #10b981;
         }
 
         select:focus,
@@ -333,8 +355,13 @@
 
         html.dark select,
         html.dark .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2334d399' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             border-color: #334155;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+
+        html.dark select option {
             background-color: #0f172a;
             color: #f1f5f9;
         }
@@ -343,6 +370,22 @@
         html.dark .form-select:focus {
             border-color: #3ebca8 !important;
             box-shadow: 0 0 0 3px rgba(62, 188, 168, 0.25) !important;
+        }
+
+        /* Slim Modern Scrollbar for Custom Dropdowns */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
         }
 
         /* =========================================================================
